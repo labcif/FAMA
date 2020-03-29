@@ -29,7 +29,8 @@ class ProjectIngestModuleFactory(IngestModuleFactoryAdapter):
 
     def createDataSourceIngestModule(self, ingestOptions):
         return ProjectIngestModule(self.settings)
-
+    
+    '''
     #Settings
     def getDefaultIngestJobSettings(self):
         return ProjectSettingsPanelSettings()
@@ -43,3 +44,4 @@ class ProjectIngestModuleFactory(IngestModuleFactoryAdapter):
         
         self.settings = settings
         return ProjectSettingsPanel(self.settings)
+    '''

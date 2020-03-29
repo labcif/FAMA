@@ -1,30 +1,36 @@
 import inspect
 import os
 import json
-from java.io import File
-from java.util import ArrayList
 from java.util.logging import Level
-
+from java.util import ArrayList
+from java.io import File
+from org.sleuthkit.datamodel import SleuthkitCase
+from org.sleuthkit.datamodel import BlackboardArtifact
 from org.sleuthkit.datamodel import BlackboardAttribute
-from org.sleuthkit.autopsy.coreutils import Logger
-from org.sleuthkit.autopsy.casemodule import Case
-from org.sleuthkit.autopsy.casemodule.services import Blackboard
-from org.sleuthkit.autopsy.datamodel import ContentUtils
+from org.sleuthkit.autopsy.ingest import IngestModule
+from org.sleuthkit.autopsy.ingest.IngestModule import IngestModuleException
 from org.sleuthkit.autopsy.ingest import DataSourceIngestModule
 from org.sleuthkit.autopsy.ingest import IngestMessage
-from org.sleuthkit.autopsy.ingest import IngestModule
 from org.sleuthkit.autopsy.ingest import IngestServices
 from org.sleuthkit.autopsy.ingest import ModuleDataEvent
+from org.sleuthkit.autopsy.coreutils import Logger
+from org.sleuthkit.autopsy.casemodule import Case
+from org.sleuthkit.autopsy.datamodel import ContentUtils
+from org.sleuthkit.autopsy.casemodule.services import Services
+from org.sleuthkit.autopsy.casemodule.services import FileManager
+from org.sleuthkit.autopsy.casemodule.services import Blackboard
 
 class ProjectIngestModule(DataSourceIngestModule):
-    def log(self, level, msg):
-        self._logger.logp(level, self.__class__.__name__, inspect.stack()[1][3], msg)
+    moduleName = "TikTok"
 
     def __init__(self, settings):
-        self.moduleName = "Tiktok"
         self._logger = Logger.getLogger(self.moduleName)
         self.context = None
         self.settings = settings
+
+    def log(self, level, msg):
+        self._logger.logp(level, self.__class__.__name__, inspect.stack()[1][3], msg)
+
     
     def create_attribute_type(self, att_name, type, att_desc, skCase):
         try:
@@ -52,7 +58,6 @@ class ProjectIngestModule(DataSourceIngestModule):
         IngestServices.getInstance().fireModuleDataEvent(ModuleDataEvent(self.moduleName,artifact_type, None))
 
     
-    
     def process_profile(self, profile, file):
         try: 
                 self.log(Level.INFO, "Parsing user profile")
@@ -62,22 +67,22 @@ class ProjectIngestModule(DataSourceIngestModule):
                 attributes.add(BlackboardAttribute(self.att_prf_follower_count, self.moduleName, profile.get("follower_count")))
                 attributes.add(BlackboardAttribute(self.att_prf_following_count, self.moduleName, profile.get("following_count")))
                 attributes.add(BlackboardAttribute(self.att_prf_google_account, self.moduleName, profile.get("google_account")))
-                attributes.add(BlackboardAttribute(self.att_prf_is_blocked, self.moduleName, profile.get("is_blocked")))
-                attributes.add(BlackboardAttribute(self.att_prf_is_minor, self.moduleName, profile.get("is_minor")))
+                # attributes.add(BlackboardAttribute(self.att_prf_is_blocked, self.moduleName, profile.get("is_blocked")))
+                # attributes.add(BlackboardAttribute(self.att_prf_is_minor, self.moduleName, profile.get("is_minor")))
                 attributes.add(BlackboardAttribute(self.att_prf_nickname, self.moduleName, profile.get("nickname")))
                 attributes.add(BlackboardAttribute(self.att_prf_register_time, self.moduleName, profile.get("register_time")))
                 attributes.add(BlackboardAttribute(self.att_prf_sec_uid, self.moduleName, profile.get("sec_uid")))
                 attributes.add(BlackboardAttribute(self.att_prf_short_id, self.moduleName, profile.get("short_id")))
                 attributes.add(BlackboardAttribute(self.att_prf_uid, self.moduleName, profile.get("uid")))
                 attributes.add(BlackboardAttribute(self.att_prf_unique_id, self.moduleName, profile.get("unique_id")))
-
+            
                 art.addAttributes(attributes)
                 self.index_artifact(self.blackboard, art, self.art_messages)        
         except Exception as e:
                 self.log(Level.INFO, "Error getting user profile: " + str(e))
-
-
-
+        
+        
+        
         return
     
     def process_messages(self, messages, file):
@@ -93,7 +98,7 @@ class ProjectIngestModule(DataSourceIngestModule):
                 attributes.add(BlackboardAttribute(self.att_msg_message, self.moduleName, m.get("message")))
                 attributes.add(BlackboardAttribute(self.att_msg_read_status, self.moduleName, m.get("readstatus")))
                 attributes.add(BlackboardAttribute(self.att_msg_local_info, self.moduleName, m.get("localinfo")))
-
+            
                 art.addAttributes(attributes)
                 self.index_artifact(self.blackboard, art, self.art_messages)        
             except Exception as e:
@@ -108,9 +113,8 @@ class ProjectIngestModule(DataSourceIngestModule):
         self.context = context
 
         skCase = Case.getCurrentCase().getSleuthkitCase()
-        
-
         # Messages attributes
+        
         self.att_msg_uid = self.create_attribute_type('TIKTOK_MSG_UID', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Uid", skCase)
         self.att_msg_uniqueid = self.create_attribute_type('TIKTOK_MSG_UNIQUE_ID', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Unique ID", skCase)
         self.att_msg_nickname = self.create_attribute_type('TIKTOK_MSG_NICKNAME', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Nickname", skCase)
@@ -119,16 +123,16 @@ class ProjectIngestModule(DataSourceIngestModule):
         self.att_msg_read_status = self.create_attribute_type('TIKTOK_MSG_READ_STATUS', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Read Status", skCase)
         self.att_msg_local_info = self.create_attribute_type('TIKTOK_MSG_LOCAL_INFO', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Local Info", skCase)
         
-         #profile
+        #profile
         self.att_prf_account_region = self.create_attribute_type('TIKTOK_PROFILE_REGION', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Region", skCase)
         self.att_prf_follower_count = self.create_attribute_type('TIKTOK_PROFILE_FOLLOWER', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.LONG, "Followers", skCase)
         self.att_prf_following_count = self.create_attribute_type('TIKTOK_PROFILE_FOLLOWING', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.LONG, "Following", skCase)
         self.att_prf_gender = self.create_attribute_type('TIKTOK_PROFILE_GENDER', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.LONG, "Gender", skCase)
         self.att_prf_google_account = self.create_attribute_type('TIKTOK_PROFILE_GOOGLE', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Google Account", skCase)
-        self.att_prf_is_blocked = self.create_attribute_type('TIKTOK_PROFILE_IS_BLOCKED', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.LONG, "Is Blocked", skCase)
-        self.att_prf_is_minor = self.create_attribute_type('TIKTOK_PROFILE_IS_MINOR', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Is Minor", skCase)
+        # self.att_prf_is_blocked = self.create_attribute_type('TIKTOK_PROFILE_IS_BLOCKED', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.BYTE, "Is Blocked", skCase)
+        # self.att_prf_is_minor = self.create_attribute_type('TIKTOK_PROFILE_IS_MINOR', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.BYTE, "Is Minor", skCase)
         self.att_prf_nickname = self.create_attribute_type('TIKTOK_PROFILE_NICKNAME', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Nickname", skCase)
-        self.att_prf_register_time = self.create_attribute_type('TIKTOK_PROFILE_REGISTER_TIME', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Register Time", skCase)
+        self.att_prf_register_time = self.create_attribute_type('TIKTOK_PROFILE_REGISTER_TIME', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.LONG, "Register Time", skCase)
         self.att_prf_sec_uid = self.create_attribute_type('TIKTOK_PROFILE_SEC_UID', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Sec. UID", skCase)
         self.att_prf_short_id = self.create_attribute_type('TIKTOK_PROFILE_SHORT_ID', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Short ID", skCase)
         self.att_prf_uid = self.create_attribute_type('TIKTOK_PROFILE_UID', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "UID", skCase)
@@ -185,9 +189,11 @@ class ProjectIngestModule(DataSourceIngestModule):
             try:
                 # get info
                 messages = data["messages"]
+                
                 profile = data["profile"]
+               
 
-                self.log(Level.INFO, "TIKTOK PROFILE: "+ profile)
+                self.log(Level.INFO, "TIKTOK PROFILE: "+ str(profile))
                 self.log(Level.INFO, "TIKTOK: {} messages found!".format(len(messages)))
 
             except Exception as e:
@@ -196,6 +202,11 @@ class ProjectIngestModule(DataSourceIngestModule):
 
             self.process_messages(messages, file)
             self.process_profile(profile, file)
+            
+
+      
+           
+             
                 
             # Clean up
             # stmt.close()
@@ -211,3 +222,4 @@ class ProjectIngestModule(DataSourceIngestModule):
         IngestServices.getInstance().postMessage(message)
 
         return IngestModule.ProcessResult.OK
+
