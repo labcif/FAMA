@@ -8,14 +8,8 @@ from analyzer import Analyzer
 #python3 start.py com.zhiliaoapp.musically --path "/Users/Nogueira/Desktop/Projeto/ExemploMount" --adb
 #python3 start.py com.zhiliaoapp.musically --dump 20200307_215555 20200307_201252
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Forensics Artefacts Analyzer')
-    parser.add_argument('app', help='Application ID to be analyzed <com.application.example>')
-    parser.add_argument('-d', '--dump', help='Analyze specific(s) dump(s) <20200307_215555 ...>', nargs='+', required = False)
-    parser.add_argument('-p', '--path', help='Dump app data in path (mount or folder structure)', required = False)
-    parser.add_argument('-a', '--adb', action='store_true', help='Dump app data directly from device with ADB', required = False)
-
-    args = parser.parse_args()
+def start(args):
+    
     
     extract = Extract()
     folders = []
@@ -47,3 +41,13 @@ if __name__ == "__main__":
     #folders = extract.dump_from_path("/Users/Nogueira/Desktop/Projeto/ExemploMount", "com.zhiliaoapp.musically")
     print(folders)
     '''
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Forensics Artefacts Analyzer')
+    parser.add_argument('app', help='Application ID to be analyzed <com.application.example>')
+    parser.add_argument('-d', '--dump', help='Analyze specific(s) dump(s) <20200307_215555 ...>', nargs='+', required = False)
+    parser.add_argument('-p', '--path', help='Dump app data in path (mount or folder structure)', required = False)
+    parser.add_argument('-a', '--adb', action='store_true', help='Dump app data directly from device with ADB', required = False)
+    args = parser.parse_args()
+    
+    start(args)
