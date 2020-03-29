@@ -1,0 +1,6 @@
+cache/
+dumps/
+report/
+todo.txt
+__pycache__
+*.class

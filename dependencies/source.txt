@@ -1,0 +1,4 @@
+Instalar ambos os utilitários como variáveis de sistema para obter sucesso na extracção
+adb -> https://developer.android.com/studio/releases/platform-tools
+base64 -> http://rtner.de/software/base64.html
+undark -> https://github.com/witwall/undark/releases
