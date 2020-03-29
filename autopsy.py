@@ -43,4 +43,3 @@ class ProjectIngestModuleFactory(IngestModuleFactoryAdapter):
         
         self.settings = settings
         return ProjectSettingsPanel(self.settings)
-    

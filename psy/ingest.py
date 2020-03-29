@@ -24,7 +24,7 @@ class ProjectIngestModule(DataSourceIngestModule):
         self.moduleName = "Tiktok"
         self._logger = Logger.getLogger(self.moduleName)
         self.context = None
-        self.settings
+        self.settings = settings
     
     def create_attribute_type(self, att_name, type, att_desc, skCase):
         try:
@@ -53,23 +53,23 @@ class ProjectIngestModule(DataSourceIngestModule):
 
     
     
-     def process_profile(self, profile, file):
+    def process_profile(self, profile, file):
         try: 
                 self.log(Level.INFO, "Parsing user profile")
                 art = file.newArtifact(self.art_user_profile.getTypeID())
                 attributes = ArrayList()
-                attributes.add(BlackboardAttribute(self.att_prf_account_region, TiktokIngestModuleFactory.moduleName, profile.get("account_region")))
-                attributes.add(BlackboardAttribute(self.att_prf_follower_count, TiktokIngestModuleFactory.moduleName, profile.get("follower_count")))
-                attributes.add(BlackboardAttribute(self.att_prf_following_count, TiktokIngestModuleFactory.moduleName, profile.get("following_count")))
-                attributes.add(BlackboardAttribute(self.att_prf_google_account, TiktokIngestModuleFactory.moduleName, profile.get("google_account")))
-                attributes.add(BlackboardAttribute(self.att_prf_is_blocked, TiktokIngestModuleFactory.moduleName, profile.get("is_blocked")))
-                attributes.add(BlackboardAttribute(self.att_prf_is_minor, TiktokIngestModuleFactory.moduleName, profile.get("is_minor")))
-                attributes.add(BlackboardAttribute(self.att_prf_nickname, TiktokIngestModuleFactory.moduleName, profile.get("nickname")))
-                attributes.add(BlackboardAttribute(self.att_prf_register_time, TiktokIngestModuleFactory.moduleName, profile.get("register_time")))
-                attributes.add(BlackboardAttribute(self.att_prf_sec_uid, TiktokIngestModuleFactory.moduleName, profile.get("sec_uid")))
-                attributes.add(BlackboardAttribute(self.att_prf_short_id, TiktokIngestModuleFactory.moduleName, profile.get("short_id")))
-                attributes.add(BlackboardAttribute(self.att_prf_uid, TiktokIngestModuleFactory.moduleName, profile.get("uid")))
-                attributes.add(BlackboardAttribute(self.att_prf_unique_id, TiktokIngestModuleFactory.moduleName, profile.get("unique_id")))
+                attributes.add(BlackboardAttribute(self.att_prf_account_region, self.moduleName, profile.get("account_region")))
+                attributes.add(BlackboardAttribute(self.att_prf_follower_count, self.moduleName, profile.get("follower_count")))
+                attributes.add(BlackboardAttribute(self.att_prf_following_count, self.moduleName, profile.get("following_count")))
+                attributes.add(BlackboardAttribute(self.att_prf_google_account, self.moduleName, profile.get("google_account")))
+                attributes.add(BlackboardAttribute(self.att_prf_is_blocked, self.moduleName, profile.get("is_blocked")))
+                attributes.add(BlackboardAttribute(self.att_prf_is_minor, self.moduleName, profile.get("is_minor")))
+                attributes.add(BlackboardAttribute(self.att_prf_nickname, self.moduleName, profile.get("nickname")))
+                attributes.add(BlackboardAttribute(self.att_prf_register_time, self.moduleName, profile.get("register_time")))
+                attributes.add(BlackboardAttribute(self.att_prf_sec_uid, self.moduleName, profile.get("sec_uid")))
+                attributes.add(BlackboardAttribute(self.att_prf_short_id, self.moduleName, profile.get("short_id")))
+                attributes.add(BlackboardAttribute(self.att_prf_uid, self.moduleName, profile.get("uid")))
+                attributes.add(BlackboardAttribute(self.att_prf_unique_id, self.moduleName, profile.get("unique_id")))
 
                 art.addAttributes(attributes)
                 self.index_artifact(self.blackboard, art, self.art_messages)        
@@ -86,13 +86,13 @@ class ProjectIngestModule(DataSourceIngestModule):
                 self.log(Level.INFO, "Parsing a new message")
                 art = file.newArtifact(self.art_messages.getTypeID())
                 attributes = ArrayList()
-                attributes.add(BlackboardAttribute(self.att_msg_uid, TiktokIngestModuleFactory.moduleName, m.get("uid")))
-                attributes.add(BlackboardAttribute(self.att_msg_uniqueid, TiktokIngestModuleFactory.moduleName, m.get("uniqueid")))
-                attributes.add(BlackboardAttribute(self.att_msg_nickname, TiktokIngestModuleFactory.moduleName, m.get("nickname")))
-                attributes.add(BlackboardAttribute(self.att_msg_created_time, TiktokIngestModuleFactory.moduleName, m.get("createdtime")))
-                attributes.add(BlackboardAttribute(self.att_msg_message, TiktokIngestModuleFactory.moduleName, m.get("message")))
-                attributes.add(BlackboardAttribute(self.att_msg_read_status, TiktokIngestModuleFactory.moduleName, m.get("readstatus")))
-                attributes.add(BlackboardAttribute(self.att_msg_local_info, TiktokIngestModuleFactory.moduleName, m.get("localinfo")))
+                attributes.add(BlackboardAttribute(self.att_msg_uid, self.moduleName, m.get("uid")))
+                attributes.add(BlackboardAttribute(self.att_msg_uniqueid, self.moduleName, m.get("uniqueid")))
+                attributes.add(BlackboardAttribute(self.att_msg_nickname, self.moduleName, m.get("nickname")))
+                attributes.add(BlackboardAttribute(self.att_msg_created_time, self.moduleName, m.get("createdtime")))
+                attributes.add(BlackboardAttribute(self.att_msg_message, self.moduleName, m.get("message")))
+                attributes.add(BlackboardAttribute(self.att_msg_read_status, self.moduleName, m.get("readstatus")))
+                attributes.add(BlackboardAttribute(self.att_msg_local_info, self.moduleName, m.get("localinfo")))
 
                 art.addAttributes(attributes)
                 self.index_artifact(self.blackboard, art, self.art_messages)        
