@@ -20,9 +20,8 @@ from org.sleuthkit.autopsy.casemodule.services import Services
 from org.sleuthkit.autopsy.casemodule.services import FileManager
 from org.sleuthkit.autopsy.casemodule.services import Blackboard
 
-
-#import sys
 #from analyzer import Analyzer
+# from start import start
 
 class ProjectIngestModule(DataSourceIngestModule):
     moduleName = "TikTok"
@@ -40,14 +39,14 @@ class ProjectIngestModule(DataSourceIngestModule):
         try:
             skCase.addArtifactAttributeType(att_name, type, att_desc)
         except:
-            self.log(Level.INFO, "Error creating attribute type: " + att_desc)
+            self.log(Level.INFO, self.moduleName + " Error creating attribute type: " + att_desc)
         return skCase.getAttributeType(att_name)
     
     def create_artifact_type(self, art_name, art_desc, skCase):
         try:
             skCase.addBlackboardArtifactType(art_name, "TIKTOK: " + art_desc)
         except:
-            self.log(Level.INFO, "Error creating artifact type: " + art_desc)
+            self.log(Level.INFO, self.moduleName +" Error creating artifact type: " + art_desc)
         art = skCase.getArtifactType(art_name)
         return art
     
@@ -56,15 +55,15 @@ class ProjectIngestModule(DataSourceIngestModule):
             # Index the artifact for keyword search
             blackboard.indexArtifact(artifact)
         except Blackboard.BlackboardException as e:
-            self.log(Level.INFO, "Error indexing artifact " +
+            self.log(Level.INFO, self.moduleName + " Error indexing artifact " +
                      artifact.getDisplayName() + "" +str(e))
         # Fire an event to notify the UI and others that there is a new log artifact
         IngestServices.getInstance().fireModuleDataEvent(ModuleDataEvent(self.moduleName,artifact_type, None))
 
     
-    def process_profile(self, profile, file):
+    def process_user_profile(self, profile, file):
         try: 
-                self.log(Level.INFO, "Parsing user profile")
+                self.log(Level.INFO, self.moduleName + " Parsing user profile")
                 art = file.newArtifact(self.art_user_profile.getTypeID())
                 attributes = ArrayList()
                 attributes.add(BlackboardAttribute(self.att_prf_account_region, self.moduleName, profile.get("account_region")))
@@ -81,18 +80,16 @@ class ProjectIngestModule(DataSourceIngestModule):
                 attributes.add(BlackboardAttribute(self.att_prf_unique_id, self.moduleName, profile.get("unique_id")))
             
                 art.addAttributes(attributes)
-                self.index_artifact(self.blackboard, art, self.art_messages)        
+                self.index_artifact(self.blackboard, art, self.art_user_profile)        
         except Exception as e:
-                self.log(Level.INFO, "Error getting user profile: " + str(e))
+                self.log(Level.INFO, self.moduleName + " Error getting user profile: " + str(e))
         
-        
-        
-        return
+      
     
     def process_messages(self, messages, file):
         for m in messages:
             try: 
-                self.log(Level.INFO, "Parsing a new message")
+                self.log(Level.INFO, self.moduleName + " Parsing a new message")
                 art = file.newArtifact(self.art_messages.getTypeID())
                 attributes = ArrayList()
                 attributes.add(BlackboardAttribute(self.att_msg_uid, self.moduleName, m.get("uid")))
@@ -106,7 +103,54 @@ class ProjectIngestModule(DataSourceIngestModule):
                 art.addAttributes(attributes)
                 self.index_artifact(self.blackboard, art, self.art_messages)        
             except Exception as e:
-                self.log(Level.INFO, "Error getting a message: " + str(e))
+                self.log(Level.INFO, self.moduleName + " Error getting a message: " + str(e))
+
+
+    def process_searches(self, searches, file):
+        for s in searches:
+            try: 
+                self.log(Level.INFO, self.moduleName + " Parsing a new search")
+                art = file.newArtifact(self.art_searches.getTypeID())
+                attributes = ArrayList()
+                attributes.add(BlackboardAttribute(self.att_searches, self.moduleName, s))
+                art.addAttributes(attributes)
+                self.index_artifact(self.blackboard, art, self.art_searches)        
+            except Exception as e:
+                self.log(Level.INFO, self.moduleName + " Error getting a search entry: " + str(e))
+
+    def process_undark(self, undarks, file):
+
+        self.log(Level.INFO, self.moduleName + " OUTPUT!!: "+ str(undarks.items()))
+        for database, row in undarks.items():
+            try: 
+                self.log(Level.INFO, self.moduleName + " Parsing a new undark entry")
+                art = file.newArtifact(self.art_undark.getTypeID())
+                attributes = ArrayList()
+                attributes.add(BlackboardAttribute(self.att_undark_key, self.moduleName, database))
+                attributes.add(BlackboardAttribute(self.att_undark_output, self.moduleName, row))
+                art.addAttributes(attributes)
+                self.index_artifact(self.blackboard, art, self.art_undark)        
+            except Exception as e:
+                self.log(Level.INFO, self.moduleName + " Error getting a message: " + str(e))
+    
+
+
+    def process_users(self, users, file):
+        for u in users:
+            try: 
+                self.log(Level.INFO, self.moduleName + " Parsing a new user")
+                art = file.newArtifact(self.art_profiles.getTypeID())
+                attributes = ArrayList()
+                attributes.add(BlackboardAttribute(self.att_msg_uid, self.moduleName, u.get("uid")))
+                attributes.add(BlackboardAttribute(self.att_msg_uniqueid, self.moduleName, u.get("uniqueid")))
+                attributes.add(BlackboardAttribute(self.att_msg_nickname, self.moduleName, u.get("nickname")))
+                attributes.add(BlackboardAttribute(self.att_prf_avatar, self.moduleName, u.get("avatar")))
+                attributes.add(BlackboardAttribute(self.att_prf_follow_status, self.moduleName, u.get("follow_status")))
+            
+                art.addAttributes(attributes)
+                self.index_artifact(self.blackboard, art, self.art_profiles)        
+            except Exception as e:
+                self.log(Level.INFO, self.moduleName + " Error getting user: " + str(e))
 
 
 
@@ -128,6 +172,7 @@ class ProjectIngestModule(DataSourceIngestModule):
         self.att_msg_local_info = self.create_attribute_type('TIKTOK_MSG_LOCAL_INFO', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Local Info", skCase)
         
         #profile
+        self.att_prf_avatar = self.create_attribute_type('TIKTOK_PROFILE_AVATAR', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Avatar", skCase)
         self.att_prf_account_region = self.create_attribute_type('TIKTOK_PROFILE_REGION', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Region", skCase)
         self.att_prf_follower_count = self.create_attribute_type('TIKTOK_PROFILE_FOLLOWER', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.LONG, "Followers", skCase)
         self.att_prf_following_count = self.create_attribute_type('TIKTOK_PROFILE_FOLLOWING', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.LONG, "Following", skCase)
@@ -142,15 +187,28 @@ class ProjectIngestModule(DataSourceIngestModule):
         self.att_prf_uid = self.create_attribute_type('TIKTOK_PROFILE_UID', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "UID", skCase)
         self.att_prf_unique_id = self.create_attribute_type('TIKTOK_PROFILE_UNIQUE_ID', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Unique ID", skCase)
 
+        self.att_prf_follow_status = self.create_attribute_type('TIKTOK_PROFILE_FOLLOW_STATUS', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.LONG, "Follow Status", skCase)
+
+        #seaches
+        self.att_searches = self.create_attribute_type('TIKTOK_SEARCH', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Search", skCase)
+
+        #undark
+        self.att_undark_key = self.create_attribute_type('TIKTOK_UNDARK_KEY', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Database", skCase)
+        self.att_undark_output = self.create_attribute_type('TIKTOK_UNDARK_OUTPUT', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Output", skCase)
+
+
         # Create artifacts
 
         # self.art_contacts = self.create_artifact_type("YPA_CONTACTS_" + guid + "_" + username,"User " + username + " - Contacts", skCase)
         
         self.art_messages = self.create_artifact_type("TIKTOK_MESSAGE_" + "UID","User " + "UID" + " - MESSAGES", skCase)
-
         self.art_user_profile = self.create_artifact_type("TIKTOK_PROFILE_" + "UID","User " + "UID" + " - PROFILE", skCase)
+        self.art_profiles = self.create_artifact_type("TIKTOK_PROFILES_" + "UID", "User " + "UID" + " - PROFILES", skCase)
+        self.art_searches = self.create_artifact_type("TIKTOK_SEARCHES_" + "UID", "User " + "UID" + " - SEARCHES", skCase)
+
+        self.art_undark = self.create_artifact_type("TIKTOK_UNDARK_" + "UID", "User " + "UID" + " - UNDARK", skCase)
                     
-                    
+        
 
     def process(self, dataSource, progressBar):
         #self.log(Level.INFO, "TESTE" + sys.path[0])
@@ -166,7 +224,22 @@ class ProjectIngestModule(DataSourceIngestModule):
         numFiles = len(files)
         progressBar.switchToDeterminate(numFiles)
         fileCount = 0
+
+        # com.zhiliaoapp.musically --path "path..." --adb
+        # localDir = os.path.join(Case.getCurrentCase().getTempDirectory(), "extract")
         
+        # class Args:
+        #     def __init__(self, adb):
+        #         self.adb = adb
+        #         self.app = "com.zhiliaoapp.musically"
+        #         self.path = localDir
+
+        # args = Args(True)      
+        # start(args)
+        
+
+
+
         
         for file in files:
 
@@ -174,7 +247,7 @@ class ProjectIngestModule(DataSourceIngestModule):
             if self.context.isJobCancelled():
                 return IngestModule.ProcessResult.OK
 
-            self.log(Level.INFO, "Processing file: " + file.getName())
+            self.log(Level.INFO, self.moduleName + " Processing file: " + file.getName())
             fileCount += 1
 
             # Save the DB locally in the temp folder. use file id as name to reduce collisions
@@ -186,31 +259,27 @@ class ProjectIngestModule(DataSourceIngestModule):
                 # open file~
                 with open(lclReportPath) as json_file:
                     data = json.load(json_file)
-
-    
-
             except Exception as e:
-            #    error open file
-            
                 return IngestModule.ProcessResult.OK
             
             # Query the contacts table in the database and get all columns. 
             try:
                 # get info
                 messages = data["messages"]
-                
-                profile = data["profile"]
-               
-
-                self.log(Level.INFO, "TIKTOK PROFILE: "+ str(profile))
-                self.log(Level.INFO, "TIKTOK: {} messages found!".format(len(messages)))
-
+                user_profile = data["profile"]
+                profiles = data["users"]
+                searches = data["searches"]
+                unkdark_ouput = data["freespace"]
             except Exception as e:
-                # error getting info
+                message = IngestMessage.createMessage(IngestMessage.MessageType.DATA, "TikTok", "Report file with wrong structure")
+                IngestServices.getInstance().postMessage(message)
                 return IngestModule.ProcessResult.OK
 
             self.process_messages(messages, file)
-            self.process_profile(profile, file)
+            self.process_user_profile(user_profile, file)
+            self.process_users(profiles, file)
+            self.process_searches(searches, file)
+            self.process_undark(unkdark_ouput, file)
             
 
       
