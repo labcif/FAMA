@@ -1,7 +1,13 @@
-import sqlite3
+import sys
 import json
 import os
-import sys
+
+try:
+    import sqlite3
+except:
+    sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+    from jythonsqlite3 import module as sqlite3
+    
 
 from utils import Utils
 
@@ -11,7 +17,7 @@ class Module:
         self.internal_path = internal_path
         self.external_path = external_path
 
-        self.cache_path = os.path.join(sys.path[0], "cache", "tiktok")
+        self.cache_path = os.path.join(Utils.get_base_path_folder(), "cache", "tiktok")
         Utils.check_and_generate_folder(self.cache_path)
 
         self.databases = self.set_databases()
@@ -109,12 +115,15 @@ class Module:
         values = Utils.xml_attribute_finder(xml_file)
         for key, value in values.items():
             if key.endswith("_aweme_user_info"):
-                dump=json.loads(value)
-                atributes =["account_region", "follower_count","following_count", "gender", "google_account", "is_blocked", "is_minor", "nickname", "register_time", "sec_uid", "short_id", "uid", "unique_id"]
+                try:
+                    dump=json.loads(value)
+                    atributes =["account_region", "follower_count","following_count", "gender", "google_account", "is_blocked", "is_minor", "nickname", "register_time", "sec_uid", "short_id", "uid", "unique_id"]
 
-                for index in atributes:
-                    user_profile[index] = dump[index]
-                break
+                    for index in atributes:
+                        user_profile[index] = dump[index]
+                    break
+                except ValueError:
+                    print("[Tiktok] JSON User Error")
 
         return user_profile
 
@@ -171,12 +180,17 @@ class Module:
     
     def get_undark_db(self):
         print("[Tiktok] Getting undark output...")
-        output = []
+        output = {}
         files = os.listdir(os.path.join(self.cache_path,  "internal", "databases"))      
         for name in files:
-            freespace = {}
-            freespace[name]= Utils.run_undark(os.path.join(self.cache_path,  "internal", "databases", name))
-            output.append(freespace)
+            listing = []
+            undark_output = Utils.run_undark(os.path.join(self.cache_path,  "internal", "databases", name)).decode()
+            for line in undark_output.splitlines():
+                listing.append(line)
+            
+            if listing:
+                output[name] = listing
+
         return output
 
     

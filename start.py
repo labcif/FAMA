@@ -4,6 +4,7 @@ import sys
 
 from extract import Extract
 from analyzer import Analyzer
+from utils import Utils
 
 #python3 start.py com.zhiliaoapp.musically --path "/Users/Nogueira/Desktop/Projeto/ExemploMount" --adb
 #python3 start.py com.zhiliaoapp.musically --dump 20200307_215555 20200307_201252
@@ -22,7 +23,7 @@ if __name__ == "__main__":
 
     if args.dump:
         for dump in args.dump:
-            dump_path = os.path.join(sys.path[0], "dumps", dump)
+            dump_path = os.path.join(Utils.get_base_path_folder(), "dumps", dump)
             if os.path.exists(dump_path):
                 folders.append(dump_path)
             else:

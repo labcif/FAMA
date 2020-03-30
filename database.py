@@ -1,4 +1,8 @@
-import sqlite3
+try:
+    import sqlite3
+except:
+    from jythonsqlite3 import module as sqlite3
+
 import subprocess
 
 class DatabaseParser:

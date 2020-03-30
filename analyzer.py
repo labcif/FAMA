@@ -14,12 +14,13 @@ class Analyzer:
         self.external_path = None
         self.app_id = self.app_id_parser()
         
-        self.cache_path = os.path.join(sys.path[0], "cache")
-        self.report_path = os.path.join(sys.path[0], "report")
+        self.cache_path = os.path.join(Utils.get_base_path_folder(), "cache")
+        self.report_path = os.path.join(Utils.get_base_path_folder(), "report")
         try:
             Utils.remove_folder(self.cache_path)
         except:
             pass
+        
         Utils.check_and_generate_folder(self.cache_path)
 
     def app_id_parser(self):
@@ -52,11 +53,14 @@ class Analyzer:
 
         report["header"] = report_header
         report["profile"] = module.get_user_profile()
+        #autopsy comment for now to test
         report["messages"] = module.get_user_messages()
         report["users"] = module.get_user_profiles()
         report["searches"] = module.get_user_searches()
         report["videos"] = module.get_videos()
-        report["freespace"] = module.get_undark_db()
+        report["freespace"] = module.get_undark_db() 
+        #####
+
         # with open("report/"+ name+"_freespace.txt",'w') as f:
         #         output = Utils.run_undark("./cache/tiktok/internal/databases/" + name)            
         #         print(output)

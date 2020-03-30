@@ -13,6 +13,11 @@ import shutil
 
 class Utils:
     ### TAR UTILS
+
+    @staticmethod
+    def get_base_path_folder():
+        return os.path.dirname(__file__)
+
     @staticmethod
     def generate_tar_gz_file(folder_path, generated_file_path):
         arcname = os.path.basename(generated_file_path).replace('.tar.gz', '')
@@ -67,7 +72,7 @@ class Utils:
         if not folder_name or not os.path.exists(folder_name):
             return files_list
 
-        for root, _, files in os.walk(os.path.join(sys.path[0], folder_name)):
+        for root, _, files in os.walk(os.path.join(Utils.get_base_path_folder(), folder_name)):
             for file in files:
                 if filter_type:
                     extension = os.path.splitext(file)[1].strip().lower()
@@ -146,7 +151,10 @@ class Utils:
                 else:
                     value = child.text
 
-                listing[child.attrib.get("name")] = str(value)
+                try:
+                    listing[child.attrib.get("name")] = str(value)
+                except:
+                    listing[child.attrib.get("name")] = "ERROR"
         return listing
 
     @staticmethod
@@ -171,32 +179,33 @@ class Utils:
     @staticmethod
     def get_adb_location():
         if platform.system() == "Windows":
-            return os.path.join(sys.path[0], "dependencies", "windows", "adb.exe")
+            return os.path.join(Utils.get_base_path_folder(), "dependencies", "windows", "adb.exe")
         elif platform.system() == "Darwin":
-            return os.path.join(sys.path[0], "dependencies", "mac", "adb")
+            return os.path.join(Utils.get_base_path_folder(), "dependencies", "mac", "adb")
         else:
-            return os.path.join(sys.path[0], "dependencies", "linux", "adb")
+            return os.path.join(Utils.get_base_path_folder(), "dependencies", "linux", "adb")
     @staticmethod
     def get_undark_location():
         if platform.system() == "Windows":
-            return os.path.join(sys.path[0], "dependencies", "windows", "undark.exe")
+            return os.path.join(Utils.get_base_path_folder(), "dependencies", "windows", "undark.exe")
         elif platform.system() == "Darwin":
-            return os.path.join(sys.path[0], "dependencies", "mac", "undark")
+            return os.path.join(Utils.get_base_path_folder(), "dependencies", "mac", "undark")
         else:
-            return os.path.join(sys.path[0], "dependencies", "linux", "undark")
+            return os.path.join(Utils.get_base_path_folder(), "dependencies", "linux", "undark")
 
 
     @staticmethod
     def get_base64_location():
         if platform.system() == "Windows":
-            return os.path.join(sys.path[0], "dependencies", "windows", "base64.exe")
+            return os.path.join(Utils.get_base_path_folder(), "dependencies", "windows", "base64.exe")
         else:
             return "base64"
 
     @staticmethod
     def run_undark(db):
         undark = Utils.get_undark_location()
-        return subprocess.Popen([undark,'-i', db, '--freespace']).communicate()
+        return subprocess.Popen([undark,'-i', db, '--freespace'], shell=True, stdout=subprocess.PIPE).stdout.read()
+
     @staticmethod
     def remove_folder(folder):
         shutil.rmtree(folder)

@@ -13,7 +13,7 @@ class Extract:
         self.internal_data_dump_name = "{}_internal.tar.gz"
         self.external_data_dump_name = "{}_external.tar.gz"
 
-        self.dumps_path = os.path.join(sys.path[0], "dumps")
+        self.dumps_path = os.path.join(Utils.get_base_path_folder(), "dumps")
 
         Utils.check_and_generate_folder(self.dumps_path)
 

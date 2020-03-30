@@ -20,6 +20,10 @@ from org.sleuthkit.autopsy.casemodule.services import Services
 from org.sleuthkit.autopsy.casemodule.services import FileManager
 from org.sleuthkit.autopsy.casemodule.services import Blackboard
 
+
+#import sys
+#from analyzer import Analyzer
+
 class ProjectIngestModule(DataSourceIngestModule):
     moduleName = "TikTok"
 
@@ -149,7 +153,12 @@ class ProjectIngestModule(DataSourceIngestModule):
                     
 
     def process(self, dataSource, progressBar):
-
+        #self.log(Level.INFO, "TESTE" + sys.path[0])
+        #self.log(Level.INFO, "TESTE" + str( os.path.dirname(__file__)))
+        
+        #analyzer = Analyzer("C:\Users\X541\Documents\GitHub\TikTok\dumps")
+        #analyzer.generate_report()
+        
         progressBar.switchToIndeterminate()
         self.blackboard = Case.getCurrentCase().getServices().getBlackboard()
         fileManager = Case.getCurrentCase().getServices().getFileManager()
