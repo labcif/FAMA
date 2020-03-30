@@ -20,7 +20,7 @@ from org.sleuthkit.autopsy.casemodule.services import Services
 from org.sleuthkit.autopsy.casemodule.services import FileManager
 from org.sleuthkit.autopsy.casemodule.services import Blackboard
 
-from start import start
+# from start import start
 
 class ProjectIngestModule(DataSourceIngestModule):
     moduleName = "TikTok"
@@ -117,7 +117,21 @@ class ProjectIngestModule(DataSourceIngestModule):
             except Exception as e:
                 self.log(Level.INFO, self.moduleName + " Error getting a search entry: " + str(e))
 
+    def process_undark(self, undarks, file):
 
+        self.log(Level.INFO, self.moduleName + " OUTPUT!!: "+ str(undarks.items()))
+        for database, row in undarks.items():
+            try: 
+                self.log(Level.INFO, self.moduleName + " Parsing a new undark entry")
+                art = file.newArtifact(self.art_undark.getTypeID())
+                attributes = ArrayList()
+                attributes.add(BlackboardAttribute(self.att_undark_key, self.moduleName, database))
+                attributes.add(BlackboardAttribute(self.att_undark_output, self.moduleName, row))
+                art.addAttributes(attributes)
+                self.index_artifact(self.blackboard, art, self.art_undark)        
+            except Exception as e:
+                self.log(Level.INFO, self.moduleName + " Error getting a message: " + str(e))
+    
 
 
     def process_users(self, users, file):
@@ -177,6 +191,10 @@ class ProjectIngestModule(DataSourceIngestModule):
         #seaches
         self.att_searches = self.create_attribute_type('TIKTOK_SEARCH', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Search", skCase)
 
+        #undark
+        self.att_undark_key = self.create_attribute_type('TIKTOK_UNDARK_KEY', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Database", skCase)
+        self.att_undark_output = self.create_attribute_type('TIKTOK_UNDARK_OUTPUT', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Output", skCase)
+
 
         # Create artifacts
 
@@ -186,6 +204,8 @@ class ProjectIngestModule(DataSourceIngestModule):
         self.art_user_profile = self.create_artifact_type("TIKTOK_PROFILE_" + "UID","User " + "UID" + " - PROFILE", skCase)
         self.art_profiles = self.create_artifact_type("TIKTOK_PROFILES_" + "UID", "User " + "UID" + " - PROFILES", skCase)
         self.art_searches = self.create_artifact_type("TIKTOK_SEARCHES_" + "UID", "User " + "UID" + " - SEARCHES", skCase)
+
+        self.art_undark = self.create_artifact_type("TIKTOK_UNDARK_" + "UID", "User " + "UID" + " - UNDARK", skCase)
                     
         
 
@@ -200,7 +220,7 @@ class ProjectIngestModule(DataSourceIngestModule):
         fileCount = 0
 
         # com.zhiliaoapp.musically --path "path..." --adb
-        localDir = os.path.join(Case.getCurrentCase().getTempDirectory(), "extract")
+        # localDir = os.path.join(Case.getCurrentCase().getTempDirectory(), "extract")
         
         # class Args:
         #     def __init__(self, adb):
@@ -243,6 +263,7 @@ class ProjectIngestModule(DataSourceIngestModule):
                 user_profile = data["profile"]
                 profiles = data["users"]
                 searches = data["searches"]
+                unkdark_ouput = data["freespace"]
             except Exception as e:
                 message = IngestMessage.createMessage(IngestMessage.MessageType.DATA, "TikTok", "Report file with wrong structure")
                 IngestServices.getInstance().postMessage(message)
@@ -252,6 +273,7 @@ class ProjectIngestModule(DataSourceIngestModule):
             self.process_user_profile(user_profile, file)
             self.process_users(profiles, file)
             self.process_searches(searches, file)
+            self.process_undark(unkdark_ouput, file)
             
 
       
