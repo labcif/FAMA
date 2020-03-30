@@ -21,9 +21,7 @@ class Extract:
         folders = []
 
         device_communication = DeviceCommunication()
-        for device in device_communication.list_devices():
-            serial_number = device.get_serial_no()
-
+        for serial_number in device_communication.list_devices():
             current_time = Utils.get_current_time()
             path_dump_folder = os.path.join(self.dumps_path, current_time)
             path_dump_internal = os.path.join(path_dump_folder, self.internal_data_dump_name.format(app_package))

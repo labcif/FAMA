@@ -9,7 +9,7 @@ import subprocess
 import shutil
 
 #from meaning.meaning import Meaning
-from database import DatabaseParser
+#from database import DatabaseParser
 
 class Utils:
     ### TAR UTILS
