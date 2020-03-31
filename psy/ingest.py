@@ -209,13 +209,13 @@ class ProjectIngestModule(DataSourceIngestModule):
         
 
     def process(self, dataSource, progressBar):
-        #analyzer = Analyzer("C:\Users\X541\Documents\GitHub\TikTok\dumps")
-        #analyzer.generate_report()
+        analyzer = Analyzer("C:\Users\X541\Documents\GitHub\TikTok\dumps\20200331_224317")
+        analyzer.generate_report()
         
         progressBar.switchToIndeterminate()
         self.blackboard = Case.getCurrentCase().getServices().getBlackboard()
         fileManager = Case.getCurrentCase().getServices().getFileManager()
-        files = fileManager.findFiles(dataSource, "REPORT_%.json")
+        files = fileManager.findFiles(dataSource, "Report.json")
         numFiles = len(files)
         progressBar.switchToDeterminate(numFiles)
         fileCount = 0

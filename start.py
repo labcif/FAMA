@@ -9,9 +9,7 @@ from utils import Utils
 #python3 start.py com.zhiliaoapp.musically --path "/Users/Nogueira/Desktop/Projeto/ExemploMount" --adb
 #python3 start.py com.zhiliaoapp.musically --dump 20200307_215555 20200307_201252
 
-def start(args):
-    
-    
+def start(args):    
     extract = Extract()
     folders = []
 

@@ -1,4 +1,4 @@
-try:
+try: #improve
     import sqlite3
     jython = False
 except:
@@ -8,21 +8,20 @@ except:
 import subprocess
 
 class Database:
-    def __init__(self, database, attach = None):
+    def __init__(self, database):
         self.database = database
-        self.attach = attach
         if jython:
             self.dbConn = DriverManager.getConnection("jdbc:sqlite:{}".format(self.database))
         else:
             self.dbConn = sqlite3.connect(self.database)
 
     
-    def execute_query(self, query):
+    def execute_query(self, query, attach = None):
         if jython:
             contents = []
             stmt = self.dbConn.createStatement()
-            if self.attach:
-                stmt.execute(self.attach)
+            if attach:
+                stmt.execute(attach)
 
             result = stmt.executeQuery(query)
             while result.next():
@@ -36,8 +35,8 @@ class Database:
             return contents
         else:
             cursor_msg = self.dbConn.cursor()
-            if self.attach:
-                cursor_msg.execute(self.attach)
+            if attach:
+                cursor_msg.execute(attach)
 
             cursor_msg.execute(query)
             return cursor_msg.fetchall()
@@ -45,6 +44,7 @@ class Database:
 
 
 ### OLD CODE, MAYBE USEFUL IN FUTURE???
+'''
 class DatabaseParser:
     #https://svn.python.org/projects/python/trunk/Lib/sqlite3/dump.py
     @staticmethod
@@ -68,14 +68,12 @@ class DatabaseParser:
                 tables[table_name].append(col)
         
         #'index', 'trigger', or 'view'
-        '''
-        q = """SELECT name, type, sql FROM sqlite_master WHERE sql NOT NULL AND type IN ('index', 'trigger', 'view')"""
-        schema_res = cu.execute(q)
-        for name, type, sql in schema_res.fetchall():
-            print('%s;' % sql)
-            #pass
-        '''
+        #q = """SELECT name, type, sql FROM sqlite_master WHERE sql NOT NULL AND type IN ('index', 'trigger', 'view')"""
+        #schema_res = cu.execute(q)
+        #for name, type, sql in schema_res.fetchall():
+        #    print('%s;' % sql)
+        #    #pass
         
         return tables
-
+'''
     

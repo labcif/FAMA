@@ -7,13 +7,13 @@ import xml.etree.ElementTree as ET
 import datetime
 import subprocess
 import shutil
+import tarfile
+import json
+import time
 
 #from meaning.meaning import Meaning
-#from database import DatabaseParser
 
 class Utils:
-    ### TAR UTILS
-
     @staticmethod
     def get_base_path_folder():
         return os.path.dirname(__file__)
@@ -24,48 +24,6 @@ class Utils:
         with tarfile.open(generated_file_path, mode='w:gz') as archive:
             archive.add(folder_path, recursive=True, arcname = arcname)
     
-    @staticmethod
-    def list_files_tar(file_path, filter_type = None):
-        files_list = []
-        if not file_path or not os.path.exists(file_path):
-            return files_list
-            
-        tar = tarfile.open(file_path)
-        for member in tar.getmembers():
-            path = member.name
-            if filter_type:
-                extension = os.path.splitext(path)[1].strip().lower()
-                if not extension in filter_type:
-                    if extension != "": 
-                        continue
-
-                    if not member.isfile():
-                        continue
-                    
-                    if not ".db" or ".mp4" in filter_type: #we are only checking header for sqlite for now
-                        continue
-
-                    if not Utils.verify_header_signature(path, header_type = b"SQLite", offset = 0, stream = tar.extractfile(member)):
-                        continue
-
-            files_list.append(path)
-
-        tar.close()
-        return files_list
-    
-    @staticmethod
-    def extract_file_tar(file_path, file_member, cache_path):
-        if not file_path or not os.path.exists(file_path):
-            return False
-
-        Utils.check_and_generate_folder(os.path.dirname(cache_path))
-        with tarfile.open(file_path) as tar:
-            fileobj = tar.extractfile(file_member)
-            with open(cache_path, 'wb') as savefile:
-                savefile.write(fileobj.read())
-            fileobj.close()
-        return True
-
     @staticmethod
     def list_files(folder_name, filter_type = None):
         files_list = []
@@ -90,14 +48,12 @@ class Utils:
                 files_list.append(os.path.join(root, file))
         
         return files_list
+    
     @staticmethod
     def get_current_time():
         return datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     
-    
-
-    
-
+    #not necessary, remove in future?
     '''
     @staticmethod
     def export_columns_from_database(folder_path):
@@ -124,6 +80,21 @@ class Utils:
 
                         writer.writerow(item)
     '''
+
+    @staticmethod
+    def safe_members(members): #used to clean : in folders
+        for finfo in members:
+            if ':' in finfo.name:
+                continue
+            else:
+                yield finfo
+
+    @staticmethod
+    def extract_tar(file, path):
+        tar = tarfile.open(file)
+        tar.extractall(path, members = Utils.safe_members(tar))
+        tar.close()
+
     @staticmethod
     def verify_header_signature(file, header_type, offset, stream = None):
         header = b""
@@ -172,11 +143,6 @@ class Utils:
         
         return path.replace('\\', '/')
 
-    
-    @staticmethod
-    def check_string_in_string_list(string, listing):
-        return any(string in s for s in listing)
-
     @staticmethod
     def get_adb_location():
         if platform.system() == "Windows":
@@ -194,7 +160,6 @@ class Utils:
         else:
             return os.path.join(Utils.get_base_path_folder(), "dependencies", "linux", "undark")
 
-
     @staticmethod
     def get_base64_location():
         if platform.system() == "Windows":
@@ -205,19 +170,16 @@ class Utils:
     @staticmethod
     def run_undark(db):
         undark = Utils.get_undark_location()
-        return subprocess.Popen([undark,'-i', db, '--freespace'], shell=True, stdout=subprocess.PIPE).stdout.read()
+        output = subprocess.Popen("{} -i {} --freespace".format(undark, db), shell=False, stdout=subprocess.PIPE).stdout.read()
+        time.sleep(1)
+        return output
 
     @staticmethod
     def remove_folder(folder):
         shutil.rmtree(folder)
 
-
-# if __name__ == "__main__":
-#     a = Utils.run_undark("6793838184616526854_im.db")
-#     print(a)
- 
-
-
-
-
-#print(Utils.xml_attribute_finder("/Users/Nogueira/MEOCloud/ProjetoFinal/ProjetoPython/output/H7AZCY02B588KZL/20200301_21h20m24s/com.zhiliaoapp.musically-v15.0.1/internal/shared_prefs/aweme_account_terminal_relative_sp.xml", "account_terminal_app_has_logged_out"))
+    @staticmethod
+    def save_report(report_name, contents):
+        f = open(report_name, "w")
+        f.write(json.dumps(contents, indent=2))
+        f.close()
