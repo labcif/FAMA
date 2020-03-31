@@ -153,8 +153,9 @@ class Utils:
 
                 try:
                     listing[child.attrib.get("name")] = str(value)
-                except:
-                    listing[child.attrib.get("name")] = "ERROR"
+                except: #jython2 fix
+                    listing[child.attrib.get("name")] = str(value.encode('utf-8','ignore'))
+
         return listing
 
     @staticmethod

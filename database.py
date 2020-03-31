@@ -1,10 +1,50 @@
 try:
     import sqlite3
+    jython = False
 except:
-    from jythonsqlite3 import module as sqlite3
+    from java.sql import DriverManager
+    jython = True
 
 import subprocess
 
+class Database:
+    def __init__(self, database, attach = None):
+        self.database = database
+        self.attach = attach
+        if jython:
+            self.dbConn = DriverManager.getConnection("jdbc:sqlite:{}".format(self.database))
+        else:
+            self.dbConn = sqlite3.connect(self.database)
+
+    
+    def execute_query(self, query):
+        if jython:
+            contents = []
+            stmt = self.dbConn.createStatement()
+            if self.attach:
+                stmt.execute(self.attach)
+
+            result = stmt.executeQuery(query)
+            while result.next():
+                row = []
+                for index in range(result.getMetaData().getColumnCount()):
+                    #row[result.getMetaData().getColumnName(index + 1)] = result.getObject(index + 1) #to se as dict instead
+                    row.append(result.getObject(index + 1))
+                
+                contents.append(row)
+            
+            return contents
+        else:
+            cursor_msg = self.dbConn.cursor()
+            if self.attach:
+                cursor_msg.execute(self.attach)
+
+            cursor_msg.execute(query)
+            return cursor_msg.fetchall()
+
+
+
+### OLD CODE, MAYBE USEFUL IN FUTURE???
 class DatabaseParser:
     #https://svn.python.org/projects/python/trunk/Lib/sqlite3/dump.py
     @staticmethod

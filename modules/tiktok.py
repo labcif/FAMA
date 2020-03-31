@@ -2,12 +2,17 @@ import sys
 import json
 import os
 
-try:
-    import sqlite3
-except:
-    sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-    from jythonsqlite3 import module as sqlite3
+#try:
+#    import sqlite3
+#except:
+#    sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+#    from jythonsqlite3 import module as sqlite3
     
+try:
+    from database import Database
+except: #jython fix
+    sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+    from database import Database
 
 from utils import Utils
 
@@ -74,7 +79,7 @@ class Module:
     def get_user_messages(self):
         print("[Tiktok] Getting User Messages...")
         messagesList =[]
-        sqlite3.SQLITE_ATTACH
+        #sqlite3.SQLITE_ATTACH
 
         db1 = self.access_path_file(self.internal_path, "./databases/db_im_xx")
         db2 = None
@@ -89,12 +94,11 @@ class Module:
             return ""
 
         db2 = self.access_path_file(self.internal_path, db2)
-        
-        conn_msg = sqlite3.connect(db1)
-        cursor_msg = conn_msg.cursor()    
-        cursor_msg.execute("ATTACH '" + db2 + "' AS 'db2'")
-        cursor_msg.execute("select UID, UNIQUE_ID, NICK_NAME, datetime(created_time/1000, 'unixepoch', 'localtime') as created_time, content as message, case when read_status = 0 then 'Not read' when read_status = 1 then 'Read' else read_status end read_not_read, local_info from SIMPLE_USER, msg where UID = sender order by created_time;")
-        for entry in cursor_msg.fetchall():
+        attach = "ATTACH '{}' AS 'db2'".format(db2)
+
+        database = Database(db1, attach = attach)
+        results = database.execute_query("select UID, UNIQUE_ID, NICK_NAME, datetime(created_time/1000, 'unixepoch', 'localtime') as created_time, content as message, case when read_status = 0 then 'Not read' when read_status = 1 then 'Read' else read_status end read_not_read, local_info from SIMPLE_USER, msg where UID = sender order by created_time;")
+        for entry in results:
             message={}
             message["uid"] = entry[0]
             message["uniqueid"] = entry[1]
@@ -115,15 +119,15 @@ class Module:
         values = Utils.xml_attribute_finder(xml_file)
         for key, value in values.items():
             if key.endswith("_aweme_user_info"):
-                try:
-                    dump=json.loads(value)
-                    atributes =["account_region", "follower_count","following_count", "gender", "google_account", "is_blocked", "is_minor", "nickname", "register_time", "sec_uid", "short_id", "uid", "unique_id"]
+                #try:
+                dump=json.loads(value)
+                atributes =["account_region", "follower_count","following_count", "gender", "google_account", "is_blocked", "is_minor", "nickname", "register_time", "sec_uid", "short_id", "uid", "unique_id"]
 
-                    for index in atributes:
-                        user_profile[index] = dump[index]
-                    break
-                except ValueError:
-                    print("[Tiktok] JSON User Error")
+                for index in atributes:
+                    user_profile[index] = dump[index]
+                break
+                #except ValueError:
+                #    print("[Tiktok] JSON User Error")
 
         return user_profile
 
@@ -140,13 +144,13 @@ class Module:
     def get_user_profiles(self):
         print("[Tiktok] Getting User Profiles...")
 
-        profiles =[]
+        profiles = []
+
         db = self.access_path_file(self.internal_path, "./databases/db_im_xx")
 
-        conn_msg = sqlite3.connect(db)
-        cursor_msg = conn_msg.cursor()    
-        cursor_msg.execute("select UID, UNIQUE_ID, NICK_NAME, AVATAR_THUMB, FOLLOW_STATUS from SIMPLE_USER")
-        for entry in cursor_msg.fetchall():
+        database = Database(db)
+        results = database.execute_query("select UID, UNIQUE_ID, NICK_NAME, AVATAR_THUMB, FOLLOW_STATUS from SIMPLE_USER")
+        for entry in results:
             message={}
             message["uid"] = entry[0]
             message["uniqueid"] = entry[1]
@@ -165,14 +169,13 @@ class Module:
 
     def get_videos(self):
         print("[Tiktok] Getting Videos...")
-        videos =[]
+        videos = []
         db = self.access_path_file(self.internal_path, "./databases/video.db")
 
-        conn_msg = sqlite3.connect(db)
-        cursor_msg = conn_msg.cursor()    
-        cursor_msg.execute("select key from video_http_header_t")
+        database = Database(db)
+        results = database.execute_query("select key from video_http_header_t")
 
-        for entry in cursor_msg.fetchall():
+        for entry in results:
             videos.append(entry[0])
             self.access_path_file(self.internal_path, "./cache/cache/{}".format(entry[0]))
         print("[Tiktok] {} videos found".format(len(videos)))
@@ -181,7 +184,11 @@ class Module:
     def get_undark_db(self):
         print("[Tiktok] Getting undark output...")
         output = {}
-        files = os.listdir(os.path.join(self.cache_path,  "internal", "databases"))      
+        database_path = os.path.join(self.cache_path,  "internal", "databases")
+        if not os.path.exists(database_path):
+            return output
+            
+        files = os.listdir(database_path)      
         for name in files:
             listing = []
             undark_output = Utils.run_undark(os.path.join(self.cache_path,  "internal", "databases", name)).decode()

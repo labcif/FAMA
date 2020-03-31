@@ -50,16 +50,13 @@ class Analyzer:
             "user": user_id
         }
         report = {}
-
         report["header"] = report_header
         report["profile"] = module.get_user_profile()
-        #autopsy comment for now to test
         report["messages"] = module.get_user_messages()
         report["users"] = module.get_user_profiles()
         report["searches"] = module.get_user_searches()
         report["videos"] = module.get_videos()
         report["freespace"] = module.get_undark_db() 
-        #####
 
         # with open("report/"+ name+"_freespace.txt",'w') as f:
         #         output = Utils.run_undark("./cache/tiktok/internal/databases/" + name)            

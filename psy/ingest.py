@@ -20,7 +20,7 @@ from org.sleuthkit.autopsy.casemodule.services import Services
 from org.sleuthkit.autopsy.casemodule.services import FileManager
 from org.sleuthkit.autopsy.casemodule.services import Blackboard
 
-#from analyzer import Analyzer
+from analyzer import Analyzer
 # from start import start
 
 class ProjectIngestModule(DataSourceIngestModule):
@@ -119,8 +119,6 @@ class ProjectIngestModule(DataSourceIngestModule):
                 self.log(Level.INFO, self.moduleName + " Error getting a search entry: " + str(e))
 
     def process_undark(self, undarks, file):
-
-        self.log(Level.INFO, self.moduleName + " OUTPUT!!: "+ str(undarks.items()))
         for database, row in undarks.items():
             try: 
                 self.log(Level.INFO, self.moduleName + " Parsing a new undark entry")
@@ -211,9 +209,6 @@ class ProjectIngestModule(DataSourceIngestModule):
         
 
     def process(self, dataSource, progressBar):
-        #self.log(Level.INFO, "TESTE" + sys.path[0])
-        #self.log(Level.INFO, "TESTE" + str( os.path.dirname(__file__)))
-        
         #analyzer = Analyzer("C:\Users\X541\Documents\GitHub\TikTok\dumps")
         #analyzer.generate_report()
         
@@ -279,7 +274,7 @@ class ProjectIngestModule(DataSourceIngestModule):
             self.process_user_profile(user_profile, file)
             self.process_users(profiles, file)
             self.process_searches(searches, file)
-            self.process_undark(unkdark_ouput, file)
+            #self.process_undark(unkdark_ouput, file)
             
 
       
