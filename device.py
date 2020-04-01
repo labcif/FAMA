@@ -9,7 +9,7 @@ class DeviceCommunication:
     def list_devices(self):
         print("[ADB] Getting list of devices")
         adb_location = Utils.get_adb_location()
-        command = """{} devices""".format(adb_location)
+        command = [adb_location, "devices"]
         info = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE).stdout.read()
 
         devices = []

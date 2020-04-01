@@ -180,7 +180,7 @@ class Utils:
     @staticmethod
     def run_undark(db):
         undark = Utils.get_undark_location()
-        output = subprocess.Popen("{} -i {} --freespace".format(undark, db), shell=False, stdout=subprocess.PIPE).stdout.read()
+        output = subprocess.Popen([undark,'-i', db, '--freespace'], shell=False, stdout=subprocess.PIPE).stdout.read()
         return output
 
     @staticmethod
