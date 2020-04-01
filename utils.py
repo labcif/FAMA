@@ -19,6 +19,15 @@ class Utils:
         return os.path.dirname(__file__)
 
     @staticmethod
+    def get_platform():
+        version = sys.platform.lower()
+        if version.startswith('java'):
+            import java.lang
+            version = java.lang.System.getProperty("os.name").lower()
+        
+        return version
+
+    @staticmethod
     def generate_tar_gz_file(folder_path, generated_file_path):
         arcname = os.path.basename(generated_file_path).replace('.tar.gz', '')
         with tarfile.open(generated_file_path, mode='w:gz') as archive:
@@ -138,31 +147,32 @@ class Utils:
 
     @staticmethod
     def replace_slash_platform(path):
-        if platform.system() == "Windows":
+        if Utils.get_platform().startswith("windows"):
             return path.replace('/', '\\')
         
         return path.replace('\\', '/')
 
     @staticmethod
     def get_adb_location():
-        if platform.system() == "Windows":
+        if Utils.get_platform().startswith("windows"):
             return os.path.join(Utils.get_base_path_folder(), "dependencies", "windows", "adb.exe")
-        elif platform.system() == "Darwin":
+        elif Utils.get_platform().startswith("darwin"):
             return os.path.join(Utils.get_base_path_folder(), "dependencies", "mac", "adb")
         else:
             return os.path.join(Utils.get_base_path_folder(), "dependencies", "linux", "adb")
+    
     @staticmethod
     def get_undark_location():
-        if platform.system() == "Windows":
+        if Utils.get_platform().startswith("windows"):
             return os.path.join(Utils.get_base_path_folder(), "dependencies", "windows", "undark.exe")
-        elif platform.system() == "Darwin":
+        elif Utils.get_platform().startswith("darwin"):
             return os.path.join(Utils.get_base_path_folder(), "dependencies", "mac", "undark")
         else:
             return os.path.join(Utils.get_base_path_folder(), "dependencies", "linux", "undark")
 
     @staticmethod
     def get_base64_location():
-        if platform.system() == "Windows":
+        if Utils.get_platform().startswith("windows"):
             return os.path.join(Utils.get_base_path_folder(), "dependencies", "windows", "base64.exe")
         else:
             return "base64"
@@ -171,7 +181,6 @@ class Utils:
     def run_undark(db):
         undark = Utils.get_undark_location()
         output = subprocess.Popen("{} -i {} --freespace".format(undark, db), shell=False, stdout=subprocess.PIPE).stdout.read()
-        time.sleep(1)
         return output
 
     @staticmethod

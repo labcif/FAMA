@@ -209,7 +209,7 @@ class ProjectIngestModule(DataSourceIngestModule):
         
 
     def process(self, dataSource, progressBar):
-        analyzer = Analyzer("C:\Users\X541\Documents\GitHub\TikTok\dumps\20200331_224317")
+        analyzer = Analyzer("C:\\Users\\X541\\Documents\\GitHub\\TikTok\\dumps\\20200331_224317")
         analyzer.generate_report()
         
         progressBar.switchToIndeterminate()
