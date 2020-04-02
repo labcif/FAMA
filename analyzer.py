@@ -9,14 +9,14 @@ from utils import Utils
 from modules import packages
 
 class Analyzer:
-    def __init__(self, folder):
+    def __init__(self, folder, report_folder):
         self.folder = folder
         self.dumps = Utils.list_files(folder, ".tar.gz")
         self.internal_path = None
         self.external_path = None
         self.app_id = self.app_id_parser()
         
-        self.report_path = os.path.join(Utils.get_base_path_folder(), "report")
+        self.report_path = os.path.join(report_folder, "report")
         
         Utils.check_and_generate_folder(self.report_path)
 
@@ -33,7 +33,7 @@ class Analyzer:
         return app_id
 
     def generate_report(self):
-        report_name = "Report_{}".format(Utils.get_current_time())
+        # report_name = "Report_{}".format(Utils.get_current_time())
 
         module_file = packages.get(self.app_id)
 
@@ -42,6 +42,6 @@ class Analyzer:
             return None
 
         m = __import__("modules.{}".format(module_file), fromlist=[None])
-        module = m.Module(self.internal_path, self.external_path, report_name)
+        module = m.Module(self.internal_path, self.external_path, self.report_path)
 
         module.generate_report()

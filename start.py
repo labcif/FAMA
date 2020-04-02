@@ -26,9 +26,13 @@ def start(args):
 
     if args.adb:
         folders.extend(extract.dump_from_adb(args.app))
+    
+    if not args.output:
+        args.output = Utils.get_base_path_folder()
+
 
     for folder in folders:
-        analyzer = Analyzer(folder)
+        analyzer = Analyzer(folder, args.output)
         analyzer.generate_report()
 
     print("[App] Done")
@@ -46,6 +50,7 @@ if __name__ == "__main__":
     parser.add_argument('app', help='Application ID to be analyzed <com.application.example>')
     parser.add_argument('-d', '--dump', help='Analyze specific(s) dump(s) <20200307_215555 ...>', nargs='+', required = False)
     parser.add_argument('-p', '--path', help='Dump app data in path (mount or folder structure)', required = False)
+    parser.add_argument('-o', '--output', help='Report output path folder', required = False)
     parser.add_argument('-a', '--adb', action='store_true', help='Dump app data directly from device with ADB', required = False)
     args = parser.parse_args()
     

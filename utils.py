@@ -10,6 +10,7 @@ import shutil
 import tarfile
 import json
 import time
+import re
 
 #from meaning.meaning import Meaning
 
@@ -92,10 +93,12 @@ class Utils:
 
     @staticmethod
     def safe_members(members): #used to clean : in folders
+
+        
+
         for finfo in members:
-            if ':' in finfo.name:
-                continue
-            else:
+            if re.sub('[<>:|?*"]', "", finfo.name) == str(finfo.name):
+                print(finfo.name)
                 yield finfo
 
     @staticmethod
@@ -154,25 +157,25 @@ class Utils:
 
     @staticmethod
     def get_adb_location():
-        if Utils.get_platform().startswith("windows"):
+        if platform.system() == "Windows":
             return os.path.join(Utils.get_base_path_folder(), "dependencies", "windows", "adb.exe")
-        elif Utils.get_platform().startswith("darwin"):
+        elif platform.system() == "darwin":
             return os.path.join(Utils.get_base_path_folder(), "dependencies", "mac", "adb")
         else:
             return os.path.join(Utils.get_base_path_folder(), "dependencies", "linux", "adb")
     
     @staticmethod
     def get_undark_location():
-        if Utils.get_platform().startswith("windows"):
+        if platform.system() == "Windows":
             return os.path.join(Utils.get_base_path_folder(), "dependencies", "windows", "undark.exe")
-        elif Utils.get_platform().startswith("darwin"):
+        elif platform.system() == "darwin":
             return os.path.join(Utils.get_base_path_folder(), "dependencies", "mac", "undark")
         else:
-            return os.path.join(Utils.get_base_path_folder(), "dependencies", "linux", "undark")
+            return os.path.join(Utils.get_base_path_folder(), "dependencies", "windows", "undark.exe")
 
     @staticmethod
     def get_base64_location():
-        if Utils.get_platform().startswith("windows"):
+        if platform.system() == "Windows":
             return os.path.join(Utils.get_base_path_folder(), "dependencies", "windows", "base64.exe")
         else:
             return "base64"

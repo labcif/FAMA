@@ -13,13 +13,14 @@ from utils import Utils
 
 class Module:
     #module super in future
-    def __init__(self, internal_path, external_path, report_name):
+    def __init__(self, internal_path, external_path, report_path):
         print("[Tiktok] Module loaded")
-        self.report_name = report_name
+        # self.report_name = report_name
         self.internal_path = internal_path
         self.external_path = external_path
         
-        self.report_path = os.path.join(Utils.get_base_path_folder(), "report", self.report_name)
+        # self.report_path = os.path.join(report_path, "report", self.report_name)
+        self.report_path = report_path
         Utils.check_and_generate_folder(self.report_path)
 
         self.internal_cache_path = os.path.join(self.report_path, "Contents", "internal")
