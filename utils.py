@@ -21,7 +21,7 @@ class Utils:
 
     @staticmethod
     def get_platform():
-        version = sys.platform.lower()
+        version = platform.system().lower()
         if version.startswith('java'):
             import java.lang
             version = java.lang.System.getProperty("os.name").lower()
@@ -157,25 +157,25 @@ class Utils:
 
     @staticmethod
     def get_adb_location():
-        if platform.system() == "Windows":
+        if Utils.get_platform().startswith("windows"):
             return os.path.join(Utils.get_base_path_folder(), "dependencies", "windows", "adb.exe")
-        elif platform.system() == "darwin":
+        elif Utils.get_platform().startswith("darwin"):
             return os.path.join(Utils.get_base_path_folder(), "dependencies", "mac", "adb")
         else:
             return os.path.join(Utils.get_base_path_folder(), "dependencies", "linux", "adb")
     
     @staticmethod
     def get_undark_location():
-        if platform.system() == "Windows":
+        if Utils.get_platform().startswith( "windows"):
             return os.path.join(Utils.get_base_path_folder(), "dependencies", "windows", "undark.exe")
-        elif platform.system() == "darwin":
+        elif Utils.get_platform().startswith("darwin"):
             return os.path.join(Utils.get_base_path_folder(), "dependencies", "mac", "undark")
         else:
-            return os.path.join(Utils.get_base_path_folder(), "dependencies", "windows", "undark.exe")
+            return os.path.join(Utils.get_base_path_folder(), "dependencies", "linux", "undark")
 
     @staticmethod
     def get_base64_location():
-        if platform.system() == "Windows":
+        if Utils.get_platform().startswith("windows"):
             return os.path.join(Utils.get_base_path_folder(), "dependencies", "windows", "base64.exe")
         else:
             return "base64"

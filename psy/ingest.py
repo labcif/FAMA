@@ -19,11 +19,12 @@ from org.sleuthkit.autopsy.datamodel import ContentUtils
 from org.sleuthkit.autopsy.casemodule.services import Services
 from org.sleuthkit.autopsy.casemodule.services import FileManager
 from org.sleuthkit.autopsy.casemodule.services import Blackboard
-from shutil import copyfile
+from shutil import rmtree
 
 
 from analyzer import Analyzer
-# from start import start
+from extract import Extract
+
 
 class ProjectIngestModule(DataSourceIngestModule):
     moduleName = "TikTok"
@@ -211,59 +212,62 @@ class ProjectIngestModule(DataSourceIngestModule):
         
 
     def process(self, dataSource, progressBar):
-        # analyzer = Analyzer("C:\\Users\\josef\\Documents\\GitHub\\TikTok\\dumps\\20200401_191957")
-        # analyzer.generate_report()
+        
         
         progressBar.switchToIndeterminate()
         self.blackboard = Case.getCurrentCase().getServices().getBlackboard()
         fileManager = Case.getCurrentCase().getServices().getFileManager()
         # files = fileManager.findFiles(dataSource, "Report.json")
         # progressBar.switchToDeterminate(1)
+        
+        #preencher com as settings
+        flag_adb_extraction = False
+        
         fileCount = 0
 
         app_name = "com.zhiliaoapp.musically"
         internal = app_name + "_internal.tar.gz"
         external = app_name + "_external.tar.gz"
 
+
+        try:
+            rmtree(os.path.join(Case.getCurrentCase().getTempDirectory(), app_name))
+        except:
+            pass
         os.makedirs(os.path.join(Case.getCurrentCase().getTempDirectory(), app_name))
 
-
-        # analyzer = Analyzer("C:\\Users\\josef\\Documents\\GitHub\\TikTok\\dumps\\20200401_191957")
-        # analyzer.generate_report()
+        if flag_adb_extraction:
+            
+            self.log(Level.INFO, self.moduleName + "Inicio da extracao ADB")
+            extract = Extract()
+            extract.dump_from_adb(app_name)
+            self.log(Level.INFO, self.moduleName + "Fim da extracao ADB")
+        
+        
 
         internal_files = fileManager.findFiles(dataSource, internal)
         external_files = fileManager.findFiles(dataSource, external)
 
+        
         lclInternalPath = os.path.join(Case.getCurrentCase().getTempDirectory(),app_name, str(internal_files[0].getName()) + internal)
         lclExternalPath = os.path.join(Case.getCurrentCase().getTempDirectory(),app_name, str(external_files[0].getName()) + external)        
 
         ContentUtils.writeToFile(external_files[0], File(lclExternalPath))
         ContentUtils.writeToFile(internal_files[0], File(lclInternalPath))
 
+        
+        
         analyzer = Analyzer(os.path.join(Case.getCurrentCase().getTempDirectory(),app_name), os.path.join(Case.getCurrentCase().getTempDirectory(),app_name))
         analyzer.generate_report()
-
-        # ContentUtils.writeToFile("Report.json", File(os.path.join(Case.getCurrentCase().getTempDirectory(),app_name, "report")))
         
-        # files = fileManager.findFiles(os.path.join(Case.getCurrentCase().getTempDirectory(),app_name, "report"), "Report.json")
+   
         self.log(Level.INFO,str(os.path.join(Case.getCurrentCase().getTempDirectory(),app_name, "report")))
+    
+    
         
-        f = File(os.path.join(Case.getCurrentCase().getTempDirectory(),app_name, "report"), "Report.json")
-
-        ContentUtils.writeToFile(f, File(os.path.join(Case.getCurrentCase().getTempDirectory(),app_name, "report"), "Report.json"))
         
-        # numFiles = len(files)
-        # progressBar.switchToDeterminate(numFiles)
-        files = fileManager.findFiles(os.path.join(Case.getCurrentCase().getTempDirectory(),app_name, "report"), "Report.json")
-        self.log(Level.INFO, self.moduleName + " TOU MESMO QUASSE A ENTRAR")
-        for file in files:
-
-            lclDbPath = os.path.join(Case.getCurrentCase().getTempDirectory(), str(file.getId()) + ".json")
-
-            ContentUtils.writeToFile(file, File(lclDbPath))
-
-            self.log(Level.INFO, "ENTREIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII")
-
+        for file in internal_files:
+            
             # Check if the user pressed cancel while we were busy
             if self.context.isJobCancelled():
                 return IngestModule.ProcessResult.OK
@@ -272,8 +276,8 @@ class ProjectIngestModule(DataSourceIngestModule):
             fileCount += 1
 
             # Save the DB locally in the temp folder. use file id as name to reduce collisions
-            lclReportPath = os.path.join(Case.getCurrentCase().getTempDirectory(), str(file.getId()) + ".json")
-            ContentUtils.writeToFile(file, File(lclReportPath))
+            lclReportPath = os.path.join(Case.getCurrentCase().getTempDirectory(), app_name, "report", "Report.json")
+            # ContentUtils.writeToFile(file, File(lclReportPath))
 
             data ={}        
             try: 
