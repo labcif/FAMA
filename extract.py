@@ -36,8 +36,9 @@ class Extract:
             #Dump internal data https://android.stackexchange.com/questions/85564/need-one-line-adb-shell-su-push-pull-to-access-data-from-windows-batch-file
             print("[{}] Extracting internal app (root) data!".format(serial_number))
 
-            command = """{} -s {} shell "su -c 'cd {} && tar czf - ./ --exclude='./files'| base64' 2>/dev/null" | {} -d > {}""".format(adb_location, serial_number, self.internal_data_path.format(app_package), base64_location, path_dump_internal)
-            subprocess.Popen(command, shell=True, stdout=subprocess.PIPE).stdout.read()
+            sort_out = open(path_dump_internal, 'wb', 0)
+            command = """{} -s {} shell "su -c 'cd {} && tar czf - ./ --exclude='./files'| base64' 2>/dev/null" | {} -d""".format(adb_location, serial_number, self.internal_data_path.format(app_package), base64_location)
+            subprocess.Popen(command, shell=True, stdout=sort_out).wait()
 
             #Clean the file if it's empty
             if os.path.getsize(path_dump_internal) == 0:
@@ -51,9 +52,10 @@ class Extract:
 
             #Dump external
             print("[{}] Extracting external app data!".format(serial_number))
-
-            command = """{} -s {} shell "su -c 'cd {} && tar czf - ./ | base64' 2>/dev/null" | {} -d > {}""".format(adb_location, serial_number, self.external_data_path.format(app_package), base64_location, path_dump_external)
-            subprocess.Popen(command, shell=True, stdout=subprocess.PIPE).stdout.read()
+            
+            sort_out = open(path_dump_external, 'wb', 0)
+            command = """{} -s {} shell "su -c 'cd {} && tar czf - ./ | base64' 2>/dev/null" | {} -d""".format(adb_location, serial_number, self.external_data_path.format(app_package), base64_location)
+            subprocess.Popen(command, shell=True, stdout=sort_out).wait()
             
             if os.path.getsize(path_dump_external) == 0:
                 print("[{}] Nothing extracted!".format(serial_number))
