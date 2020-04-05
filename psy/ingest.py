@@ -165,13 +165,19 @@ class ProjectIngestModule(DataSourceIngestModule):
     # See: http://sleuthkit.org/autopsy/docs/api-docs/latest/classorg_1_1sleuthkit_1_1autopsy_1_1ingest_1_1_ingest_job_context.html
     def startUp(self, context):
         self.context = context
-
-        extract = Extract()
-        folders = extract.dump_from_adb("com.zhiliaoapp.musically")
-
-        for serial, folder in folders.items():
-            self.generate_new_fileset("ADBFileSet_{}".format(serial), [folder])
         
+        adb = True
+        
+        if adb:
+            self.log(Level.INFO, "Starting ADB")
+            extract = Extract()
+            folders = extract.dump_from_adb("com.zhiliaoapp.musically")
+
+            for serial, folder in folders.items():
+                self.generate_new_fileset("ADBFileSet_{}".format(serial), [folder])
+            
+            self.log(Level.INFO, "Ending ADB")
+            
         
         skCase = Case.getCurrentCase().getSleuthkitCase()
         # Messages attributes
@@ -220,21 +226,14 @@ class ProjectIngestModule(DataSourceIngestModule):
         self.art_searches = self.create_artifact_type("TIKTOK_SEARCHES_" + "UID", "User " + "UID" + " - SEARCHES", skCase)
 
         self.art_undark = self.create_artifact_type("TIKTOK_UNDARK_" + "UID", "User " + "UID" + " - UNDARK", skCase)
-                    
         
 
     def process(self, dataSource, progressBar):
-        extract = Extract()
-        folder = extract.dump_from_adb("com.zhiliaoapp.musically")
-
         progressBar.switchToIndeterminate()
         self.blackboard = Case.getCurrentCase().getServices().getBlackboard()
         fileManager = Case.getCurrentCase().getServices().getFileManager()
         # files = fileManager.findFiles(dataSource, "Report.json")
         # progressBar.switchToDeterminate(1)
-        
-        #preencher com as settings
-        flag_adb_extraction = False
         
         fileCount = 0
 
@@ -248,15 +247,6 @@ class ProjectIngestModule(DataSourceIngestModule):
         except:
             pass
         os.makedirs(os.path.join(Case.getCurrentCase().getTempDirectory(), app_name))
-
-        if flag_adb_extraction:
-            
-            self.log(Level.INFO, self.moduleName + "Inicio da extracao ADB")
-            extract = Extract()
-            extract.dump_from_adb(app_name)
-            self.log(Level.INFO, self.moduleName + "Fim da extracao ADB")
-        
-        
 
         internal_files = fileManager.findFiles(dataSource, internal)
         external_files = fileManager.findFiles(dataSource, external)

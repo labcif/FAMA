@@ -25,7 +25,8 @@ def start(args):
         folders.extend(extract.dump_from_path(args.path, args.app))
 
     if args.adb:
-        folders.extend(extract.dump_from_adb(args.app))
+        for serial, folder in extract.dump_from_adb(args.app).items():
+            folders.append(folder)
     
     if not args.output:
         args.output = Utils.get_base_path_folder()

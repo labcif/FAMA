@@ -57,16 +57,6 @@ class Module:
         
         return files
     
-    # def set_videos(self):
-    #     files = []
-    #     print("entrou nos videos")
-    #     for mp4 in Utils.list_files_tar(self.internal_path, [""]):
-    #         if '/cache/cache/' in mp4:
-    #             files.append(mp4)
-
-    #     print("tamanho:{}".format(len(files)))
-    #     return files
-    
     def generate_report(self):
         user_id = self.get_user_id()
         report_header = {
@@ -221,4 +211,129 @@ class Module:
                 output[relative_name] = listing
 
         return output
+        
+    ## PSY
+
+    @staticmethod
+    def get_attributes(self):
+        return {
+            'TIKTOK_MSG_UID': {
+                "type": "string",
+                "name": "Uid"
+            },
+            'TIKTOK_MSG_UNIQUE_ID': {
+                "type": "string",
+                "name": "Unique ID"
+            }, 
+            'TIKTOK_MSG_NICKNAME': {
+                "type": "string",
+                "name": "Nickname"
+            },
+            'TIKTOK_MSG_CREATED_TIME': {
+                "type": "string",
+                "name": "Created Time"
+            }, 
+            'TIKTOK_MSG_MESSAGE': {
+                "type": "string",
+                "name": "Message"
+            },
+            'TIKTOK_MSG_READ_STATUS': {
+                "type": "string",
+                "name": "Read Status"
+            }, 
+            'TIKTOK_MSG_LOCAL_INFO': {
+                "type": "string",
+                "name": "Local Info"
+            },
+            'TIKTOK_PROFILE_AVATAR': {
+                "type": "string",
+                "name": "Avatar"
+            }, 
+            'TIKTOK_PROFILE_REGION': {
+                "type": "string",
+                "name": "Region"
+            },
+            'TIKTOK_PROFILE_FOLLOWER': {
+                "type": "long",
+                "name": "Followers"
+            }, 
+            'TIKTOK_PROFILE_FOLLOWING': {
+                "type": "long",
+                "name": "Following"
+            },
+            'TIKTOK_PROFILE_GENDER': {
+                "type": "long",
+                "name": "Gender"
+            }, 
+            'TIKTOK_PROFILE_GOOGLE': {
+                "type": "string",
+                "name": "Google Account"
+            },
+            'TIKTOK_PROFILE_NICKNAME': {
+                "type": "string",
+                "name": "Nickname"
+            }, 
+            'TIKTOK_PROFILE_REGISTER_TIME': {
+                "type": "long",
+                "name": "Register Time"
+            }, 
+            'TIKTOK_PROFILE_SEC_UID': {
+                "type": "string",
+                "name": "Sec. UID"
+            }, 
+            'TIKTOK_PROFILE_SHORT_ID': {
+                "type": "string",
+                "name": "Short ID"
+            }, 
+            'TIKTOK_PROFILE_UID': {
+                "type": "string",
+                "name": "UID"
+            }, 
+            'TIKTOK_PROFILE_UNIQUE_ID': {
+                "type": "string",
+                "name": "Unique ID"
+            }, 
+            'TIKTOK_PROFILE_FOLLOW_STATUS': {
+                "type": "long",
+                "name": "Follow Status"
+            }, 
+            'TIKTOK_SEARCH': {
+                "type": "string",
+                "name": "Search"
+            }, 
+            'TIKTOK_UNDARK_KEY': {
+                "type": "string",
+                "name": "Database"
+            }, 
+            'TIKTOK_UNDARK_KEY': {
+                "type": "string",
+                "name": "Output"
+            }, 
+            'TIKTOK_UNDARK_OUTPUT': {
+                "type": "string",
+                "name": "Output"
+            }
+        }
+        # self.att_prf_is_blocked = self.create_attribute_type('TIKTOK_PROFILE_IS_BLOCKED', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.BYTE, "Is Blocked", skCase)
+        # self.att_prf_is_minor = self.create_attribute_type('TIKTOK_PROFILE_IS_MINOR', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.BYTE, "Is Minor", skCase)
+
+    @staticmethod
+    def get_artifacts(user_id):
+        return {
+            "TIKTOK_MESSAGE_" + user_id: {
+                "name": "User " + user_id + " - MESSAGES"
+            },
+            "TIKTOK_PROFILE_" + user_id: {
+                "name": "User " + user_id + " - PROFILE"
+            },
+            "TIKTOK_PROFILES_" + user_id: {
+                "name": "User " + user_id + " - PROFILES"
+            },
+            "TIKTOK_SEARCHES_" + user_id: {
+                "name": "User " + user_id + " - SEARCHES"
+            },
+            "TIKTOK_UNDARK_" + user_id: {
+                "name": "User " + user_id + " - UNDARK"
+            }
+        }
         

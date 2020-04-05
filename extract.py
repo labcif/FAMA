@@ -18,7 +18,7 @@ class Extract:
         Utils.check_and_generate_folder(self.dumps_path)
 
     def dump_from_adb(self, app_package):
-        folders = []
+        folders = {}
 
         device_communication = DeviceCommunication()
         for serial_number in device_communication.list_devices():
@@ -67,7 +67,8 @@ class Extract:
                 print("[{}] File generated! {}".format(serial_number, path_dump_external))
 
             #Generated folders
-            folders.append(path_dump_folder)
+            #folders.append(path_dump_folder)
+            folders[serial_number] = path_dump_folder
         
         return folders
 
