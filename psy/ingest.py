@@ -4,6 +4,7 @@ import json
 from java.util.logging import Level
 from java.util import ArrayList
 from java.io import File
+from java.util import UUID
 from org.sleuthkit.datamodel import SleuthkitCase
 from org.sleuthkit.datamodel import BlackboardArtifact
 from org.sleuthkit.datamodel import BlackboardAttribute
@@ -21,9 +22,11 @@ from org.sleuthkit.autopsy.casemodule.services import FileManager
 from org.sleuthkit.autopsy.casemodule.services import Blackboard
 from shutil import rmtree
 
-
 from analyzer import Analyzer
 from extract import Extract
+
+from psy.psyutils import PsyUtils
+from psy.progress import ProgressUpdater
 
 
 class ProjectIngestModule(DataSourceIngestModule):
@@ -33,6 +36,7 @@ class ProjectIngestModule(DataSourceIngestModule):
         self._logger = Logger.getLogger(self.moduleName)
         self.context = None
         self.settings = settings
+        self.utils = PsyUtils()
 
     def log(self, level, msg):
         self._logger.logp(level, self.__class__.__name__, inspect.stack()[1][3], msg)
@@ -155,12 +159,20 @@ class ProjectIngestModule(DataSourceIngestModule):
 
 
 
+
     # Where any setup and configuration is done
     # 'context' is an instance of org.sleuthkit.autopsy.ingest.IngestJobContext.
     # See: http://sleuthkit.org/autopsy/docs/api-docs/latest/classorg_1_1sleuthkit_1_1autopsy_1_1ingest_1_1_ingest_job_context.html
     def startUp(self, context):
         self.context = context
 
+        extract = Extract()
+        folders = extract.dump_from_adb("com.zhiliaoapp.musically")
+
+        for serial, folder in folders.items():
+            self.generate_new_fileset("ADBFileSet_{}".format(serial), [folder])
+        
+        
         skCase = Case.getCurrentCase().getSleuthkitCase()
         # Messages attributes
         
@@ -212,8 +224,6 @@ class ProjectIngestModule(DataSourceIngestModule):
         
 
     def process(self, dataSource, progressBar):
-        
-        
         progressBar.switchToIndeterminate()
         self.blackboard = Case.getCurrentCase().getServices().getBlackboard()
         fileManager = Case.getCurrentCase().getServices().getFileManager()
