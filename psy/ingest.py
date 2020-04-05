@@ -224,6 +224,9 @@ class ProjectIngestModule(DataSourceIngestModule):
         
 
     def process(self, dataSource, progressBar):
+        extract = Extract()
+        folder = extract.dump_from_adb("com.zhiliaoapp.musically")
+
         progressBar.switchToIndeterminate()
         self.blackboard = Case.getCurrentCase().getServices().getBlackboard()
         fileManager = Case.getCurrentCase().getServices().getFileManager()
