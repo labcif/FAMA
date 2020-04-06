@@ -19,8 +19,12 @@ class DeviceCommunication:
                 continue
 
             device_serial = device.split('\t')[0].strip()
-            
+
             if not device_serial:
+                continue
+            
+            if '\tunauthorized' in device:
+                print("[ADB] {} unauthorized. Trust this device. Ignoring...".format(device_serial))
                 continue
 
             devices.append(device_serial)
