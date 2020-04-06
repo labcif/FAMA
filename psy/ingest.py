@@ -11,6 +11,7 @@ from org.sleuthkit.datamodel import BlackboardAttribute
 from org.sleuthkit.autopsy.ingest import IngestModule
 from org.sleuthkit.autopsy.ingest.IngestModule import IngestModuleException
 from org.sleuthkit.autopsy.ingest import DataSourceIngestModule
+from org.sleuthkit.autopsy.ingest import DataSourceIngestModuleProgress
 from org.sleuthkit.autopsy.ingest import IngestMessage
 from org.sleuthkit.autopsy.ingest import IngestServices
 from org.sleuthkit.autopsy.ingest import ModuleDataEvent
@@ -20,6 +21,7 @@ from org.sleuthkit.autopsy.datamodel import ContentUtils
 from org.sleuthkit.autopsy.casemodule.services import Services
 from org.sleuthkit.autopsy.casemodule.services import FileManager
 from org.sleuthkit.autopsy.casemodule.services import Blackboard
+from org.sleuthkit.autopsy.progress import LoggingProgressIndicator
 from shutil import rmtree
 
 from analyzer import Analyzer
@@ -166,15 +168,7 @@ class ProjectIngestModule(DataSourceIngestModule):
     def startUp(self, context):
         self.context = context
 
-        if self.settings.getSetting('adb') == "true":
-            self.log(Level.INFO, "Starting ADB")
-            extract = Extract()
-            folders = extract.dump_from_adb(self.settings.getSetting('app_id'))
-
-            for serial, folder in folders.items():
-                self.utils.generate_new_fileset("ADBFileSet_{}".format(serial), [folder])
-            
-            self.log(Level.INFO, "Ending ADB")
+       
             
         
         skCase = Case.getCurrentCase().getSleuthkitCase()
@@ -227,9 +221,22 @@ class ProjectIngestModule(DataSourceIngestModule):
         
 
     def process(self, dataSource, progressBar):
-        #progressBar.progress(5)
+        progressBar.switchToDeterminate(100)
 
-        progressBar.switchToIndeterminate()
+        if self.settings.getSetting('adb') == "true":
+            progressBar.progress("Extracting from ADB", 25)
+            self.log(Level.INFO, "Starting ADB")
+            extract = Extract()
+            folders = extract.dump_from_adb(self.settings.getSetting('app_id'))
+
+            for serial, folder in folders.items():
+                self.utils.generate_new_fileset("ADBFileSet_{}".format(serial), [folder])
+            
+            self.log(Level.INFO, "Ending ADB")
+
+
+
+        #progressBar.switchToIndeterminate()
         self.blackboard = Case.getCurrentCase().getServices().getBlackboard()
         fileManager = Case.getCurrentCase().getServices().getFileManager()
         # files = fileManager.findFiles(dataSource, "Report.json")
@@ -259,6 +266,7 @@ class ProjectIngestModule(DataSourceIngestModule):
         ContentUtils.writeToFile(internal_files[0], File(lclInternalPath))
 
         
+        progressBar.progress("Analyzing Information", 50)
         
         analyzer = Analyzer(os.path.join(Case.getCurrentCase().getTempDirectory(),app_name), os.path.join(Case.getCurrentCase().getTempDirectory(),app_name))
         analyzer.generate_report()
@@ -266,7 +274,7 @@ class ProjectIngestModule(DataSourceIngestModule):
    
         self.log(Level.INFO,str(os.path.join(Case.getCurrentCase().getTempDirectory(),app_name, "report")))
     
-    
+        progressBar.progress("Processing Data", 75)
         
         
         for file in internal_files:
@@ -378,7 +386,7 @@ class ProjectIngestModule(DataSourceIngestModule):
         #     json_file.close()
         #     # os.remove(lclReportPath)
             
-
+        progressBar.progress("Done", 100)
             
         # After all reports, post a message to the ingest messages in box.
         message = IngestMessage.createMessage(IngestMessage.MessageType.DATA,
