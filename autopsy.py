@@ -1,5 +1,7 @@
 from java.util.logging import Level
 
+from org.sleuthkit.autopsy.ingest.IngestModule import IngestModuleException
+
 from org.sleuthkit.autopsy.ingest import GenericIngestModuleJobSettings
 from org.sleuthkit.autopsy.ingest import IngestModuleFactoryAdapter
 
@@ -32,14 +34,14 @@ class ProjectIngestModuleFactory(IngestModuleFactoryAdapter):
   
     #Settings
     def getDefaultIngestJobSettings(self):
-        return ProjectSettingsPanelSettings()
+        return GenericIngestModuleJobSettings()
     
     def hasIngestJobSettingsPanel(self):
         return True
 
     def getIngestJobSettingsPanel(self, settings):
-        if not isinstance(settings, ProjectSettingsPanelSettings):
-            settings = ProjectSettingsPanelSettings()
+        if not isinstance(settings, GenericIngestModuleJobSettings):
+            raise IllegalArgumentException("Expected settings argument to be instanceof GenericIngestModuleJobSettings")
         
         self.settings = settings
         return ProjectSettingsPanel(self.settings)

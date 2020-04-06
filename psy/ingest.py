@@ -165,13 +165,11 @@ class ProjectIngestModule(DataSourceIngestModule):
     # See: http://sleuthkit.org/autopsy/docs/api-docs/latest/classorg_1_1sleuthkit_1_1autopsy_1_1ingest_1_1_ingest_job_context.html
     def startUp(self, context):
         self.context = context
-        
-        adb = True
-        
-        if adb:
+
+        if self.settings.getSetting('adb') == "true":
             self.log(Level.INFO, "Starting ADB")
             extract = Extract()
-            folders = extract.dump_from_adb("com.zhiliaoapp.musically")
+            folders = extract.dump_from_adb(self.settings.getSetting('app_id'))
 
             for serial, folder in folders.items():
                 self.utils.generate_new_fileset("ADBFileSet_{}".format(serial), [folder])
@@ -229,6 +227,8 @@ class ProjectIngestModule(DataSourceIngestModule):
         
 
     def process(self, dataSource, progressBar):
+        #progressBar.progress(5)
+
         progressBar.switchToIndeterminate()
         self.blackboard = Case.getCurrentCase().getServices().getBlackboard()
         fileManager = Case.getCurrentCase().getServices().getFileManager()
