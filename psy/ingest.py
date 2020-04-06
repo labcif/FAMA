@@ -174,7 +174,7 @@ class ProjectIngestModule(DataSourceIngestModule):
             folders = extract.dump_from_adb("com.zhiliaoapp.musically")
 
             for serial, folder in folders.items():
-                self.generate_new_fileset("ADBFileSet_{}".format(serial), [folder])
+                self.utils.generate_new_fileset("ADBFileSet_{}".format(serial), [folder])
             
             self.log(Level.INFO, "Ending ADB")
             

@@ -1,7 +1,11 @@
 import inspect
 
+from java.util import UUID
 from java.util.logging import Level
+from org.sleuthkit.autopsy.casemodule import Case
 from org.sleuthkit.autopsy.coreutils import Logger
+
+from psy.progress import ProgressUpdater
 
 class PsyUtils:
     def __init__(self):
