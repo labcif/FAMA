@@ -158,7 +158,41 @@ class ProjectIngestModule(DataSourceIngestModule):
                 self.index_artifact(self.blackboard, art, self.art_profiles)        
             except Exception as e:
                 self.log(Level.INFO, self.moduleName + " Error getting user: " + str(e))
+    
+    def process_report(self, app_name, file, path):
+        # Check if the user pressed cancel while we were busy
+        if self.context.isJobCancelled():
+            return IngestModule.ProcessResult.OK
 
+        self.log(Level.INFO, self.moduleName + " Processing file: " + file.getName())
+
+        # lclReportPath = os.path.join(Case.getCurrentCase().getTempDirectory(), app_name, "report", "Report.json")
+
+        data ={}        
+        try: 
+            with open(path) as json_file:
+                data = json.load(json_file)
+        except Exception as e:
+            return IngestModule.ProcessResult.OK
+        
+        try:
+            # get info
+            messages = data["messages"]
+            user_profile = data["profile"]
+            profiles = data["users"]
+            searches = data["searches"]
+            unkdark_ouput = data["freespace"]
+        except Exception as e:
+            message = IngestMessage.createMessage(IngestMessage.MessageType.DATA, "TikTok", "Report file with wrong structure")
+            IngestServices.getInstance().postMessage(message)
+            return IngestModule.ProcessResult.OK
+
+        self.process_messages(messages, file)
+        self.process_user_profile(user_profile, file)
+        self.process_users(profiles, file)
+        self.process_searches(searches, file)
+        self.process_undark(unkdark_ouput, file)
+        json_file.close()
 
 
 
@@ -168,8 +202,6 @@ class ProjectIngestModule(DataSourceIngestModule):
     def startUp(self, context):
         self.context = context
 
-       
-            
         
         skCase = Case.getCurrentCase().getSleuthkitCase()
         # Messages attributes
@@ -235,7 +267,6 @@ class ProjectIngestModule(DataSourceIngestModule):
             self.log(Level.INFO, "Ending ADB")
 
 
-
         #progressBar.switchToIndeterminate()
         self.blackboard = Case.getCurrentCase().getServices().getBlackboard()
         fileManager = Case.getCurrentCase().getServices().getFileManager()
@@ -247,92 +278,56 @@ class ProjectIngestModule(DataSourceIngestModule):
         app_name = "com.zhiliaoapp.musically"
         internal = app_name + "_internal.tar.gz"
         external = app_name + "_external.tar.gz"
+        json_report = "%.json"
+        
 
+        # try:
+        #     rmtree(os.path.join(Case.getCurrentCase().getTempDirectory(), app_name))
+        # except Exception as e:
+        #     self.log(Level.INFO, "REMOVE TEMPORARY FOLDER ERROR" + str(e))
+        # os.makedirs(os.path.join(Case.getCurrentCase().getTempDirectory(), app_name))
 
         try:
-            rmtree(os.path.join(Case.getCurrentCase().getTempDirectory(), app_name))
-        except:
-            pass
-        os.makedirs(os.path.join(Case.getCurrentCase().getTempDirectory(), app_name))
+            os.makedirs(os.path.join(Case.getCurrentCase().getTempDirectory(), app_name))
+        except Exception as e:
+            self.log(Level.INFO, "CREATE TEMPORARY FOLDER ERROR" + str(e))
+
+        
+        number_of_reports = len(os.listdir(os.path.join(Case.getCurrentCase().getTempDirectory(), app_name)))
 
         internal_files = fileManager.findFiles(dataSource, internal)
         external_files = fileManager.findFiles(dataSource, external)
+        json_reports = fileManager.findFiles(dataSource, json_report)
 
-        
-        lclInternalPath = os.path.join(Case.getCurrentCase().getTempDirectory(),app_name, str(internal_files[0].getName()) + internal)
-        lclExternalPath = os.path.join(Case.getCurrentCase().getTempDirectory(),app_name, str(external_files[0].getName()) + external)        
+        # Analyse and generate and processing reports 
+        if len(internal_files) > 0 and len(internal_files) > 0:
+            number_of_reports+=1
+            os.makedirs(os.path.join(Case.getCurrentCase().getTempDirectory(), app_name, str(number_of_reports)))
+            lclInternalPath = os.path.join(Case.getCurrentCase().getTempDirectory(),app_name,str(number_of_reports), str(internal_files[0].getName()) + internal)
+            lclExternalPath = os.path.join(Case.getCurrentCase().getTempDirectory(),app_name,str(number_of_reports), str(external_files[0].getName()) + external)        
+            ContentUtils.writeToFile(external_files[0], File(lclExternalPath))
+            ContentUtils.writeToFile(internal_files[0], File(lclInternalPath))
+            
+            progressBar.progress("Analyzing Information", 50)
+            
+            analyzer = Analyzer(os.path.join(Case.getCurrentCase().getTempDirectory(),app_name,str(number_of_reports)), os.path.join(Case.getCurrentCase().getTempDirectory(),app_name, str(number_of_reports)))
+            analyzer.generate_report()
 
-        ContentUtils.writeToFile(external_files[0], File(lclExternalPath))
-        ContentUtils.writeToFile(internal_files[0], File(lclInternalPath))
+            lclReportsPath = os.path.join(Case.getCurrentCase().getTempDirectory(),app_name,str(number_of_reports),"report", "Report.json")
+            self.process_report(app_name, internal_files[0], lclReportsPath)
 
-        
-        progressBar.progress("Analyzing Information", 50)
-        
-        analyzer = Analyzer(os.path.join(Case.getCurrentCase().getTempDirectory(),app_name), os.path.join(Case.getCurrentCase().getTempDirectory(),app_name))
-        analyzer.generate_report()
-        
-   
-        self.log(Level.INFO,str(os.path.join(Case.getCurrentCase().getTempDirectory(),app_name, "report")))
-    
+        # Processing standalone reports
+        for report in json_reports:
+
+            number_of_reports+=1
+            os.makedirs(os.path.join(Case.getCurrentCase().getTempDirectory(), app_name, str(number_of_reports), "report"))
+            lclReportsPath = os.path.join(Case.getCurrentCase().getTempDirectory(),app_name,str(number_of_reports),"report", "Report.json")
+            ContentUtils.writeToFile(report, File(lclReportsPath))
+            
+            self.process_report(app_name, report, lclReportsPath)
+
         progressBar.progress("Processing Data", 75)
         
-        
-        for file in internal_files:
-            
-            # Check if the user pressed cancel while we were busy
-            if self.context.isJobCancelled():
-                return IngestModule.ProcessResult.OK
-
-            self.log(Level.INFO, self.moduleName + " Processing file: " + file.getName())
-            fileCount += 1
-
-            # Save the DB locally in the temp folder. use file id as name to reduce collisions
-            lclReportPath = os.path.join(Case.getCurrentCase().getTempDirectory(), app_name, "report", "Report.json")
-            # ContentUtils.writeToFile(file, File(lclReportPath))
-
-            data ={}        
-            try: 
-                # open file~
-                with open(lclReportPath) as json_file:
-                    data = json.load(json_file)
-            except Exception as e:
-                return IngestModule.ProcessResult.OK
-            
-            # Query the contacts table in the database and get all columns. 
-            try:
-                # get info
-                messages = data["messages"]
-                user_profile = data["profile"]
-                profiles = data["users"]
-                searches = data["searches"]
-                unkdark_ouput = data["freespace"]
-            except Exception as e:
-                message = IngestMessage.createMessage(IngestMessage.MessageType.DATA, "TikTok", "Report file with wrong structure")
-                IngestServices.getInstance().postMessage(message)
-                return IngestModule.ProcessResult.OK
-
-            self.process_messages(messages, file)
-            self.process_user_profile(user_profile, file)
-            self.process_users(profiles, file)
-            self.process_searches(searches, file)
-            self.process_undark(unkdark_ouput, file)
-        
-
-        
-           
-             
-                
-            # Clean up
-            # stmt.close()
-            # dbConn.close()
-        json_file.close()
-            # os.remove(lclReportPath)
-
-
-
-
-
-
 
         # inicio
         # for file in files:
