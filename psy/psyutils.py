@@ -13,7 +13,7 @@ from psy.progress import ProgressUpdater
 class PsyUtils:
     def __init__(self):
         self._logger = Logger.getLogger("Ingest Logger")
-        self.moduleName = "TEST FOR NOW"
+        self.moduleName = "TIKTOK - TEST - "
 
     def log(self, level, msg):
         self._logger.logp(level, self.__class__.__name__, inspect.stack()[1][3], msg)
