@@ -34,7 +34,6 @@ class Analyzer:
 
     def generate_report(self):
         # report_name = "Report_{}".format(Utils.get_current_time())
-
         module_file = packages.get(self.app_id)
 
         if not module_file:

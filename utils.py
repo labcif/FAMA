@@ -93,12 +93,8 @@ class Utils:
 
     @staticmethod
     def safe_members(members): #used to clean : in folders
-
-        
-
         for finfo in members:
             if re.sub('[<>:|?*"]', "", finfo.name) == str(finfo.name):
-                print(finfo.name)
                 yield finfo
 
     @staticmethod

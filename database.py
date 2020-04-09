@@ -1,7 +1,10 @@
-try: #improve
+import sys
+
+if sys.executable and "python" in sys.executable.lower():
     import sqlite3
     jython = False
-except:
+
+else:
     from java.sql import DriverManager
     jython = True
 
