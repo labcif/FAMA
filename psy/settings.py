@@ -65,6 +65,8 @@ class ProjectSettingsPanel(IngestModuleIngestJobSettingsPanel):
         self.add(self.json_reports)
 
     def customizeComponents(self):
+        self.local_settings.setSetting('adb', 'false')
+        self.local_settings.setSetting('old_report', 'false')
         self.local_settings.setSetting('app_id', self.app.getText())
 
     def getSettings(self):
