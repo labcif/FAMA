@@ -41,6 +41,6 @@ class Analyzer:
             return None
 
         m = __import__("modules.{}".format(module_file), fromlist=[None])
-        module = m.Module(self.internal_path, self.external_path, self.report_path)
+        module = m.ModuleReport(self.internal_path, self.external_path, self.report_path)
 
         module.generate_report()

@@ -14,7 +14,7 @@ else: #jython
 from modules import ModuleParent
 from utils import Utils
 
-class Module(ModuleParent):
+class ModuleReport(ModuleParent):
     def __init__(self, internal_path, external_path, report_path):
         ModuleParent.__init__(self, internal_path, external_path, report_path)
         print("[Tiktok] Module started")
@@ -181,3 +181,16 @@ class Module(ModuleParent):
                 output[relative_name] = listing
 
         return output
+
+class ModulePsy:
+    def __init__(self, case):
+        self.case = case
+        
+        #self.process_messages(messages, file)
+        #self.process_user_profile(user_profile, file)
+        #self.process_users(profiles, file)
+        #self.process_searches(searches, file)
+        #self.process_undark(unkdark_ouput, file)
+        #self.process_videos(videos, report_number, file)
+        #self.att_msg_uid = self.utils.create_attribute_type('TIKTOK_MSG_UID', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Uid", skCase)
+        #self.art_messages = self.utils.create_artifact_type("TIKTOK_MESSAGES","MESSAGES", skCase)

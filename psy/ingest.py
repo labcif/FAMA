@@ -29,6 +29,7 @@ from extract import Extract
 
 from psy.psyutils import PsyUtils
 from psy.progress import ProgressUpdater
+from modules import packages
 
 
 class ProjectIngestModule(DataSourceIngestModule):
@@ -39,37 +40,20 @@ class ProjectIngestModule(DataSourceIngestModule):
         self.context = None
         self.settings = settings
         self.utils = PsyUtils()
+        
+        self.module_file = packages.get(self.settings.getSetting('app_id'))
+
+        #ABORTAR TO DO IN AUTOPSY
+        #if not module_file:
+        #    print("[Analyzer] Module not found for {}".format(self.app_id))
+        #    return None
+
+        m = __import__("modules.{}".format(self.module_file), fromlist=[None])
+        self.module_psy = m.ModulePsy(case = Case.getCurrentCase().getSleuthkitCase())
 
     def log(self, level, msg):
         self._logger.logp(level, self.__class__.__name__, inspect.stack()[1][3], msg)
 
-    
-    def create_attribute_type(self, att_name, type, att_desc, skCase):
-        try:
-            skCase.addArtifactAttributeType(att_name, type, att_desc)
-        except:
-            self.log(Level.INFO, self.moduleName + " Error creating attribute type: " + att_desc)
-        return skCase.getAttributeType(att_name)
-    
-    def create_artifact_type(self, art_name, art_desc, skCase):
-        try:
-            skCase.addBlackboardArtifactType(art_name, "TIKTOK: " + art_desc)
-        except:
-            self.log(Level.INFO, self.moduleName +" Error creating artifact type: " + art_desc)
-        art = skCase.getArtifactType(art_name)
-        return art
-    
-    def index_artifact(self, blackboard, artifact, artifact_type):
-        try:
-            # Index the artifact for keyword search
-            blackboard.indexArtifact(artifact)
-        except Blackboard.BlackboardException as e:
-            self.log(Level.INFO, self.moduleName + " Error indexing artifact " +
-                     artifact.getDisplayName() + "" +str(e))
-        # Fire an event to notify the UI and others that there is a new log artifact
-        IngestServices.getInstance().fireModuleDataEvent(ModuleDataEvent(self.moduleName,artifact_type, None))
-
-    
     def process_user_profile(self, profile, file):
         
         try: 
@@ -92,7 +76,7 @@ class ProjectIngestModule(DataSourceIngestModule):
                 attributes.append(BlackboardAttribute(self.att_prf_unique_id, self.moduleName, profile.get("unique_id")))
             
                 art.addAttributes(attributes)
-                self.index_artifact(self.blackboard, art, self.art_user_profile)        
+                self.utils.index_artifact(self.blackboard, art, self.art_user_profile)        
         except Exception as e:
                 self.log(Level.INFO, self.moduleName + " Error getting user profile: " + str(e))
         
@@ -113,7 +97,7 @@ class ProjectIngestModule(DataSourceIngestModule):
                 attributes.add(BlackboardAttribute(self.att_msg_local_info, self.moduleName, m.get("localinfo")))
             
                 art.addAttributes(attributes)
-                self.index_artifact(self.blackboard, art, self.art_messages)        
+                self.utils.index_artifact(self.blackboard, art, self.art_messages)        
             except Exception as e:
                 self.log(Level.INFO, self.moduleName + " Error getting a message: " + str(e))
 
@@ -126,7 +110,7 @@ class ProjectIngestModule(DataSourceIngestModule):
                 attributes = ArrayList()
                 attributes.add(BlackboardAttribute(self.att_searches, self.moduleName, s))
                 art.addAttributes(attributes)
-                self.index_artifact(self.blackboard, art, self.art_searches)        
+                self.utils.index_artifact(self.blackboard, art, self.art_searches)        
             except Exception as e:
                 self.log(Level.INFO, self.moduleName + " Error getting a search entry: " + str(e))
 
@@ -139,7 +123,7 @@ class ProjectIngestModule(DataSourceIngestModule):
                 attributes.add(BlackboardAttribute(self.att_undark_key, self.moduleName, database))
                 attributes.add(BlackboardAttribute(self.att_undark_output, self.moduleName, row))
                 art.addAttributes(attributes)
-                self.index_artifact(self.blackboard, art, self.art_undark)        
+                self.utils.index_artifact(self.blackboard, art, self.art_undark)        
             except Exception as e:
                 self.log(Level.INFO, self.moduleName + " Error getting a message: " + str(e))
     
@@ -158,7 +142,7 @@ class ProjectIngestModule(DataSourceIngestModule):
                 attributes.add(BlackboardAttribute(self.att_prf_follow_status, self.moduleName, u.get("follow_status")))
             
                 art.addAttributes(attributes)
-                self.index_artifact(self.blackboard, art, self.art_profiles)        
+                self.utils.index_artifact(self.blackboard, art, self.art_profiles)        
             except Exception as e:
                 self.log(Level.INFO, self.moduleName + " Error getting user: " + str(e))
     
@@ -172,7 +156,7 @@ class ProjectIngestModule(DataSourceIngestModule):
                 attributes.add(BlackboardAttribute(self.att_vid_key, self.moduleName, v.get("key")))
                 attributes.add(BlackboardAttribute(self.att_vid_last_modified, self.moduleName, v.get("last_modified")))
                 art.addAttributes(attributes)
-                self.index_artifact(self.blackboard, art, self.art_videos)        
+                self.utils.index_artifact(self.blackboard, art, self.art_videos)        
             except Exception as e:
                 self.log(Level.INFO, self.moduleName + " Error getting a video: " + str(e))
 
@@ -244,59 +228,59 @@ class ProjectIngestModule(DataSourceIngestModule):
         skCase = Case.getCurrentCase().getSleuthkitCase()
         # Messages attributes
         
-        self.att_msg_uid = self.create_attribute_type('TIKTOK_MSG_UID', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Uid", skCase)
-        self.att_msg_uniqueid = self.create_attribute_type('TIKTOK_MSG_UNIQUE_ID', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Unique ID", skCase)
-        self.att_msg_nickname = self.create_attribute_type('TIKTOK_MSG_NICKNAME', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Nickname", skCase)
-        self.att_msg_created_time = self.create_attribute_type('TIKTOK_MSG_CREATED_TIME', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Created TIme", skCase)
-        self.att_msg_message = self.create_attribute_type('TIKTOK_MSG_MESSAGE', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Message", skCase)
-        self.att_msg_read_status = self.create_attribute_type('TIKTOK_MSG_READ_STATUS', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Read Status", skCase)
-        self.att_msg_local_info = self.create_attribute_type('TIKTOK_MSG_LOCAL_INFO', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Local Info", skCase)
+        self.att_msg_uid = self.utils.create_attribute_type('TIKTOK_MSG_UID', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Uid", skCase)
+        self.att_msg_uniqueid = self.utils.create_attribute_type('TIKTOK_MSG_UNIQUE_ID', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Unique ID", skCase)
+        self.att_msg_nickname = self.utils.create_attribute_type('TIKTOK_MSG_NICKNAME', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Nickname", skCase)
+        self.att_msg_created_time = self.utils.create_attribute_type('TIKTOK_MSG_CREATED_TIME', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Created TIme", skCase)
+        self.att_msg_message = self.utils.create_attribute_type('TIKTOK_MSG_MESSAGE', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Message", skCase)
+        self.att_msg_read_status = self.utils.create_attribute_type('TIKTOK_MSG_READ_STATUS', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Read Status", skCase)
+        self.att_msg_local_info = self.utils.create_attribute_type('TIKTOK_MSG_LOCAL_INFO', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Local Info", skCase)
         
         #profile
-        self.att_prf_avatar = self.create_attribute_type('TIKTOK_PROFILE_AVATAR', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Avatar", skCase)
-        self.att_prf_account_region = self.create_attribute_type('TIKTOK_PROFILE_REGION', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Region", skCase)
-        self.att_prf_follower_count = self.create_attribute_type('TIKTOK_PROFILE_FOLLOWER', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.LONG, "Followers", skCase)
-        self.att_prf_following_count = self.create_attribute_type('TIKTOK_PROFILE_FOLLOWING', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.LONG, "Following", skCase)
-        self.att_prf_gender = self.create_attribute_type('TIKTOK_PROFILE_GENDER', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.LONG, "Gender", skCase)
-        self.att_prf_google_account = self.create_attribute_type('TIKTOK_PROFILE_GOOGLE', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Google Account", skCase)
-        # self.att_prf_is_blocked = self.create_attribute_type('TIKTOK_PROFILE_IS_BLOCKED', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.BYTE, "Is Blocked", skCase)
-        # self.att_prf_is_minor = self.create_attribute_type('TIKTOK_PROFILE_IS_MINOR', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.BYTE, "Is Minor", skCase)
-        self.att_prf_nickname = self.create_attribute_type('TIKTOK_PROFILE_NICKNAME', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Nickname", skCase)
-        self.att_prf_register_time = self.create_attribute_type('TIKTOK_PROFILE_REGISTER_TIME', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.LONG, "Register Time", skCase)
-        self.att_prf_sec_uid = self.create_attribute_type('TIKTOK_PROFILE_SEC_UID', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Sec. UID", skCase)
-        self.att_prf_short_id = self.create_attribute_type('TIKTOK_PROFILE_SHORT_ID', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Short ID", skCase)
-        self.att_prf_uid = self.create_attribute_type('TIKTOK_PROFILE_UID', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "UID", skCase)
-        self.att_prf_unique_id = self.create_attribute_type('TIKTOK_PROFILE_UNIQUE_ID', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Unique ID", skCase)
+        self.att_prf_avatar = self.utils.create_attribute_type('TIKTOK_PROFILE_AVATAR', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Avatar", skCase)
+        self.att_prf_account_region = self.utils.create_attribute_type('TIKTOK_PROFILE_REGION', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Region", skCase)
+        self.att_prf_follower_count = self.utils.create_attribute_type('TIKTOK_PROFILE_FOLLOWER', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.LONG, "Followers", skCase)
+        self.att_prf_following_count = self.utils.create_attribute_type('TIKTOK_PROFILE_FOLLOWING', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.LONG, "Following", skCase)
+        self.att_prf_gender = self.utils.create_attribute_type('TIKTOK_PROFILE_GENDER', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.LONG, "Gender", skCase)
+        self.att_prf_google_account = self.utils.create_attribute_type('TIKTOK_PROFILE_GOOGLE', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Google Account", skCase)
+        # self.att_prf_is_blocked = self.utils.create_attribute_type('TIKTOK_PROFILE_IS_BLOCKED', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.BYTE, "Is Blocked", skCase)
+        # self.att_prf_is_minor = self.utils.create_attribute_type('TIKTOK_PROFILE_IS_MINOR', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.BYTE, "Is Minor", skCase)
+        self.att_prf_nickname = self.utils.create_attribute_type('TIKTOK_PROFILE_NICKNAME', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Nickname", skCase)
+        self.att_prf_register_time = self.utils.create_attribute_type('TIKTOK_PROFILE_REGISTER_TIME', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.LONG, "Register Time", skCase)
+        self.att_prf_sec_uid = self.utils.create_attribute_type('TIKTOK_PROFILE_SEC_UID', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Sec. UID", skCase)
+        self.att_prf_short_id = self.utils.create_attribute_type('TIKTOK_PROFILE_SHORT_ID', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Short ID", skCase)
+        self.att_prf_uid = self.utils.create_attribute_type('TIKTOK_PROFILE_UID', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "UID", skCase)
+        self.att_prf_unique_id = self.utils.create_attribute_type('TIKTOK_PROFILE_UNIQUE_ID', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Unique ID", skCase)
 
-        self.att_prf_follow_status = self.create_attribute_type('TIKTOK_PROFILE_FOLLOW_STATUS', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Follow Status", skCase)
+        self.att_prf_follow_status = self.utils.create_attribute_type('TIKTOK_PROFILE_FOLLOW_STATUS', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Follow Status", skCase)
 
         #seaches
-        self.att_searches = self.create_attribute_type('TIKTOK_SEARCH', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Search", skCase)
+        self.att_searches = self.utils.create_attribute_type('TIKTOK_SEARCH', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Search", skCase)
 
         #undark
-        self.att_undark_key = self.create_attribute_type('TIKTOK_UNDARK_KEY', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Database", skCase)
-        self.att_undark_output = self.create_attribute_type('TIKTOK_UNDARK_OUTPUT', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Output", skCase)
+        self.att_undark_key = self.utils.create_attribute_type('TIKTOK_UNDARK_KEY', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Database", skCase)
+        self.att_undark_output = self.utils.create_attribute_type('TIKTOK_UNDARK_OUTPUT', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Output", skCase)
 
         #videos
 
-        self.att_vid_key = self.create_attribute_type('TIKTOK_VIDEO_KEY', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Key", skCase)
-        self.att_vid_last_modified = self.create_attribute_type('TIKTOK_VIDEO_LAST_MODIFIED', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Last Modified", skCase)
+        self.att_vid_key = self.utils.create_attribute_type('TIKTOK_VIDEO_KEY', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Key", skCase)
+        self.att_vid_last_modified = self.utils.create_attribute_type('TIKTOK_VIDEO_LAST_MODIFIED', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Last Modified", skCase)
 
 
 
 
         # Create artifacts
 
-        # self.art_contacts = self.create_artifact_type("YPA_CONTACTS_" + guid + "_" + username,"User " + username + " - Contacts", skCase)
+        # self.art_contacts = self.utils.create_artifact_type("YPA_CONTACTS_" + guid + "_" + username,"User " + username + " - Contacts", skCase)
         
-        self.art_messages = self.create_artifact_type("TIKTOK_MESSAGES","MESSAGES", skCase)
-        self.art_user_profile = self.create_artifact_type("TIKTOK_PROFILE", "PROFILE", skCase)
-        self.art_profiles = self.create_artifact_type("TIKTOK_PROFILES_", "PROFILES", skCase)
-        self.art_searches = self.create_artifact_type("TIKTOK_SEARCHES","SEARCHES", skCase)
-        self.art_undark = self.create_artifact_type("TIKTOK_UNDARK", "UNDARK", skCase)
-        self.art_videos = self.create_artifact_type("TIKTOK_VIDEOS", "VIDEOS", skCase)
+        self.art_messages = self.utils.create_artifact_type("TIKTOK_MESSAGES","MESSAGES", skCase)
+        self.art_user_profile = self.utils.create_artifact_type("TIKTOK_PROFILE", "PROFILE", skCase)
+        self.art_profiles = self.utils.create_artifact_type("TIKTOK_PROFILES_", "PROFILES", skCase)
+        self.art_searches = self.utils.create_artifact_type("TIKTOK_SEARCHES","SEARCHES", skCase)
+        self.art_undark = self.utils.create_artifact_type("TIKTOK_UNDARK", "UNDARK", skCase)
+        self.art_videos = self.utils.create_artifact_type("TIKTOK_VIDEOS", "VIDEOS", skCase)
 
-        self.art_undark = self.create_artifact_type("TIKTOK_UNDARK_" + "UID", "User " + "UID" + " - UNDARK", skCase)
+        self.art_undark = self.utils.create_artifact_type("TIKTOK_UNDARK_" + "UID", "User " + "UID" + " - UNDARK", skCase)
         
 
     def process(self, dataSource, progressBar):
