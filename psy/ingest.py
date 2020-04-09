@@ -159,7 +159,36 @@ class ProjectIngestModule(DataSourceIngestModule):
             except Exception as e:
                 self.log(Level.INFO, self.moduleName + " Error getting user: " + str(e))
     
-    def process_report(self, app_name, file, path):
+    def process_videos(self, videos, report_number ,file):
+
+        for v in videos:
+            try: 
+                self.log(Level.INFO, self.moduleName + " Parsing a new video")
+                art = file.newArtifact(self.art_videos.getTypeID())
+                attributes = ArrayList()
+                attributes.add(BlackboardAttribute(self.att_vid_key, self.moduleName, v.get("key")))
+                attributes.add(BlackboardAttribute(self.att_vid_last_modified, self.moduleName, v.get("last_modified")))
+                art.addAttributes(attributes)
+                self.index_artifact(self.blackboard, art, self.art_videos)        
+            except Exception as e:
+                self.log(Level.INFO, self.moduleName + " Error getting a video: " + str(e))
+
+
+
+        path = os.path.join(self.tempDirectory,str(report_number),"report", "Contents", "internal", "cache", "cache")
+        try:
+            files = os.listdir(path)
+        except:
+            self.log(Level.INFO, "Report {} doesn't have video files")
+            return
+        
+        for v in files:
+            self.log(Level.INFO, os.path.join(path, v))
+            os.rename(os.path.join(path, v), os.path.join(path, v) + ".mp4")
+
+        self.utils.generate_new_fileset("Videos", [path])
+
+    def process_report(self, file, report_number, path):
         # Check if the user pressed cancel while we were busy
         if self.context.isJobCancelled():
             return IngestModule.ProcessResult.OK
@@ -182,6 +211,7 @@ class ProjectIngestModule(DataSourceIngestModule):
             profiles = data["users"]
             searches = data["searches"]
             unkdark_ouput = data["freespace"]
+            videos = data["videos"]
         except Exception as e:
             message = IngestMessage.createMessage(IngestMessage.MessageType.DATA, "TikTok", "Report file with wrong structure")
             IngestServices.getInstance().postMessage(message)
@@ -192,6 +222,7 @@ class ProjectIngestModule(DataSourceIngestModule):
         self.process_users(profiles, file)
         self.process_searches(searches, file)
         self.process_undark(unkdark_ouput, file)
+        self.process_videos(videos, report_number, file)
         json_file.close()
 
 
@@ -201,6 +232,10 @@ class ProjectIngestModule(DataSourceIngestModule):
     # See: http://sleuthkit.org/autopsy/docs/api-docs/latest/classorg_1_1sleuthkit_1_1autopsy_1_1ingest_1_1_ingest_job_context.html
     def startUp(self, context):
         self.context = context
+        self.app_name = "com.zhiliaoapp.musically"
+        self.tempDirectory = os.path.join(Case.getCurrentCase().getTempDirectory(), self.app_name)
+        self.blackboard = Case.getCurrentCase().getServices().getBlackboard()
+        self.fileManager = Case.getCurrentCase().getServices().getFileManager()
 
         
         skCase = Case.getCurrentCase().getSleuthkitCase()
@@ -239,17 +274,25 @@ class ProjectIngestModule(DataSourceIngestModule):
         self.att_undark_key = self.create_attribute_type('TIKTOK_UNDARK_KEY', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Database", skCase)
         self.att_undark_output = self.create_attribute_type('TIKTOK_UNDARK_OUTPUT', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Output", skCase)
 
+        #videos
+
+        self.att_vid_key = self.create_attribute_type('TIKTOK_VIDEO_KEY', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Key", skCase)
+        self.att_vid_last_modified = self.create_attribute_type('TIKTOK_VIDEO_LAST_MODIFIED', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Last Modified", skCase)
+
+
+
 
         # Create artifacts
 
         # self.art_contacts = self.create_artifact_type("YPA_CONTACTS_" + guid + "_" + username,"User " + username + " - Contacts", skCase)
         
-        self.art_messages = self.create_artifact_type("TIKTOK_MESSAGE_" + "UID","User " + "UID" + " - MESSAGES", skCase)
-        self.art_user_profile = self.create_artifact_type("TIKTOK_PROFILE_" + "UID","User " + "UID" + " - PROFILE", skCase)
-        self.art_profiles = self.create_artifact_type("TIKTOK_PROFILES_" + "UID", "User " + "UID" + " - PROFILES", skCase)
-        self.art_searches = self.create_artifact_type("TIKTOK_SEARCHES_" + "UID", "User " + "UID" + " - SEARCHES", skCase)
+        self.art_messages = self.create_artifact_type("TIKTOK_MESSAGES","MESSAGES", skCase)
+        self.art_user_profile = self.create_artifact_type("TIKTOK_PROFILE", "PROFILE", skCase)
+        self.art_profiles = self.create_artifact_type("TIKTOK_PROFILES_", "PROFILES", skCase)
+        self.art_searches = self.create_artifact_type("TIKTOK_SEARCHES","SEARCHES", skCase)
+        self.art_undark = self.create_artifact_type("TIKTOK_UNDARK", "UNDARK", skCase)
+        self.art_videos = self.create_artifact_type("TIKTOK_VIDEOS", "VIDEOS", skCase)
 
-        self.art_undark = self.create_artifact_type("TIKTOK_UNDARK_" + "UID", "User " + "UID" + " - UNDARK", skCase)
         
 
     def process(self, dataSource, progressBar):
@@ -268,16 +311,15 @@ class ProjectIngestModule(DataSourceIngestModule):
 
 
         #progressBar.switchToIndeterminate()
-        self.blackboard = Case.getCurrentCase().getServices().getBlackboard()
-        fileManager = Case.getCurrentCase().getServices().getFileManager()
+        
         # files = fileManager.findFiles(dataSource, "Report.json")
         # progressBar.switchToDeterminate(1)
         
         fileCount = 0
 
-        app_name = "com.zhiliaoapp.musically"
-        internal = app_name + "_internal.tar.gz"
-        external = app_name + "_external.tar.gz"
+        
+        internal = self.app_name + "_internal.tar.gz"
+        external = self.app_name + "_external.tar.gz"
         json_report = "%.json"
         
 
@@ -288,45 +330,46 @@ class ProjectIngestModule(DataSourceIngestModule):
         # os.makedirs(os.path.join(Case.getCurrentCase().getTempDirectory(), app_name))
 
         try:
-            os.makedirs(os.path.join(Case.getCurrentCase().getTempDirectory(), app_name))
+            os.makedirs(os.path.join(Case.getCurrentCase().getTempDirectory(), self.app_name))
         except Exception as e:
             self.log(Level.INFO, "CREATE TEMPORARY FOLDER ERROR" + str(e))
 
         
-        number_of_reports = len(os.listdir(os.path.join(Case.getCurrentCase().getTempDirectory(), app_name)))
+        number_of_reports = len(os.listdir(self.tempDirectory))
 
-        internal_files = fileManager.findFiles(dataSource, internal)
-        external_files = fileManager.findFiles(dataSource, external)
-        json_reports = fileManager.findFiles(dataSource, json_report)
+        internal_files = self.fileManager.findFiles(dataSource, internal)
+        external_files = self.fileManager.findFiles(dataSource, external)
+        json_reports = self.fileManager.findFiles(dataSource, json_report)
 
         # Analyse and generate and processing reports 
         if len(internal_files) > 0 and len(internal_files) > 0:
             number_of_reports+=1
-            os.makedirs(os.path.join(Case.getCurrentCase().getTempDirectory(), app_name, str(number_of_reports)))
-            lclInternalPath = os.path.join(Case.getCurrentCase().getTempDirectory(),app_name,str(number_of_reports), str(internal_files[0].getName()) + internal)
-            lclExternalPath = os.path.join(Case.getCurrentCase().getTempDirectory(),app_name,str(number_of_reports), str(external_files[0].getName()) + external)        
+            os.makedirs(os.path.join(self.tempDirectory, str(number_of_reports)))
+            lclInternalPath = os.path.join(self.tempDirectory,str(number_of_reports), str(internal_files[0].getName()) + internal)
+            lclExternalPath = os.path.join(self.tempDirectory,str(number_of_reports), str(external_files[0].getName()) + external)        
             ContentUtils.writeToFile(external_files[0], File(lclExternalPath))
             ContentUtils.writeToFile(internal_files[0], File(lclInternalPath))
             
             progressBar.progress("Analyzing Information", 50)
             
-            analyzer = Analyzer(os.path.join(Case.getCurrentCase().getTempDirectory(),app_name,str(number_of_reports)), os.path.join(Case.getCurrentCase().getTempDirectory(),app_name, str(number_of_reports)))
+            analyzer = Analyzer(os.path.join(self.tempDirectory,str(number_of_reports)), os.path.join(self.tempDirectory, str(number_of_reports)))
             analyzer.generate_report()
 
-            lclReportsPath = os.path.join(Case.getCurrentCase().getTempDirectory(),app_name,str(number_of_reports),"report", "Report.json")
-            self.process_report(app_name, internal_files[0], lclReportsPath)
+            lclReportsPath = os.path.join(self.tempDirectory,str(number_of_reports),"report", "Report.json")
+            self.process_report(internal_files[0], number_of_reports, lclReportsPath)
 
         # Processing standalone reports
         for report in json_reports:
 
             number_of_reports+=1
-            os.makedirs(os.path.join(Case.getCurrentCase().getTempDirectory(), app_name, str(number_of_reports), "report"))
-            lclReportsPath = os.path.join(Case.getCurrentCase().getTempDirectory(),app_name,str(number_of_reports),"report", "Report.json")
+            os.makedirs(os.path.join(self.tempDirectory, str(number_of_reports), "report"))
+            lclReportsPath = os.path.join(self.tempDirectory,str(number_of_reports),"report", "Report.json")
             ContentUtils.writeToFile(report, File(lclReportsPath))
             
-            self.process_report(app_name, report, lclReportsPath)
+            self.process_report(report, number_of_reports, lclReportsPath)
 
         progressBar.progress("Processing Data", 75)
+
         
 
         # inicio

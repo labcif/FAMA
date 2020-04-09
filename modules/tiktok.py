@@ -2,6 +2,8 @@ import sys
 import json
 import os
 import tarfile
+# import time
+# import datetime
 
 try:
     from database import Database
@@ -155,7 +157,7 @@ class Module:
         db = os.path.join(self.internal_cache_path, "databases", "db_im_xx")
 
         database = Database(db)
-        results = database.execute_query("select UID, UNIQUE_ID, NICK_NAME, AVATAR_THUMB, FOLLOW_STATUS from SIMPLE_USER")
+        results = database.execute_query("select UID, UNIQUE_ID, NICK_NAME, AVATAR_THUMB, case when follow_status = 1 then 'Following' when follow_status = 2 then 'Followed and Following ' else follow_status end follow_following from SIMPLE_USER")
         for entry in results:
             message={}
             message["uid"] = entry[0]
@@ -184,10 +186,18 @@ class Module:
         db = os.path.join(self.internal_cache_path, "databases", "video.db")
 
         database = Database(db)
-        results = database.execute_query("select key from video_http_header_t")
+        results = database.execute_query("select key, extra from video_http_header_t")
 
         for entry in results:
-            videos.append(entry[0])
+            video = {}
+            video["key"] = entry[0]
+            dump = json.loads(entry[1])
+            
+            for line in dump["responseHeaders"].splitlines():
+                if 'Last-Modified:' in line:
+                    video["last_modified"] = line.split(": ")[1]
+                    break
+            videos.append(video)
             #self.access_path_file(self.internal_path, "./cache/cache/{}".format(entry[0]))
         
         if not db in self.used_databases:
