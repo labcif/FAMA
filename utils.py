@@ -29,11 +29,15 @@ class Utils:
         return version
 
     @staticmethod
-    def find_package(app):
+    def get_all_packages():
         handler = open(os.path.join(Utils.get_base_path_folder(), "modules", "packages.json"), "r")
         listing = json.loads(handler.read())
         handler.close()
-        return listing.get(app)
+        return listing
+
+    @staticmethod
+    def find_package(app):
+        return Utils.get_all_packages().get(app)
 
     @staticmethod
     def generate_tar_gz_file(folder_path, generated_file_path):

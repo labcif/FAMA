@@ -20,6 +20,8 @@ from javax.swing.filechooser import FileNameExtensionFilter
 from org.sleuthkit.autopsy.ingest import IngestModuleIngestJobSettings
 from org.sleuthkit.autopsy.ingest import IngestModuleIngestJobSettingsPanel
 
+from utils import Utils
+
 #https://github.com/HienTH/autopsy/blob/master/pythonExamples/fileIngestModuleWithGui.py    
 class ProjectSettingsPanelSettings(IngestModuleIngestJobSettings):
     serialVersionUID = 1L
@@ -45,17 +47,22 @@ class ProjectSettingsPanel(IngestModuleIngestJobSettingsPanel):
 
     def event(self, event):
         self.local_settings.setSetting('adb', 'true' if self.adb.isSelected() else 'false')
+        self.local_settings.setSetting('clean_temp', 'true' if self.clean_temp.isSelected() else 'false')
         self.local_settings.setSetting('old_report', 'true' if self.json_reports.isSelected() else 'false')
-        self.local_settings.setSetting('app_id', self.app.getText())
+        self.local_settings.setSetting('app', self.app.getSelectedItem().split(' (')[0].lower())
 
     def initComponents(self):
         self.setLayout(BoxLayout(self, BoxLayout.Y_AXIS))
 
-        self.label = JLabel("Package ID to be analyzed")
+        self.label = JLabel("Application to be analyzed")
         self.label.setBounds(120,20,60,20)
         self.add(self.label)
 
-        self.app = JTextField('com.zhiliaoapp.musically', 25, focusLost=self.event)
+        self.combobox_data = []
+        for app, app_id in Utils.get_all_packages().items():
+            self.combobox_data.append("{} ({})".format(app.capitalize(), app_id))
+
+        self.app = JComboBox(sorted(self.combobox_data), itemStateChanged = self.event)
         self.add(self.app)
 
         self.adb = JCheckBox("Extract data from ADB and analyze it", actionPerformed=self.event)
@@ -64,10 +71,17 @@ class ProjectSettingsPanel(IngestModuleIngestJobSettingsPanel):
         self.json_reports = JCheckBox("Include old JSON reports")
         self.add(self.json_reports)
 
+        self.clean_temp = JCheckBox("Clean temporary folder if exists", actionPerformed=self.event)
+        self.clean_temp.setSelected(True)
+        self.add(self.clean_temp)
+
     def customizeComponents(self):
+        self.app.setSelectedItem("Tiktok (com.zhiliaoapp.musically)")
+
         self.local_settings.setSetting('adb', 'false')
+        self.local_settings.setSetting('clean_temp', 'true')
         self.local_settings.setSetting('old_report', 'false')
-        self.local_settings.setSetting('app_id', self.app.getText())
+        self.local_settings.setSetting('app', self.app.getSelectedItem().split(' (')[0].lower())
 
     def getSettings(self):
         return self.local_settings
