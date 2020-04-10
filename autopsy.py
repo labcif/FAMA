@@ -10,7 +10,7 @@ from psy.settings import ProjectSettingsPanel
 from psy.settings import ProjectSettingsPanelSettings
 
 class ProjectIngestModuleFactory(IngestModuleFactoryAdapter):
-    moduleName = "TikTok"
+    moduleName = "TikTok (to be changed)"
 
     def __init__(self):
         self.settings = None
@@ -20,7 +20,7 @@ class ProjectIngestModuleFactory(IngestModuleFactoryAdapter):
         return self.moduleName
 
     def getModuleDescription(self):
-        return "Forensics Analyzer"
+        return "Android forensis framework. Extract, analyze and generate reports based on user data."
         
     def getModuleVersionNumber(self):
         return "1.0"

@@ -29,6 +29,13 @@ class Utils:
         return version
 
     @staticmethod
+    def find_package(app):
+        handler = open(os.path.join(Utils.get_base_path_folder(), "modules", "packages.json"), "r")
+        listing = json.loads(handler.read())
+        handler.close()
+        return listing.get(app)
+
+    @staticmethod
     def generate_tar_gz_file(folder_path, generated_file_path):
         arcname = os.path.basename(generated_file_path).replace('.tar.gz', '')
         with tarfile.open(generated_file_path, mode='w:gz') as archive:
