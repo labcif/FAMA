@@ -2,44 +2,57 @@ import sys
 import os
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-from database import Database
 
 from java.util.logging import Level
 from org.sleuthkit.datamodel import BlackboardAttribute
+
+from database import Database
+from utils import Utils
+from psy.psyutils import PsyUtils
 
 class ModulePsy:
     def __init__(self, case, log):
         self.log = log
         self.case = case
         self.moduleName = "TEST"
-    '''
+        self.log(Level.INFO, str(__file__))
+        self.structure = Utils.read_json(__file__.replace('$py.class','.json').replace('.py','.json'))
+    
     def initialize(self):
-        pass
+        for att, value in self.structure["attributes"].items():
+            self.structure["attributes"][att]["att"] = PsyUtils.create_attribute_type(att, PsyUtils.blackboard_attribute(value["type"]), value["name"], self.case)
+
+        for art, value in self.structure["artifacts"].items():
+            self.structure["artifacts"][art]["art"] = PsyUtils.create_artifact_type(att, value["name"], self.case)
 
     def process_user_profile(self, profile, file):
         try: 
-                self.log(Level.INFO, self.moduleName + " Parsing user profile")
-                art = file.newArtifact(self.art_user_profile.getTypeID())
-                attributes = []
+            self.log(Level.INFO, self.moduleName + " Parsing user profile")
+            art = file.newArtifact(self.art_user_profile.getTypeID())
+            attributes = []
 
-                #attributes = ArrayList()
-                attributes.append(BlackboardAttribute(self.att_prf_account_region, self.moduleName, profile.get("account_region")))
-                attributes.append(BlackboardAttribute(self.att_prf_follower_count, self.moduleName, profile.get("follower_count")))
-                attributes.append(BlackboardAttribute(self.att_prf_following_count, self.moduleName, profile.get("following_count")))
-                attributes.append(BlackboardAttribute(self.att_prf_google_account, self.moduleName, profile.get("google_account")))
-                # attributes.append(BlackboardAttribute(self.att_prf_is_blocked, self.moduleName, profile.get("is_blocked")))
-                # attributes.append(BlackboardAttribute(self.att_prf_is_minor, self.moduleName, profile.get("is_minor")))
-                attributes.append(BlackboardAttribute(self.att_prf_nickname, self.moduleName, profile.get("nickname")))
-                attributes.append(BlackboardAttribute(self.att_prf_register_time, self.moduleName, profile.get("register_time")))
-                attributes.append(BlackboardAttribute(self.att_prf_sec_uid, self.moduleName, profile.get("sec_uid")))
-                attributes.append(BlackboardAttribute(self.att_prf_short_id, self.moduleName, profile.get("short_id")))
-                attributes.append(BlackboardAttribute(self.att_prf_uid, self.moduleName, profile.get("uid")))
-                attributes.append(BlackboardAttribute(self.att_prf_unique_id, self.moduleName, profile.get("unique_id")))
-            
-                art.addAttributes(attributes)
-                self.utils.index_artifact(self.blackboard, art, self.art_user_profile)        
+            #attributes = ArrayList()
+            attributes.append(BlackboardAttribute(self.att_prf_account_region, self.moduleName, profile.get("account_region")))
+            attributes.append(BlackboardAttribute(self.att_prf_follower_count, self.moduleName, profile.get("follower_count")))
+            attributes.append(BlackboardAttribute(self.att_prf_following_count, self.moduleName, profile.get("following_count")))
+            attributes.append(BlackboardAttribute(self.att_prf_google_account, self.moduleName, profile.get("google_account")))
+            # attributes.append(BlackboardAttribute(self.att_prf_is_blocked, self.moduleName, profile.get("is_blocked")))
+            # attributes.append(BlackboardAttribute(self.att_prf_is_minor, self.moduleName, profile.get("is_minor")))
+            attributes.append(BlackboardAttribute(self.att_prf_nickname, self.moduleName, profile.get("nickname")))
+            attributes.append(BlackboardAttribute(self.att_prf_register_time, self.moduleName, profile.get("register_time")))
+            attributes.append(BlackboardAttribute(self.att_prf_sec_uid, self.moduleName, profile.get("sec_uid")))
+            attributes.append(BlackboardAttribute(self.att_prf_short_id, self.moduleName, profile.get("short_id")))
+            attributes.append(BlackboardAttribute(self.att_prf_uid, self.moduleName, profile.get("uid")))
+            attributes.append(BlackboardAttribute(self.att_prf_unique_id, self.moduleName, profile.get("unique_id")))
+        
+            art.addAttributes(attributes)
+            self.utils.index_artifact(self.blackboard, art, self.art_user_profile)        
         except Exception as e:
-                self.log(Level.INFO, self.moduleName + " Error getting user profile: " + str(e))
+            self.log(Level.INFO, self.moduleName + " Error getting user profile: " + str(e))
+
+    '''
+
+    
 
     def process_messages(self, messages, file):
         for m in messages:

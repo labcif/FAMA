@@ -20,7 +20,7 @@ class ProjectIngestModuleFactory(IngestModuleFactoryAdapter):
         return self.moduleName
 
     def getModuleDescription(self):
-        return "Android forensis framework. Extract, analyze and generate reports based on user data."
+        return "Android forensics framework. Extract, analyze and generate reports based on user data."
         
     def getModuleVersionNumber(self):
         return "1.0"

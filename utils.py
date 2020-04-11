@@ -30,10 +30,7 @@ class Utils:
 
     @staticmethod
     def get_all_packages():
-        handler = open(os.path.join(Utils.get_base_path_folder(), "modules", "packages.json"), "r")
-        listing = json.loads(handler.read())
-        handler.close()
-        return listing
+        return Utils.read_json((os.path.join(Utils.get_base_path_folder(), "modules", "packages.json")))
 
     @staticmethod
     def find_package(app):
@@ -196,6 +193,13 @@ class Utils:
     @staticmethod
     def remove_folder(folder):
         shutil.rmtree(folder)
+
+    @staticmethod
+    def read_json(path):
+        f = open(path, "r")
+        contents = json.loads(f.read())
+        f.close()
+        return contents
 
     @staticmethod
     def save_report(report_name, contents):
