@@ -43,7 +43,19 @@ class Database:
 
             cursor_msg.execute(query)
             return cursor_msg.fetchall()
+    
 
+    
+    
+    def execute_pragma(self):
+        query = "PRAGMA table_info('%s')" % self.database
+
+        if jython:
+            stmt = self.dbConn.createStatement()
+            stmt.executeQuery(query)
+        else:
+            cu = self.dbConn.cursor()
+            cu.execute(query)
 
 
 ### OLD CODE, MAYBE USEFUL IN FUTURE???
