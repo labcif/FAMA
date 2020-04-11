@@ -20,16 +20,15 @@ class PsyUtils:
         self._logger.logp(level, self.__class__.__name__, inspect.stack()[1][3], msg)
 
     @staticmethod
-    def generate_new_fileset(name, folder):
+    def add_to_fileset(name, folder, device_id = UUID.randomUUID()):
         fileManager = Case.getCurrentCase().getServices().getFileManager()
         skcase_data = Case.getCurrentCase()
-        device_id = UUID.randomUUID() #use real adb device in future?
-        skcase_data.notifyAddingDataSource(device_id)
+        #skcase_data.notifyAddingDataSource(device_id)
         progress_updater = ProgressUpdater() 
         
-        newDataSources = []
-        newDataSource = fileManager.addLocalFilesDataSource(str(device_id), name, "", folder, progress_updater)
-        newDataSources.append(newDataSource.getRootDirectory())
+        #newDataSources = []
+        newDataSource = fileManager.addLocalFilesDataSource(device_id.toString(), name, "", folder, progress_updater)
+        #newDataSources.append(newDataSource.getRootDirectory())
         
         files_added = progress_updater.getFiles()
         
