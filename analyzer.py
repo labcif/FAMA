@@ -4,8 +4,13 @@ from utils import Utils
 class Analyzer:
     def __init__(self, app, folder, report_folder):
         self.folder = folder
-        self.app = app
-        self.app_id = Utils.find_package(self.app)
+        if '.' in app:
+            self.app = Utils.find_app_name(app)
+            self.app_id = app
+        else:
+            self.app = app
+            self.app_id = Utils.find_package(app)
+
         self.dumps = Utils.list_files(folder, ".tar.gz")
         self.internal_path = None
         self.external_path = None
@@ -25,7 +30,11 @@ class Analyzer:
 
     def generate_report(self):
         if not self.app_id:
-            print("[Analyzer] Module not found for {}".format(self.app))
+            print("[Analyzer] Module not found for application {}".format(self.app))
+            return None
+
+        if not self.app:
+            print("[Analyzer] Module not found for {} package".format(self.app_id))
             return None
 
         print("[Analyzer] Module {} for {}".format(self.app, self.app_id))

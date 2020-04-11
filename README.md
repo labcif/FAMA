@@ -2,7 +2,7 @@
 
 ## Getting Started
 
-Android extraction and analysis framework with an integrated Autopsy Plugin. Dump easily user data from a device and generate powerful reports for Autopsy or external applications.
+Android extraction and analysis framework with integrated Autopsy Plugin. Dump easily user data from a device and generate powerful reports for Autopsy or external applications.
 
 ## Functionalities
 
@@ -30,7 +30,7 @@ usage: start.py [-h] [-d DUMP [DUMP ...]] [-p PATH] [-o OUTPUT] [-a] app
 Forensics Artefacts Analyzer
 
 positional arguments:
-  app                                            Application to be analyzed <tiktok>
+  app                                            Application or package to be analyzed <tiktok> or <com.zhiliaoapp.musically>
 
 optional arguments:
   -h, --help                                     show this help message and exit
@@ -56,7 +56,7 @@ optional arguments:
 
 ## Mentors
 * **Miguel Frade** - [GitHub](https://github.com/mfrade)
-* **Patrício Domingues** - (...)
+* **Patrício Domingues** - [GitHub](https://github.com/PatricioDomingues)
 
 Project developed as final project for Computer Engineering course in Escola Superior de Tecnologia e Gestão de Leiria.
 

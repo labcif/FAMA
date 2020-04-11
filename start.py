@@ -25,7 +25,11 @@ def start(args):
         folders.extend(extract.dump_from_path(args.path, args.app))
 
     if args.adb:
-        app_id = Utils.find_package(args.app)
+        if '.' in args.app:
+            app_id = args.app
+        else:
+            app_id = Utils.find_package(args.app)
+
         for serial, folder in extract.dump_from_adb(app_id).items():
             folders.append(folder)
     
@@ -49,7 +53,7 @@ def start(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Forensics Artefacts Analyzer')
-    parser.add_argument('app', help='Application to be analyzed <tiktok>')
+    parser.add_argument('app', help='Application or package to be analyzed <tiktok> or <com.zhiliaoapp.musically>')
     parser.add_argument('-d', '--dump', help='Analyze specific(s) dump(s) <20200307_215555 ...>', nargs='+', required = False)
     parser.add_argument('-p', '--path', help='Dump app data in path (mount or folder structure)', required = False)
     parser.add_argument('-o', '--output', help='Report output path folder', required = False)

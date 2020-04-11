@@ -24,10 +24,8 @@ from psy.psyutils import PsyUtils
 from psy.progress import ProgressUpdater
 
 class ProjectIngestModule(DataSourceIngestModule):
-    moduleName = "TikTok"
-
     def __init__(self, settings):
-        self._logger = Logger.getLogger(self.moduleName)
+        self._logger = Logger.getLogger("ProjectIngest")
         self.context = None
         self.settings = settings
         self.utils = PsyUtils()
@@ -41,7 +39,7 @@ class ProjectIngestModule(DataSourceIngestModule):
         #    return None
 
         m = __import__("modules.autopsy.{}".format(self.app), fromlist=[None])
-        self.module_psy = m.ModulePsy(case = Case.getCurrentCase().getSleuthkitCase(), log = self.log)
+        self.module_psy = m.ModulePsy(self.app, case = Case.getCurrentCase().getSleuthkitCase(), log = self.log)
 
     def log(self, level, msg):
         self._logger.logp(level, self.__class__.__name__, inspect.stack()[1][3], msg)
@@ -55,16 +53,25 @@ class ProjectIngestModule(DataSourceIngestModule):
         
     def process(self, dataSource, progressBar):
         progressBar.switchToDeterminate(100)
+        self.log(Level.INFO, str(Case.getCurrentCase().getDataSources()))
+
+        data_sources = [dataSource]
+
         if self.settings.getSetting('adb') == "true":
-            progressBar.progress("Extracting from ADB", 25)
+            progressBar.progress("Extracting from ADB", 40)
             self.log(Level.INFO, "Starting ADB")
             extract = Extract()
             folders = extract.dump_from_adb(self.app_id)
 
             for serial, folder in folders.items():
-                self.utils.add_to_fileset(dataSource.getName() + "_ADB", [folder], device_id = UUID.fromString(dataSource.getDeviceId()))
-                #self.utils.add_to_fileset("ADBFileSet_{}".format(serial), [folder])
-            
+                datasource_name = dataSource.getName() + "_ADB_{}".format(serial)
+                self.utils.add_to_fileset(datasource_name, [folder], device_id = UUID.fromString(dataSource.getDeviceId()))
+
+                for case in Case.getCurrentCase().getDataSources():
+                    if case.getName() == datasource_name:
+                        data_sources.append(case)
+                        break
+
             self.log(Level.INFO, "Ending ADB")
 
         if self.settings.getSetting('clean_temp') == "true":
@@ -75,6 +82,17 @@ class ProjectIngestModule(DataSourceIngestModule):
             #     self.log(Level.INFO, "REMOVE TEMPORARY FOLDER ERROR" + str(e))
             # os.makedirs(os.path.join(Case.getCurrentCase().getTempDirectory(), app_name))
 
+        count = 0
+        for source in data_sources:
+            count += 1
+            #percent = int(count / (len(data_sources) + 1) * 100)
+            self.process_by_datasource(source, progressBar)
+        
+        progressBar.progress("Done", 100)
+
+
+
+    def process_by_datasource(self, dataSource, progressBar):
         fileCount = 0
 
         internal = self.app_id + "_internal.tar.gz"
@@ -100,7 +118,7 @@ class ProjectIngestModule(DataSourceIngestModule):
         #    if not base_path in base_paths:
         #        base_paths.append(base_path)
 
-        progressBar.progress("Analyzing Information", 50)
+        progressBar.progress("Analyzing Information for {}".format(dataSource.getName()), 80)
 
         # Analyse and generate and processing reports 
         for base in dumps:
@@ -140,12 +158,10 @@ class ProjectIngestModule(DataSourceIngestModule):
                 item["file"] = report
                 reports.append(item)
 
-        progressBar.progress("Processing Data", 75)
+        progressBar.progress("Processing Data for {}".format(dataSource.getName()), 80)
 
         for report in reports:
-            self.module_psy.process_report(report["file"], number_of_reports, report["report"])
-
-        progressBar.progress("Done", 100)
+            self.module_psy.process_report(dataSource.getName(), report["file"], number_of_reports, report["report"])
             
         # After all reports, post a message to the ingest messages in box.
         message = IngestMessage.createMessage(IngestMessage.MessageType.DATA, "Forensics Analyzer", "Found %d files" % fileCount)

@@ -14,14 +14,14 @@ from utils import Utils
 from psy.psyutils import PsyUtils
 
 class ModulePsy:
-    def __init__(self, case, log):
+    def __init__(self, app_name, case, log):
         self.log = log
         self.case = case
         self.context = None
-        self.moduleName = "TEST"
+        self.module_name = app_name + ": "
         self.utils = PsyUtils()
     
-    def process_report(self, file, report_number, path):
+    def process_report(self, datasource_name, file, report_number, path):
         # Check if the user pressed cancel while we were busy
         if self.context.isJobCancelled():
             return IngestModule.ProcessResult.OK
@@ -35,7 +35,7 @@ class ModulePsy:
         self.process_users(data.get("users"), file)
         self.process_searches(data.get("searches"), file)
         self.process_undark(data.get("freespace"), file)
-        self.process_videos(data.get("videos"), report_number, file, os.path.dirname(path))
+        self.process_videos(data.get("videos"), report_number, file, os.path.dirname(path), datasource_name)
 
     def initialize(self, context):
         self.context = context
@@ -79,45 +79,41 @@ class ModulePsy:
         self.att_vid_last_modified = self.utils.create_attribute_type('TIKTOK_VIDEO_LAST_MODIFIED', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Last Modified", self.case)
 
         # Create artifacts
-
-        #self.art_contacts = self.utils.create_artifact_type("YPA_CONTACTS_" + guid + "_" + username,"User " + username + " - Contacts", self.case)
         
-        self.art_messages = self.utils.create_artifact_type("TIKTOK_MESSAGES","MESSAGES", self.case)
-        self.art_user_profile = self.utils.create_artifact_type("TIKTOK_PROFILE", "PROFILE", self.case)
-        self.art_profiles = self.utils.create_artifact_type("TIKTOK_PROFILES_", "PROFILES", self.case)
-        self.art_searches = self.utils.create_artifact_type("TIKTOK_SEARCHES","SEARCHES", self.case)
-        self.art_undark = self.utils.create_artifact_type("TIKTOK_UNDARK", "UNDARK", self.case)
-        self.art_videos = self.utils.create_artifact_type("TIKTOK_VIDEOS", "VIDEOS", self.case)
-
-        self.art_undark = self.utils.create_artifact_type("TIKTOK_UNDARK_" + "UID", "User " + "UID" + " - UNDARK", self.case)
+        self.art_messages = self.utils.create_artifact_type(self.module_name, "TIKTOK_MESSAGES","Messages", self.case)
+        self.art_user_profile = self.utils.create_artifact_type(self.module_name, "TIKTOK_PROFILE", "Profile", self.case)
+        self.art_profiles = self.utils.create_artifact_type(self.module_name, "TIKTOK_PROFILES_", "Profiles", self.case)
+        self.art_searches = self.utils.create_artifact_type(self.module_name, "TIKTOK_SEARCHES","Search", self.case)
+        self.art_videos = self.utils.create_artifact_type(self.module_name, "TIKTOK_VIDEOS", "Videos", self.case)
+        self.art_undark = self.utils.create_artifact_type(self.module_name, "TIKTOK_UNDARK", "Undark", self.case)
 
     def process_user_profile(self, profile, file):
         if not profile:
             return
 
         try: 
-            self.log(Level.INFO, self.moduleName + " Parsing user profile")
+            self.log(Level.INFO, self.module_name + " Parsing user profile")
             art = file.newArtifact(self.art_user_profile.getTypeID())
             attributes = []
 
             #attributes = ArrayList()
-            attributes.append(BlackboardAttribute(self.att_prf_account_region, self.moduleName, profile.get("account_region")))
-            attributes.append(BlackboardAttribute(self.att_prf_follower_count, self.moduleName, profile.get("follower_count")))
-            attributes.append(BlackboardAttribute(self.att_prf_following_count, self.moduleName, profile.get("following_count")))
-            attributes.append(BlackboardAttribute(self.att_prf_google_account, self.moduleName, profile.get("google_account")))
-            # attributes.append(BlackboardAttribute(self.att_prf_is_blocked, self.moduleName, profile.get("is_blocked")))
-            # attributes.append(BlackboardAttribute(self.att_prf_is_minor, self.moduleName, profile.get("is_minor")))
-            attributes.append(BlackboardAttribute(self.att_prf_nickname, self.moduleName, profile.get("nickname")))
-            attributes.append(BlackboardAttribute(self.att_prf_register_time, self.moduleName, profile.get("register_time")))
-            attributes.append(BlackboardAttribute(self.att_prf_sec_uid, self.moduleName, profile.get("sec_uid")))
-            attributes.append(BlackboardAttribute(self.att_prf_short_id, self.moduleName, profile.get("short_id")))
-            attributes.append(BlackboardAttribute(self.att_prf_uid, self.moduleName, profile.get("uid")))
-            attributes.append(BlackboardAttribute(self.att_prf_unique_id, self.moduleName, profile.get("unique_id")))
+            attributes.append(BlackboardAttribute(self.att_prf_account_region, self.module_name, profile.get("account_region")))
+            attributes.append(BlackboardAttribute(self.att_prf_follower_count, self.module_name, profile.get("follower_count")))
+            attributes.append(BlackboardAttribute(self.att_prf_following_count, self.module_name, profile.get("following_count")))
+            attributes.append(BlackboardAttribute(self.att_prf_google_account, self.module_name, profile.get("google_account")))
+            # attributes.append(BlackboardAttribute(self.att_prf_is_blocked, self.module_name, profile.get("is_blocked")))
+            # attributes.append(BlackboardAttribute(self.att_prf_is_minor, self.module_name, profile.get("is_minor")))
+            attributes.append(BlackboardAttribute(self.att_prf_nickname, self.module_name, profile.get("nickname")))
+            attributes.append(BlackboardAttribute(self.att_prf_register_time, self.module_name, profile.get("register_time")))
+            attributes.append(BlackboardAttribute(self.att_prf_sec_uid, self.module_name, profile.get("sec_uid")))
+            attributes.append(BlackboardAttribute(self.att_prf_short_id, self.module_name, profile.get("short_id")))
+            attributes.append(BlackboardAttribute(self.att_prf_uid, self.module_name, profile.get("uid")))
+            attributes.append(BlackboardAttribute(self.att_prf_unique_id, self.module_name, profile.get("unique_id")))
         
             art.addAttributes(attributes)
             self.utils.index_artifact(self.case.getBlackboard(), art, self.art_user_profile)        
         except Exception as e:
-            self.log(Level.INFO, self.moduleName + " Error getting user profile: " + str(e))
+            self.log(Level.INFO, self.module_name + " Error getting user profile: " + str(e))
 
     def process_messages(self, messages, file):
         if not messages:
@@ -125,21 +121,21 @@ class ModulePsy:
 
         for m in messages:
             try: 
-                self.log(Level.INFO, self.moduleName + " Parsing a new message")
+                self.log(Level.INFO, self.module_name + " Parsing a new message")
                 art = file.newArtifact(self.art_messages.getTypeID())
                 attributes = []
-                attributes.append(BlackboardAttribute(self.att_msg_uid, self.moduleName, m.get("uid")))
-                attributes.append(BlackboardAttribute(self.att_msg_uniqueid, self.moduleName, m.get("uniqueid")))
-                attributes.append(BlackboardAttribute(self.att_msg_nickname, self.moduleName, m.get("nickname")))
-                attributes.append(BlackboardAttribute(self.att_msg_created_time, self.moduleName, m.get("createdtime")))
-                attributes.append(BlackboardAttribute(self.att_msg_message, self.moduleName, m.get("message")))
-                attributes.append(BlackboardAttribute(self.att_msg_read_status, self.moduleName, m.get("readstatus")))
-                attributes.append(BlackboardAttribute(self.att_msg_local_info, self.moduleName, m.get("localinfo")))
+                attributes.append(BlackboardAttribute(self.att_msg_uid, self.module_name, m.get("uid")))
+                attributes.append(BlackboardAttribute(self.att_msg_uniqueid, self.module_name, m.get("uniqueid")))
+                attributes.append(BlackboardAttribute(self.att_msg_nickname, self.module_name, m.get("nickname")))
+                attributes.append(BlackboardAttribute(self.att_msg_created_time, self.module_name, m.get("createdtime")))
+                attributes.append(BlackboardAttribute(self.att_msg_message, self.module_name, m.get("message")))
+                attributes.append(BlackboardAttribute(self.att_msg_read_status, self.module_name, m.get("readstatus")))
+                attributes.append(BlackboardAttribute(self.att_msg_local_info, self.module_name, m.get("localinfo")))
             
                 art.addAttributes(attributes)
                 self.utils.index_artifact(self.case.getBlackboard(), art, self.art_messages)        
             except Exception as e:
-                self.log(Level.INFO, self.moduleName + " Error getting a message: " + str(e))
+                self.log(Level.INFO, self.module_name + " Error getting a message: " + str(e))
 
 
     def process_searches(self, searches, file):
@@ -148,14 +144,14 @@ class ModulePsy:
 
         for s in searches:
             try: 
-                self.log(Level.INFO, self.moduleName + " Parsing a new search")
+                self.log(Level.INFO, self.module_name + " Parsing a new search")
                 art = file.newArtifact(self.art_searches.getTypeID())
                 attributes = []
-                attributes.append(BlackboardAttribute(self.att_searches, self.moduleName, s))
+                attributes.append(BlackboardAttribute(self.att_searches, self.module_name, s))
                 art.addAttributes(attributes)
                 self.utils.index_artifact(self.case.getBlackboard(), art, self.art_searches)        
             except Exception as e:
-                self.log(Level.INFO, self.moduleName + " Error getting a search entry: " + str(e))
+                self.log(Level.INFO, self.module_name + " Error getting a search entry: " + str(e))
 
     def process_undark(self, undarks, file):
         if not undarks:
@@ -163,15 +159,15 @@ class ModulePsy:
 
         for database, row in undarks.items():
             try: 
-                self.log(Level.INFO, self.moduleName + " Parsing a new undark entry")
+                self.log(Level.INFO, self.module_name + " Parsing a new undark entry")
                 art = file.newArtifact(self.art_undark.getTypeID())
                 attributes = []
-                attributes.append(BlackboardAttribute(self.att_undark_key, self.moduleName, database))
-                attributes.append(BlackboardAttribute(self.att_undark_output, self.moduleName, row))
+                attributes.append(BlackboardAttribute(self.att_undark_key, self.module_name, database))
+                attributes.append(BlackboardAttribute(self.att_undark_output, self.module_name, row))
                 art.addAttributes(attributes)
                 self.utils.index_artifact(self.case.getBlackboard(), art, self.art_undark)        
             except Exception as e:
-                self.log(Level.INFO, self.moduleName + " Error getting a message: " + str(e))
+                self.log(Level.INFO, self.module_name + " Error getting a message: " + str(e))
 
     def process_users(self, users, file):
         if not users:
@@ -179,32 +175,32 @@ class ModulePsy:
 
         for u in users:
             try: 
-                self.log(Level.INFO, self.moduleName + " Parsing a new user")
+                self.log(Level.INFO, self.module_name + " Parsing a new user")
                 art = file.newArtifact(self.art_profiles.getTypeID())
                 attributes = []
-                attributes.append(BlackboardAttribute(self.att_msg_uid, self.moduleName, u.get("uid")))
-                attributes.append(BlackboardAttribute(self.att_msg_uniqueid, self.moduleName, u.get("uniqueid")))
-                attributes.append(BlackboardAttribute(self.att_msg_nickname, self.moduleName, u.get("nickname")))
-                attributes.append(BlackboardAttribute(self.att_prf_avatar, self.moduleName, u.get("avatar")))
-                attributes.append(BlackboardAttribute(self.att_prf_follow_status, self.moduleName, u.get("follow_status")))
+                attributes.append(BlackboardAttribute(self.att_msg_uid, self.module_name, u.get("uid")))
+                attributes.append(BlackboardAttribute(self.att_msg_uniqueid, self.module_name, u.get("uniqueid")))
+                attributes.append(BlackboardAttribute(self.att_msg_nickname, self.module_name, u.get("nickname")))
+                attributes.append(BlackboardAttribute(self.att_prf_avatar, self.module_name, u.get("avatar")))
+                attributes.append(BlackboardAttribute(self.att_prf_follow_status, self.module_name, u.get("follow_status")))
             
                 art.addAttributes(attributes)
                 self.utils.index_artifact(self.case.getBlackboard(), art, self.art_profiles)        
             except Exception as e:
-                self.log(Level.INFO, self.moduleName + " Error getting user: " + str(e))
+                self.log(Level.INFO, self.module_name + " Error getting user: " + str(e))
     
-    def process_videos(self, videos, report_number, file, base_path):
+    def process_videos(self, videos, report_number, file, base_path, datasource_name):
         for v in videos:
             try: 
-                self.log(Level.INFO, self.moduleName + " Parsing a new video")
+                self.log(Level.INFO, self.module_name + " Parsing a new video")
                 art = file.newArtifact(self.art_videos.getTypeID())
                 attributes = []
-                attributes.append(BlackboardAttribute(self.att_vid_key, self.moduleName, v.get("key")))
-                attributes.append(BlackboardAttribute(self.att_vid_last_modified, self.moduleName, v.get("last_modified")))
+                attributes.append(BlackboardAttribute(self.att_vid_key, self.module_name, v.get("key")))
+                attributes.append(BlackboardAttribute(self.att_vid_last_modified, self.module_name, v.get("last_modified")))
                 art.addAttributes(attributes)
                 self.utils.index_artifact(self.case.getBlackboard(), art, self.art_videos)        
             except Exception as e:
-                self.log(Level.INFO, self.moduleName + " Error getting a video: " + str(e))
+                self.log(Level.INFO, self.module_name + " Error getting a video: " + str(e))
 
 
 
@@ -219,4 +215,4 @@ class ModulePsy:
             self.log(Level.INFO, os.path.join(path, v))
             os.rename(os.path.join(path, v), os.path.join(path, v) + ".mp4")
 
-        self.utils.add_to_fileset("Videos", [path])
+        self.utils.add_to_fileset("{}_Videos".format(datasource_name), [path])

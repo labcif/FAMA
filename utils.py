@@ -37,6 +37,14 @@ class Utils:
         return Utils.get_all_packages().get(app)
 
     @staticmethod
+    def find_app_name(package):
+        for app, pack in Utils.get_all_packages().items():
+            if package == pack:
+                return app
+        
+        return None
+
+    @staticmethod
     def generate_tar_gz_file(folder_path, generated_file_path):
         arcname = os.path.basename(generated_file_path).replace('.tar.gz', '')
         with tarfile.open(generated_file_path, mode='w:gz') as archive:
