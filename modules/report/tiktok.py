@@ -30,7 +30,8 @@ class ModuleReport(ModuleParent):
         report["users"] = self.get_user_profiles()
         report["searches"] = self.get_user_searches()
         report["videos"] = self.get_videos()
-        report["freespace"] = self.get_undark_db() 
+        report["freespace"] = self.get_undark_db()
+        report["log"] = self.get_last_session() 
         print("[Tiktok] Generate Report")
 
         Utils.save_report(os.path.join(self.report_path, "Report.json"), report)
@@ -179,4 +180,39 @@ class ModuleReport(ModuleParent):
                 output[relative_name] = listing
 
         return output
+    
+    def get_last_session(self):
+        print("[Tiktok] Getting last session...")
+        session = []
+
+        relevant_keys = ["page", "request_method", "is_first","duration","is_first","rip","duration","author_id","access2","video_duration","video_quality","access",
+        "page_uid","previous_page","enter_method","enter_page","key_word","search_keyword","next_tab","search_type", "play_duration"]
+
+        db = os.path.join(self.internal_cache_path, "databases", "ss_app_log.db")
+        database = Database(db)
+        database.execute_pragma()
+        results = database.execute_query("select tag, ext_json, timestamp, session_id from event order by timestamp")
+        
+        for entry in results:
+            session_entry={}
+            session_entry["action"] = entry[0]
+            
+            body_dump = json.loads(entry[1])
+            session_entry["time"] = entry[2]
+            session_entry["session_id"] = entry[3]
+            session.append(session_entry)
+
+            #json body parser
+            body = {}
+            for key, value in body_dump.items():     
+                if key in relevant_keys:
+                    body[key] = value
+            
+            session_entry["body"] =body
+
+
+        
+        
+        print("[Tiktok] {} entrys found".format(len(results)))
+        return session
 
