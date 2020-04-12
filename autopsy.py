@@ -1,13 +1,14 @@
 from java.util.logging import Level
 
-from org.sleuthkit.autopsy.ingest.IngestModule import IngestModuleException
-
 from org.sleuthkit.autopsy.ingest import GenericIngestModuleJobSettings
+from org.sleuthkit.autopsy.report import GeneralReportModuleAdapter
 from org.sleuthkit.autopsy.ingest import IngestModuleFactoryAdapter
 
 from psy.ingest import ProjectIngestModule
-from psy.settings import ProjectSettingsPanel
-from psy.settings import ProjectSettingsPanelSettings
+from psy.report import ReportOutput
+from psy.settings import ProjectIngestSettingsPanel
+from psy.settings import ProjectReportSettingsPanel
+
 
 class ProjectIngestModuleFactory(IngestModuleFactoryAdapter):
     moduleName = "TikTok (to be changed)"
@@ -44,4 +45,24 @@ class ProjectIngestModuleFactory(IngestModuleFactoryAdapter):
             raise IllegalArgumentException("Expected settings argument to be instanceof GenericIngestModuleJobSettings")
         
         self.settings = settings
-        return ProjectSettingsPanel(self.settings)
+        return ProjectIngestSettingsPanel(self.settings)
+
+class ProjectIngestModuleReport(GeneralReportModuleAdapter):
+    moduleName = "Unnamed Project Report"
+
+    def __init__(self):
+        self.settings = None
+        self.report = ReportOutput()
+
+    def getName(self):
+        return self.moduleName
+
+    def getDescription(self):
+        return "Android Forensics Framework Report Generator"
+
+    def generateReport(self, baseReportDir, progressBar):
+        self.generateReport(baseReportDir, progressBar)
+    
+    def getConfigurationPanel(self):
+        self.configPanel = ProjectReportSettingsPanel()
+        return self.configPanel

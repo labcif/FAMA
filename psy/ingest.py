@@ -90,8 +90,6 @@ class ProjectIngestModule(DataSourceIngestModule):
         
         progressBar.progress("Done", 100)
 
-
-
     def process_by_datasource(self, dataSource, progressBar):
         fileCount = 0
 

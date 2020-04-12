@@ -23,7 +23,7 @@ from org.sleuthkit.autopsy.ingest import IngestModuleIngestJobSettingsPanel
 from utils import Utils
 
 #https://github.com/HienTH/autopsy/blob/master/pythonExamples/fileIngestModuleWithGui.py    
-class ProjectSettingsPanelSettings(IngestModuleIngestJobSettings):
+class ProjectIngestSettingsPanelSettings(IngestModuleIngestJobSettings):
     serialVersionUID = 1L
 
     def __init__(self):
@@ -39,7 +39,7 @@ class ProjectSettingsPanelSettings(IngestModuleIngestJobSettings):
     def setFlag(self, flag):
         self.flag = flag
 
-class ProjectSettingsPanel(IngestModuleIngestJobSettingsPanel):
+class ProjectIngestSettingsPanel(IngestModuleIngestJobSettingsPanel):
     def __init__(self, settings):
         self.local_settings = settings
         self.initComponents()
@@ -85,3 +85,7 @@ class ProjectSettingsPanel(IngestModuleIngestJobSettingsPanel):
 
     def getSettings(self):
         return self.local_settings
+
+class ProjectReportSettingsPanel(JPanel):
+    def __init__(self):
+        pass
