@@ -3,11 +3,12 @@ import os
 from utils import Utils
 
 class ModuleParent:
-    def __init__(self, internal_path, external_path, report_path):
+    def __init__(self, internal_path, external_path, report_path, app_name, app_id):
         print("[Module] Starting module")
         # self.report_name = report_name
         self.internal_path = internal_path
         self.external_path = external_path
+        
         
         # self.report_path = os.path.join(report_path, "report", self.report_name)
         self.report_path = report_path
@@ -30,6 +31,10 @@ class ModuleParent:
         #print(self.shared_preferences)
         
         self.used_databases = []
+        self.report = {}
+        self.app_name = app_name
+        self.app_id = app_id
+        self.set_header()
 
     def set_databases(self):
         dbs = []
@@ -44,3 +49,13 @@ class ModuleParent:
                 files.append(xmlfile)
         
         return files
+    
+    def set_header(self):
+        self.report = {}
+        report_header = {
+            "report_name": Utils.get_current_time(),
+            "report_date": Utils.get_current_millis(),
+            "app_name" : self.app_name,
+            "app_id": self.app_id
+        }
+        self.report["header"] = report_header
