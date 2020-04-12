@@ -13,29 +13,25 @@ else: #jython #improve relative imports!!
     from database import Database
 
 class ModuleReport(ModuleParent):
-    def __init__(self, internal_path, external_path, report_path):
-        ModuleParent.__init__(self, internal_path, external_path, report_path)
+    def __init__(self, internal_path, external_path, report_path, app_name, app_id):
+        ModuleParent.__init__(self, internal_path, external_path, report_path, app_name, app_id)
         print("[Tiktok] Module started")
     
     def generate_report(self):
-        user_id = self.get_user_id()
-        report_header = {
-            "report_date": Utils.get_current_time(),
-            "user": user_id
-        }
-        report = {}
-        report["header"] = report_header
-        report["profile"] = self.get_user_profile()
-        report["messages"] = self.get_user_messages()
-        report["users"] = self.get_user_profiles()
-        report["searches"] = self.get_user_searches()
-        report["videos"] = self.get_videos()
-        report["freespace"] = self.get_undark_db()
-        report["log"] = self.get_last_session() 
+
+        self.report["profile"] = self.get_user_profile()
+        self.report["messages"] = self.get_user_messages()
+        self.report["users"] = self.get_user_profiles()
+        self.report["searches"] = self.get_user_searches()
+        self.report["videos"] = self.get_videos()
+        self.report["published_videos"] = self.get_videos_publish()
+        self.report["freespace"] = self.get_undark_db()
+        self.report["log"] = self.get_last_session()
+
         print("[Tiktok] Generate Report")
 
-        Utils.save_report(os.path.join(self.report_path, "Report.json"), report)
-        return report
+        Utils.save_report(os.path.join(self.report_path, "Report.json"), self.report)
+        return self.report
 
     #TIKTOK
     def get_user_messages(self):
@@ -58,17 +54,40 @@ class ModuleReport(ModuleParent):
         attach = "ATTACH '{}' AS 'db2'".format(db2)
 
         database = Database(db1)
-        results = database.execute_query("select UID, UNIQUE_ID, NICK_NAME, datetime(created_time/1000, 'unixepoch', 'localtime') as created_time, content as message, case when read_status = 0 then 'Not read' when read_status = 1 then 'Read' else read_status end read_not_read, local_info from SIMPLE_USER, msg where UID = sender order by created_time;", attach = attach)
+        results = database.execute_query("select UID, UNIQUE_ID, NICK_NAME, datetime(created_time/1000, 'unixepoch', 'localtime') as created_time, content as message, case when read_status = 0 then 'Not read' when read_status = 1 then 'Read' else read_status end read_not_read, local_info, type, case when deleted = 0 then 'Not deleted' when read_status = 1 then 'Deleted' else deleted end from SIMPLE_USER, msg where UID = sender order by created_time;", attach = attach)
+        
         for entry in results:
             message={}
             message["uid"] = entry[0]
             message["uniqueid"] = entry[1]
             message["nickname"] = entry[2]
             message["createdtime"] = entry[3]
-            message["message"] = entry[4]
             message["readstatus"] = entry[5]
             message["localinfo"] = entry[6]
+            message_type = entry[7]
+
+            message_dump = json.loads(entry[4])
+            body=""
+
+            if  message_type == 7: #text message type
+                message["type"] = "text"
+                body = message_dump.get("text")
+
+            elif message_type == 8: #video message type
+                message["type"] = "video"
+                body= "https://www.tiktok.com/@tiktok/video/{}".format(message_dump.get("itemId"))
+            
+            elif message_type == 5:
+                message["type"] = "gif"
+                body=message_dump.get("url").get("url_list")[0]
+            else:
+                body= str(message_dump)
+            
+            message["message"] = body
+
+            message["deleted"] = entry[8]
             messages_list.append(message)
+
         
         print("[Tiktok] {} messages found".format(len(messages_list)))
 
@@ -94,6 +113,8 @@ class ModuleReport(ModuleParent):
                 for index in atributes:
                     user_profile[index] = dump[index]
                 break
+            
+        user_profile["url"] = "https://www.tiktok.com/@{}".format(user_profile["unique_id"])
                 #except ValueError:
                 #    print("[Tiktok] JSON User Error")
 
@@ -102,9 +123,15 @@ class ModuleReport(ModuleParent):
     def get_user_searches(self):
         print("[Tiktok] Getting User Search History...")
         xml_file = os.path.join(self.internal_cache_path, "shared_prefs", "search.xml")
-        dump = json.loads(Utils.xml_attribute_finder(xml_file, "recent_history")["recent_history"])
         searches = []
-        for i in dump: searches.append(i["keyword"])
+        #verify if recent hisotry tag exists
+        try:
+            dump = json.loads(Utils.xml_attribute_finder(xml_file, "recent_history")["recent_history"])
+            for i in dump: searches.append(i["keyword"])
+        except:
+            pass
+        
+        
 
         print("[Tiktok] {} search entrys found".format(len(searches)))
         return searches
@@ -125,6 +152,7 @@ class ModuleReport(ModuleParent):
             dump_avatar = json.loads(entry[3])
             message["avatar"] = dump_avatar["url_list"][0]
             message["follow_status"] = entry[4]
+            message["url"] = "https://www.tiktok.com/@{}".format(message["uniqueid"])
             profiles.append(message)
         
         print("[Tiktok] {} profiles found".format(len(profiles)))
@@ -162,7 +190,7 @@ class ModuleReport(ModuleParent):
         if not db in self.used_databases:
             self.used_databases.append(db)
 
-        print("[Tiktok] {} videos found".format(len(videos)))
+        print("[Tiktok] {} video(s) found".format(len(videos)))
         return videos
     
     def get_undark_db(self):
@@ -181,17 +209,39 @@ class ModuleReport(ModuleParent):
 
         return output
     
+
+    def get_videos_publish(self):
+        print("[Tiktok] Getting published videos")
+        videos = []
+        base_path = os.path.join(self.internal_cache_path, "cache", "aweme_publish")
+        aweme_publish_files = os.listdir(base_path)
+
+        for aweme_file in aweme_publish_files:
+            dump = Utils.read_json(os.path.join(base_path, aweme_file))
+            aweme_list = dump.get("aweme_list")
+            
+            for entry in aweme_list:
+                video ={}
+                video["created_time"] = entry.get("create_time")
+                video["video"] = entry.get("video").get("animated_cover").get("url_list")[0]
+                videos.append(video)
+    
+        print("[Tiktok] {} video(s) found".format(len(videos)))
+        return videos
+
+
+    
     def get_last_session(self):
         print("[Tiktok] Getting last session...")
         session = []
 
         relevant_keys = ["page", "request_method", "is_first","duration","is_first","rip","duration","author_id","access2","video_duration","video_quality","access",
-        "page_uid","previous_page","enter_method","enter_page","key_word","search_keyword","next_tab","search_type", "play_duration"]
+        "page_uid","previous_page","enter_method","enter_page","key_word","search_keyword","next_tab","search_type", "play_duration", "content"]
 
         db = os.path.join(self.internal_cache_path, "databases", "ss_app_log.db")
         database = Database(db)
         database.execute_pragma()
-        results = database.execute_query("select tag, ext_json, timestamp, session_id from event order by timestamp")
+        results = database.execute_query("select tag, ext_json, datetime(timestamp/1000, 'unixepoch', 'localtime'), session_id from event order by timestamp")
         
         for entry in results:
             session_entry={}
@@ -210,9 +260,6 @@ class ModuleReport(ModuleParent):
             
             session_entry["body"] =body
 
-
-        
-        
         print("[Tiktok] {} entrys found".format(len(results)))
         return session
 

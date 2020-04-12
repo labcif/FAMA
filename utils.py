@@ -71,6 +71,10 @@ class Utils:
     def get_current_time():
         return datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     
+    @staticmethod
+    def get_current_millis():
+        return int(round(time.time() * 1000))
+    
     #not necessary, remove in future?
     '''
     @staticmethod
