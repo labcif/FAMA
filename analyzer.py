@@ -40,6 +40,8 @@ class Analyzer:
         print("[Analyzer] Module {} for {}".format(self.app, self.app_id))
 
         m = __import__("modules.report.{}".format(self.app), fromlist=[None])
-        module = m.ModuleReport(self.internal_path, self.external_path, self.report_path)
-
+        module = m.ModuleReport(self.internal_path, self.external_path, self.report_path, self.app, self.app_id)
+        
+        # Utils.remove_folder(os.path.join(self.report_path))
+        
         module.generate_report()
