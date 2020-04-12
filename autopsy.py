@@ -61,8 +61,11 @@ class ProjectIngestModuleReport(GeneralReportModuleAdapter):
         return "Android Forensics Framework Report Generator"
 
     def generateReport(self, baseReportDir, progressBar):
-        self.generateReport(baseReportDir, progressBar)
+        self.report.generateReport(baseReportDir, progressBar)
     
     def getConfigurationPanel(self):
         self.configPanel = ProjectReportSettingsPanel()
         return self.configPanel
+
+    def getRelativeFilePath(self):
+        return "index.html"

@@ -4,10 +4,24 @@ function capitalize(text){
   return text.charAt(0).toUpperCase() + text.substr(1).toLowerCase();
 }
 
+function initializeReports(){
+  Object.keys(reportData).forEach(function (item) {
+    $("#reports-list").append(new Option(item, item));
+  });
+}
+
+function getSelectedOption(select){
+  return $(select).find(":selected").text()
+}
+
+function getReportData(){
+  return reportData[getSelectedOption("#reports-list")];
+}
+
 function initializeMenus(){
   let list = "";
 
-  Object.keys(reportData).forEach(function (item) {
+  Object.keys(getReportData()).forEach(function (item) {
     if (item !== "header"){
       list += `<li class="nav-item"><a id="menulink-${item}" class="nav-link menu-item" href="#"><span data-feather="file-text"></span>${capitalize(item)}</a></li>`;
     }
@@ -28,7 +42,9 @@ function menuClick(event){
     idName = "menulink-" + event;
   }
 
-  Object.keys(reportData).forEach(function (item) {
+  console.log(idName);
+
+  Object.keys(getReportData()).forEach(function (item) {
     $("#menulink-" + item).removeClass("active");
   });
 
@@ -39,7 +55,8 @@ function menuClick(event){
 }
 
 function pageBuilder(title){
-  if (!(title in reportData)){
+  report = getReportData()
+  if (!(title in report)){
     return;
   }
 
@@ -48,11 +65,11 @@ function pageBuilder(title){
   content += `<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom"><h1 class="h2">${capitalize(title)}</h1></div>`
 
   //Array of objects
-  if (Array.isArray(reportData[title]) && typeof reportData[title][0] === 'object'){
+  if (Array.isArray(report[title]) && typeof report[title][0] === 'object'){
     let titleDefined = false;
-    content += `<div class="table-responsive"><table class="table table-striped table-sm">`;
+    content += `<div class="table-responsive"><table class="table table-striped table-sm table-bordered table-hover">`;
 
-    reportData[title].forEach(item => {
+    report[title].forEach(item => {
       //define table header
       if (!titleDefined){
         let theads = ""
@@ -74,40 +91,33 @@ function pageBuilder(title){
     content += `</tbody></table></div>`;
   }
   //Array of strings
-  else if (Array.isArray(reportData[title]) && typeof reportData[title][0] === 'string'){
+  else if (Array.isArray(report[title]) && typeof report[title][0] === 'string'){
     content += `<ul class="list-group">`;
-    reportData[title].forEach(item => {
+    report[title].forEach(item => {
       content += `<li class="list-group-item">${item}</li>`;
     });
     content += `</ul>`;
   }
   //Object (key/value)
-  else if (typeof reportData[title] === 'object'){
-    content += `<div class="table-responsive"><table class="table table-striped table-sm">`;
+  else if (typeof report[title] === 'object'){
+    content += `<div class="table-responsive"><table class="table table-striped table-sm table-bordered table-hover">`;
 
 
-    Object.keys(reportData[title]).forEach(function (key) {
-      content += `<tr><td>${key}</td><td>${reportData[title][key]}</td></tr>`;
+    Object.keys(report[title]).forEach(function (key) {
+      content += `<tr><td>${key}</td><td>${report[title][key]}</td></tr>`;
     });
 
     content += `</tbody></table></div>`;
 
   }
 
-
-
   $("#page-builder").html(content);
 }
 
-(function () {
-  'use strict'
-  //Initialize menu
+function startUp(){
   initializeMenus()
-  generatedDate()
+  //generatedDate()
 
-  $(".menu-item").on("click", menuClick);
-  
-  //Select first item of menu
   let defined = false
   Object.keys(reportData).forEach(function (item) {
     if (!defined && item !== "header"){
@@ -115,6 +125,17 @@ function pageBuilder(title){
       defined = true;
     }
   });
-  
+
   feather.replace()
+}
+
+(function () {
+  'use strict'
+  initializeReports()
+
+  startUp()
+
+  $(".menu-item").on("click", menuClick);
+  $("#reports-list").change(startUp);
+
 }())

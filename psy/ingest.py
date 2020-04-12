@@ -48,7 +48,11 @@ class ProjectIngestModule(DataSourceIngestModule):
         self.context = context
         self.module_psy.initialize(context)
 
-        self.tempDirectory = os.path.join(Case.getCurrentCase().getTempDirectory(), self.app_id)
+        self.temp_module_path = os.path.join(Case.getCurrentCase().getModulesOutputDirAbsPath(), "AndroidForensics")
+        Utils.check_and_generate_folder(self.temp_module_path)
+
+        self.tempDirectory = os.path.join(self.temp_module_path, self.app_id)
+
         self.fileManager = Case.getCurrentCase().getServices().getFileManager()
         
     def process(self, dataSource, progressBar):
@@ -77,10 +81,10 @@ class ProjectIngestModule(DataSourceIngestModule):
         if self.settings.getSetting('clean_temp') == "true":
             self.log(Level.INFO, "Cleaning temp folder") #TODO
             # try:
-            #     rmtree(os.path.join(Case.getCurrentCase().getTempDirectory(), app_name))
+            #     rmtree(os.path.join(Case.getCurrentCase().getModulesOutputDirAbsPath(), "AndroidForensics", app_name))
             # except Exception as e:
             #     self.log(Level.INFO, "REMOVE TEMPORARY FOLDER ERROR" + str(e))
-            # os.makedirs(os.path.join(Case.getCurrentCase().getTempDirectory(), app_name))
+            # os.makedirs(os.path.join(Case.getCurrentCase().getModulesOutputDirAbsPath(), "AndroidForensics", app_name))
 
         count = 0
         for source in data_sources:
