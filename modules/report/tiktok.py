@@ -219,12 +219,12 @@ class ModuleReport(ModuleParent):
         for aweme_file in aweme_publish_files:
             dump = Utils.read_json(os.path.join(base_path, aweme_file))
             aweme_list = dump.get("aweme_list")
-            
-            for entry in aweme_list:
-                video ={}
-                video["created_time"] = entry.get("create_time")
-                video["video"] = entry.get("video").get("animated_cover").get("url_list")[0]
-                videos.append(video)
+            if aweme_list:
+                for entry in aweme_list:
+                    video ={}
+                    video["created_time"] = entry.get("create_time")
+                    video["video"] = entry.get("video").get("animated_cover").get("url_list")[0]
+                    videos.append(video)
     
         print("[Tiktok] {} video(s) found".format(len(videos)))
         return videos

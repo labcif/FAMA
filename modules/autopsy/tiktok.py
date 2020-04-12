@@ -240,15 +240,15 @@ class ModulePsy:
 
         for l in logs:
             try: 
-                self.log(Level.INFO, self.moduleName + " Parsing a new log")
+                self.log(Level.INFO, self.module_name + " Parsing a new log")
                 art = file.newArtifact(self.art_logs.getTypeID())
                 attributes = []
-                attributes.append(BlackboardAttribute(self.att_log_action, self.moduleName, l.get("action")))
-                attributes.append(BlackboardAttribute(self.att_log_time, self.moduleName, l.get("time")))
-                attributes.append(BlackboardAttribute(self.att_log_session, self.moduleName, l.get("session_id")))
-                attributes.append(BlackboardAttribute(self.att_log_body, self.moduleName, str(l.get("body"))))
+                attributes.append(BlackboardAttribute(self.att_log_action, self.module_name, l.get("action")))
+                attributes.append(BlackboardAttribute(self.att_log_time, self.module_name, l.get("time")))
+                attributes.append(BlackboardAttribute(self.att_log_session, self.module_name, l.get("session_id")))
+                attributes.append(BlackboardAttribute(self.att_log_body, self.module_name, str(l.get("body"))))
             
                 art.addAttributes(attributes)
                 self.utils.index_artifact(self.case.getBlackboard(), art, self.art_logs)        
             except Exception as e:
-                self.log(Level.INFO, self.moduleName + " Error getting log: " + str(e))
+                self.log(Level.INFO, self.module_name + " Error getting log: " + str(e))
