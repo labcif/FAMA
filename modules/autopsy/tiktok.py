@@ -36,6 +36,7 @@ class ModulePsy:
         self.process_searches(data.get("searches"), file)
         self.process_undark(data.get("freespace"), file)
         self.process_videos(data.get("videos"), report_number, file, os.path.dirname(path))
+        self.process_logs(data.get("log"), file)
 
     def initialize(self, context):
         self.context = context
@@ -63,7 +64,6 @@ class ModulePsy:
         self.att_prf_short_id = self.utils.create_attribute_type('TIKTOK_PROFILE_SHORT_ID', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Short ID", self.case)
         self.att_prf_uid = self.utils.create_attribute_type('TIKTOK_PROFILE_UID', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "UID", self.case)
         self.att_prf_unique_id = self.utils.create_attribute_type('TIKTOK_PROFILE_UNIQUE_ID', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Unique ID", self.case)
-
         self.att_prf_follow_status = self.utils.create_attribute_type('TIKTOK_PROFILE_FOLLOW_STATUS', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Follow Status", self.case)
 
         #seaches
@@ -78,7 +78,25 @@ class ModulePsy:
         self.att_vid_key = self.utils.create_attribute_type('TIKTOK_VIDEO_KEY', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Key", self.case)
         self.att_vid_last_modified = self.utils.create_attribute_type('TIKTOK_VIDEO_LAST_MODIFIED', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Last Modified", self.case)
 
+        #logs
+
+        self.att_log_time = self.utils.create_attribute_type('TIKTOK_LOGS_TIME', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.LONG, "Time", self.case)
+        self.att_log_session = self.utils.create_attribute_type('TIKTOK_LOGS_SESSION_ID', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.LONG, "Session ID", self.case)
+        self.att_log_action = self.utils.create_attribute_type('TIKTOK_LOGS_ACTION', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Action", self.case)
+        self.att_log_body = self.utils.create_attribute_type('TIKTOK_LOGS_BODY', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Body", self.case)
+        
+
+
+
+        # self.attributes = {}
+        # self.attributes["log_time"]= self.utils.create_attribute_type('TIKTOK_LOGS_TIME', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.LONG, "Time", self.case)
+        # # self.attributes["log_time"] 
+
+
+        # self.attributes["log_time"]
         # Create artifacts
+
+
 
         #self.art_contacts = self.utils.create_artifact_type("YPA_CONTACTS_" + guid + "_" + username,"User " + username + " - Contacts", self.case)
         
@@ -88,8 +106,8 @@ class ModulePsy:
         self.art_searches = self.utils.create_artifact_type("TIKTOK_SEARCHES","SEARCHES", self.case)
         self.art_undark = self.utils.create_artifact_type("TIKTOK_UNDARK", "UNDARK", self.case)
         self.art_videos = self.utils.create_artifact_type("TIKTOK_VIDEOS", "VIDEOS", self.case)
-
-        self.art_undark = self.utils.create_artifact_type("TIKTOK_UNDARK_" + "UID", "User " + "UID" + " - UNDARK", self.case)
+        self.art_undark = self.utils.create_artifact_type("TIKTOK_UNDARK", "UNDARK", self.case)
+        self.art_logs = self.utils.create_artifact_type("TIKTOK_LOGS", "LOGS", self.case)
 
     def process_user_profile(self, profile, file):
         if not profile:
@@ -206,8 +224,6 @@ class ModulePsy:
             except Exception as e:
                 self.log(Level.INFO, self.moduleName + " Error getting a video: " + str(e))
 
-
-
         path = os.path.join(base_path, "Contents", "internal", "cache", "cache")
         try:
             files = os.listdir(path)
@@ -220,3 +236,23 @@ class ModulePsy:
             os.rename(os.path.join(path, v), os.path.join(path, v) + ".mp4")
 
         self.utils.add_to_fileset("Videos", [path])
+
+
+    def process_logs(self, logs, file):
+        if not logs:
+            return
+
+        for l in logs:
+            try: 
+                self.log(Level.INFO, self.moduleName + " Parsing a new log")
+                art = file.newArtifact(self.art_logs.getTypeID())
+                attributes = []
+                attributes.append(BlackboardAttribute(self.att_log_action, self.moduleName, l.get("action")))
+                attributes.append(BlackboardAttribute(self.att_log_time, self.moduleName, l.get("time")))
+                attributes.append(BlackboardAttribute(self.att_log_session, self.moduleName, l.get("session_id")))
+                attributes.append(BlackboardAttribute(self.att_log_body, self.moduleName, str(l.get("body"))))
+            
+                art.addAttributes(attributes)
+                self.utils.index_artifact(self.case.getBlackboard(), art, self.art_logs)        
+            except Exception as e:
+                self.log(Level.INFO, self.moduleName + " Error getting log: " + str(e))
