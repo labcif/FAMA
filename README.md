@@ -42,7 +42,7 @@ optional arguments:
 
 ### Running from Autopsy
 
-1. Download repository contents ([zip](../archive/master.zip)).
+1. Download repository contents ([zip](../../archive/master.zip)).
 2. Open Autopsy -> Tools -> Python Plugins
 3. Unzip previously downloaded zip in `python_modules` folder.
 4. Restart Autopsy, create a case and select the module.
@@ -51,7 +51,7 @@ optional arguments:
 
 ## Build an application module
 
-Do you need a forensics module for a specific Android application? Follow the instructions [here](../module/README.md) and build a module by yourself.
+Do you need a forensics module for a specific Android application? Follow the instructions [here](master/module/README.md) and build a module by yourself.
 
 ## Authors
 
