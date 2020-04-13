@@ -6,12 +6,12 @@ Android extraction and analysis framework with integrated Autopsy Plugin. Dump e
 
 ## Functionalities
 
-* Extract user application data from an Android device with ADB (root and ADB required)
+* Extract user application data from an Android device with ADB (root and ADB required).
 * Dump user data from an android image or mounted path.
 * Easily build modules for a specific Android application.
 * Generate clean and readable JSON reports.
-* Integrated complete Autopsy compatibility.
-* (...)
+* Complete integrated Autopsy compatibility (ingest, report, communication and timeline support).
+* Export HTML report based on the current case.
 
 ## Prerequisites
 
@@ -42,26 +42,32 @@ optional arguments:
 
 ### Running from Autopsy
 
-1. Download repository contents ([zip](https://github.com/labcif/TikTok/archive/master.zip)).
+1. Download repository contents ([zip](archive/master.zip)).
 2. Open Autopsy -> Tools -> Python Plugins
 3. Unzip previously downloaded zip in `python_modules` folder.
 4. Restart Autopsy, create a case and select the module.
-5. (...)
+5. Select your module options in the Ingest Module window selector.
+6. Click "Generate Report" to generate an HTML report of the case.
+
+## Build an application module
+
+Do you need a forensics module for a specific Android application? Follow the instructions [here](module/README.md) and build a module by yourself.
 
 ## Authors
 
 * **José Francisco** - [GitHub](https://github.com/98jfran)
 * **Ruben Nogueira** - [GitHub](https://github.com/rubnogueira)
 
-
 ## Mentors
+
 * **Miguel Frade** - [GitHub](https://github.com/mfrade)
 * **Patrício Domingues** - [GitHub](https://github.com/PatricioDomingues)
 
 Project developed as final project for Computer Engineering course in Escola Superior de Tecnologia e Gestão de Leiria.
 
 ## Environments Tested
-* Windows (main)
+
+* Windows (primary)
 * Linux
 * Mac OS
 
@@ -72,6 +78,9 @@ Project License (...)
 * [ADB](https://developer.android.com/studio/releases/platform-tools) - license (...)
 * [Base64](http://rtner.de/software/base64.html) - license (...)
 * [Undark](https://github.com/witwall/undark) - license (...)
+* [Bootstrap](https://getbootstrap.com/) - license (...)
+* [jQuery](https://jquery.com/) - license (...)
+* [feather](https://github.com/feathericons/feather) - license (...)
 
 ## Notes
 
