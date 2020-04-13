@@ -37,6 +37,7 @@ class ModulePsy:
         self.process_undark(data.get("freespace"), file)
         self.process_videos(data.get("videos"), report_number, file, os.path.dirname(path), datasource_name)
         self.process_logs(data.get("log"), file)
+        self.process_published_videos(data.get("published_videos"), file)
 
     def initialize(self, context):
         self.context = context
@@ -84,6 +85,13 @@ class ModulePsy:
         self.att_vid_key = self.utils.create_attribute_type('TIKTOK_VIDEO_KEY', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Key", self.case)
         self.att_vid_last_modified = self.utils.create_attribute_type('TIKTOK_VIDEO_LAST_MODIFIED', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Last Modified", self.case)
 
+        #published videos
+
+        self.att_publish_vid_created_time = self.utils.create_attribute_type('TIKTOK_PUBLISH_VIDEOS_CREATED_TIME', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.LONG, "Created TIme", self.case)
+        self.att_publish_vid_url = self.utils.create_attribute_type('TIKTOK_PUBLISH_VIDEOS_URL', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Url", self.case)
+
+
+
         #logs
 
         self.att_log_time = self.utils.create_attribute_type('TIKTOK_LOGS_TIME', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Time", self.case)
@@ -107,9 +115,11 @@ class ModulePsy:
         self.art_profiles = self.utils.create_artifact_type(self.module_name, "TIKTOK_PROFILES_", "Profiles", self.case)
         self.art_searches = self.utils.create_artifact_type(self.module_name, "TIKTOK_SEARCHES","Search", self.case)
         self.art_videos = self.utils.create_artifact_type(self.module_name, "TIKTOK_VIDEOS", "Videos", self.case)
+        self.art_publish_videos = self.utils.create_artifact_type(self.module_name, "TIKTOK_PUBLISH_VIDEOS", "Publish Videos", self.case)
         self.art_undark = self.utils.create_artifact_type(self.module_name, "TIKTOK_UNDARK", "Undark", self.case)
         self.art_logs = self.utils.create_artifact_type(self.module_name, "TIKTOK_LOGS", "LOGS", self.case)
         
+
     def process_user_profile(self, profile, file):
         if not profile:
             return
@@ -141,20 +151,23 @@ class ModulePsy:
     def process_messages(self, conversations, file):
         if not conversations:
             return
-        try:
+        
+        
             
-            for m in conversations:
-                self.log(Level.INFO, self.module_name + " Parsing a new message")
-                art = file.newArtifact(self.art_messages.getTypeID())
+        for c in conversations:
+            self.log(Level.INFO, self.module_name + " Parsing a new conversation")
+            participant_1 = c.get("participant_1")
+            participant_2 = c.get("participant_2")
                 
-                participant_1 = m.get("participant_1")
-                participant_2 = m.get("participant_2")
-                
-                for m in conversations.get("messages"):
+            
+            for m in c.get("messages"):
+                try:    
+                    self.log(Level.INFO, self.module_name + " Parsing a new message")
+                    art = file.newArtifact(self.art_messages.getTypeID())
+                    
                     attributes = []
                     attributes.append(BlackboardAttribute(self.att_msg_participant_1, self.module_name, participant_1))
                     attributes.append(BlackboardAttribute(self.att_msg_participant_2, self.module_name, participant_2))
-
                     attributes.append(BlackboardAttribute(self.att_msg_sender, self.module_name, m.get("sender")))
                     attributes.append(BlackboardAttribute(self.att_msg_created_time, self.module_name, m.get("createdtime")))
                     attributes.append(BlackboardAttribute(self.att_msg_type, self.module_name, m.get("type")))
@@ -162,11 +175,11 @@ class ModulePsy:
                     attributes.append(BlackboardAttribute(self.att_msg_read_status, self.module_name, m.get("readstatus")))
                     attributes.append(BlackboardAttribute(self.att_msg_local_info, self.module_name, m.get("localinfo")))
                     attributes.append(BlackboardAttribute(self.att_msg_deleted, self.module_name, m.get("deleted")))
-                
                     art.addAttributes(attributes)
-                    self.utils.index_artifact(self.case.getBlackboard(), art, self.art_messages)        
-        except Exception as e:
-            self.log(Level.INFO, self.module_name + " Error getting a message: " + str(e))
+                    self.utils.index_artifact(self.case.getBlackboard(), art, self.art_messages)
+                        
+                except Exception as e:
+                    self.log(Level.INFO, self.module_name + " Error getting a message: " + str(e))
 
 
     def process_searches(self, searches, file):
@@ -204,7 +217,7 @@ class ModulePsy:
         if not users:
             return
 
-        for u in users.items():
+        for u in users.values():
             try: 
                 self.log(Level.INFO, self.module_name + " Parsing a new user")
                 art = file.newArtifact(self.art_profiles.getTypeID())
@@ -246,6 +259,19 @@ class ModulePsy:
             os.rename(os.path.join(path, v), os.path.join(path, v) + ".mp4")
 
         self.utils.add_to_fileset("{}_Videos".format(datasource_name), [path])
+
+    def process_published_videos(self, videos,file):
+        for v in videos:
+            try: 
+                self.log(Level.INFO, self.module_name + " Parsing a new video")
+                art = file.newArtifact(self.art_publish_videos.getTypeID())
+                attributes = []
+                attributes.append(BlackboardAttribute(self.att_publish_vid_url, self.module_name, v.get("video")))
+                attributes.append(BlackboardAttribute(self.att_publish_vid_created_time, self.module_name, v.get("created_time")))
+                art.addAttributes(attributes)
+                self.utils.index_artifact(self.case.getBlackboard(), art, self.art_publish_videos)        
+            except Exception as e:
+                self.log(Level.INFO, self.module_name + " Error getting a video: " + str(e))
 
 
 
