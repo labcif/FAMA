@@ -51,7 +51,7 @@ optional arguments:
 
 ## Build an application module
 
-Do you need a forensics module for a specific Android application? Follow the instructions [here](module/README.md) and build a module by yourself.
+Do you need a forensics module for a specific Android application? Follow the instructions [here](modules/README.md) and build a module by yourself.
 
 ## Authors
 
