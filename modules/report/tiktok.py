@@ -3,14 +3,9 @@ import json
 import os
 import tarfile
 
+from database import Database
 from utils import Utils
 from modules.report import ModuleParent
-
-if sys.executable and "python" in sys.executable.lower():
-    from database import Database
-else: #jython #improve relative imports!!
-    sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-    from database import Database
 
 class ModuleReport(ModuleParent):
     def __init__(self, internal_path, external_path, report_path, app_name, app_id):
