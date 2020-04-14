@@ -18,7 +18,7 @@ from package.logsystem import LogSystem
 class Utils: 
     @staticmethod
     def get_base_path_folder():
-        return os.path.join(os.path.dirname(__file__), '..')
+        return os.path.dirname((os.path.dirname(__file__)))
 
     @staticmethod
     def get_platform():
