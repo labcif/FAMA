@@ -43,8 +43,8 @@ class Extract:
 
             sort_out = open(path_dump_internal, 'wb', 0)
             error_message = ""
-            command = """{} -s {} shell "su -c 'cd {} && tar czf - ./ --exclude='./files'| base64' 2>/dev/null" | {} -di""".format(adb_location, serial_number, self.internal_data_path.format(app_package), base64_location)
-            subprocess.Popen(command, shell=True, stdout=sort_out, stderr = error_message).wait()
+            command = """{} -s {} shell "su -c 'cd {} && tar czf - ./ --exclude='./files'| base64 -w 0' 2>/dev/null" | {} -d""".format(adb_location, serial_number, self.internal_data_path.format(app_package), base64_location)
+            subprocess.Popen(command, shell=True, stdout=sort_out).wait()
 
             #Clean the file if it's empty
             if os.path.getsize(path_dump_internal) == 0:
@@ -60,9 +60,8 @@ class Extract:
             self.log.info("[{}] Extracting external app data!".format(serial_number))
             
             sort_out = open(path_dump_external, 'wb', 0)
-            error_message = ""
-            command = """{} -s {} shell "su -c 'cd {} && tar czf - ./ | base64' 2>/dev/null" | {} -di""".format(adb_location, serial_number, self.external_data_path.format(app_package), base64_location)
-            subprocess.Popen(command, shell=True, stderr = error_message).wait()
+            command = """{} -s {} shell "su -c 'cd {} && tar czf - ./ | base64 -w 0' 2>/dev/null" | {} -d""".format(adb_location, serial_number, self.external_data_path.format(app_package), base64_location)
+            subprocess.Popen(command, shell=True, stdout=sort_out).wait()
             
             if os.path.getsize(path_dump_external) == 0:
                 self.log.warning("[{}] Nothing extracted!".format(serial_number))
