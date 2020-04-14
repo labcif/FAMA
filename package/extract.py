@@ -16,7 +16,7 @@ class Extract:
         self.internal_data_dump_name = "{}_internal.tar.gz"
         self.external_data_dump_name = "{}_external.tar.gz"
 
-        if Utils.get_platform().startswith("windows"): #some linux versions doesn't output if contains errors, so we ignore it. but base64 for windows doesn't have this attribute
+        if Utils.get_platform().startswith("windows") or Utils.get_platform().startswith("darwin"): #some linux versions doesn't output if contains errors, so we ignore it. but base64 for windows doesn't have this attribute
             self.ignore_attribute = ""
         else:
             self.ignore_attribute = "i"
