@@ -18,7 +18,7 @@ import logging
 class Utils:
     @staticmethod
     def get_base_path_folder():
-        return os.path.dirname(__file__)
+        return os.path.join(os.path.dirname(__file__), '..')
 
     @staticmethod
     def get_platform():

@@ -4,7 +4,7 @@ import json
 
 from distutils.dir_util import copy_tree
 
-from utils import Utils
+from package.utils import Utils
 
 from java.util.logging import Level
 from org.sleuthkit.autopsy.casemodule import Case

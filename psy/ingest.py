@@ -5,8 +5,6 @@ import json
 from shutil import rmtree, copyfile
 from distutils.dir_util import copy_tree
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-
 from java.util.logging import Level
 from java.util import UUID
 from org.sleuthkit.autopsy.ingest import IngestModule
@@ -16,9 +14,9 @@ from org.sleuthkit.autopsy.ingest import IngestServices
 from org.sleuthkit.autopsy.coreutils import Logger
 from org.sleuthkit.autopsy.casemodule import Case
 
-from analyzer import Analyzer
-from extract import Extract
-from utils import Utils
+from package.analyzer import Analyzer
+from package.extract import Extract
+from package.utils import Utils
 
 from psy.psyutils import PsyUtils
 from psy.progress import ProgressUpdater

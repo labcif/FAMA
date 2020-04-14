@@ -3,10 +3,10 @@ import json
 import os
 import tarfile
 
-from database import Database
-from utils import Utils
+from package.database import Database
+from package.utils import Utils
+from package.logsystem import LogSystem
 from modules.report import ModuleParent
-from modules.LogSystem import LogSystem
 
 class ModuleReport(ModuleParent):
     def __init__(self, internal_path, external_path, report_path, app_name, app_id):

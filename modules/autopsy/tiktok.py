@@ -9,8 +9,8 @@ from org.sleuthkit.autopsy.ingest import IngestModule
 from org.sleuthkit.autopsy.ingest import IngestMessage
 from org.sleuthkit.autopsy.ingest import IngestServices
 
-from database import Database
-from utils import Utils
+from package.database import Database
+from package.utils import Utils
 from psy.psyutils import PsyUtils
 
 class ModulePsy:

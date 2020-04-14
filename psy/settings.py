@@ -20,7 +20,7 @@ from javax.swing.filechooser import FileNameExtensionFilter
 from org.sleuthkit.autopsy.ingest import IngestModuleIngestJobSettings
 from org.sleuthkit.autopsy.ingest import IngestModuleIngestJobSettingsPanel
 
-from utils import Utils
+from package.utils import Utils
 
 #https://github.com/HienTH/autopsy/blob/master/pythonExamples/fileIngestModuleWithGui.py    
 class ProjectIngestSettingsPanelSettings(IngestModuleIngestJobSettings):

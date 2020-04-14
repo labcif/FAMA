@@ -2,10 +2,10 @@ import argparse
 import os
 import sys
 
-from extract import Extract
-from analyzer import Analyzer
-from utils import Utils
-from modules.LogSystem import LogSystem
+from package.extract import Extract
+from package.analyzer import Analyzer
+from package.utils import Utils
+from package.logsystem import LogSystem
 
 #python3 start.py tiktok --path "/Users/Nogueira/Desktop/Projeto/ExemploMount" --adb
 #python3 start.py tiktok --dump 20200307_215555 20200307_201252

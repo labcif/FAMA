@@ -1,5 +1,5 @@
 import os
-from utils import Utils
+from package.utils import Utils
 
 class ModuleParent:
     def __init__(self, internal_path, external_path, report_path, app_name, app_id):

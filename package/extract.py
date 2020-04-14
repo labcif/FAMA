@@ -3,9 +3,9 @@ import datetime
 import os
 import sys
 
-from utils import Utils
-from device import DeviceCommunication
-from modules.LogSystem import LogSystem
+from package.utils import Utils
+from package.device import DeviceCommunication
+from package.logsystem import LogSystem
 
 class Extract:
     def __init__(self):

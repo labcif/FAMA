@@ -1,6 +1,6 @@
 import os
-from utils import Utils
-from modules.LogSystem import LogSystem
+from package.utils import Utils
+from package.logsystem import LogSystem
 
 class Analyzer:
     def __init__(self, app, folder, report_folder):
