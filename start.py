@@ -5,13 +5,18 @@ import sys
 from extract import Extract
 from analyzer import Analyzer
 from utils import Utils
+from modules.LogSystem import LogSystem
 
 #python3 start.py tiktok --path "/Users/Nogueira/Desktop/Projeto/ExemploMount" --adb
 #python3 start.py tiktok --dump 20200307_215555 20200307_201252
 
-def start(args):    
+def start(args):
+    log = LogSystem("app")
+    log.info("Starting")    
+    
     extract = Extract()
     folders = []
+    
 
     if args.dump:
         for dump in args.dump:
@@ -19,7 +24,7 @@ def start(args):
             if os.path.exists(dump_path):
                 folders.append(dump_path)
             else:
-                print("[App] Invalid dump name: {}. Ignoring".format(dump))
+                log.warning("Invalid dump name: {}. Ignoring".format(dump))
 
     if args.path:
         folders.extend(extract.dump_from_path(args.path, args.app))
@@ -41,7 +46,7 @@ def start(args):
         analyzer = Analyzer(args.app, folder, args.output)
         analyzer.generate_report()
 
-    print("[App] Done")
+    log.info("Done")
 
     #old stuff, hardcoded
     '''

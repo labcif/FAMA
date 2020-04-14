@@ -1,10 +1,8 @@
 import os
-
 from utils import Utils
 
 class ModuleParent:
     def __init__(self, internal_path, external_path, report_path, app_name, app_id):
-        print("[Module] Starting module")
         # self.report_name = report_name
         self.internal_path = internal_path
         self.external_path = external_path

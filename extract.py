@@ -5,9 +5,12 @@ import sys
 
 from utils import Utils
 from device import DeviceCommunication
+from modules.LogSystem import LogSystem
 
 class Extract:
     def __init__(self):
+        self.log = LogSystem("Extract")
+
         self.internal_data_path = "/data/data/{}"
         self.external_data_path = "/sdcard/Android/data/{}"
         self.internal_data_dump_name = "{}_internal.tar.gz"
@@ -34,7 +37,9 @@ class Extract:
             Utils.check_and_generate_folder(path_dump_folder)
             
             #Dump internal data https://android.stackexchange.com/questions/85564/need-one-line-adb-shell-su-push-pull-to-access-data-from-windows-batch-file
-            print("[{}] Extracting internal app (root) data!".format(serial_number))
+            
+            
+            self.log.info("[{}] Extracting internal app (root) data!".format(serial_number))
 
             sort_out = open(path_dump_internal, 'wb', 0)
             command = """{} -s {} shell "su -c 'cd {} && tar czf - ./ --exclude='./files'| base64' 2>/dev/null" | {} -d""".format(adb_location, serial_number, self.internal_data_path.format(app_package), base64_location)
@@ -42,29 +47,29 @@ class Extract:
 
             #Clean the file if it's empty
             if os.path.getsize(path_dump_internal) == 0:
-                print("[{}] Nothing extracted!".format(serial_number))
+                self.log.warning("[{}] Nothing extracted!".format(serial_number))
                 try:
                     os.remove(path_dump_internal)
                 except:
                     pass
             else:
-                print("[{}] File generated! {}".format(serial_number, path_dump_internal))
+                self.log.info("[{}] File generated! {}".format(serial_number, path_dump_internal))
 
             #Dump external
-            print("[{}] Extracting external app data!".format(serial_number))
+            self.log.info("[{}] Extracting external app data!".format(serial_number))
             
             sort_out = open(path_dump_external, 'wb', 0)
             command = """{} -s {} shell "su -c 'cd {} && tar czf - ./ | base64' 2>/dev/null" | {} -d""".format(adb_location, serial_number, self.external_data_path.format(app_package), base64_location)
             subprocess.Popen(command, shell=True, stdout=sort_out).wait()
             
             if os.path.getsize(path_dump_external) == 0:
-                print("[{}] Nothing extracted!".format(serial_number))
+                self.log.warning("[{}] Nothing extracted!".format(serial_number))
                 try:
                     os.remove(path_dump_external)
                 except:
                     pass
             else:
-                print("[{}] File generated! {}".format(serial_number, path_dump_external))
+                self.log.info("[{}] File generated! {}".format(serial_number, path_dump_external))
 
             #Generated folders
             #folders.append(path_dump_folder)
@@ -76,7 +81,7 @@ class Extract:
         base_path = Utils.replace_slash_platform(base_path)
 
         if not os.path.exists(base_path):
-            print("[Dump] Dump from path failed: {} doesn't exists".format(base_path))
+            self.log.critical("[Dump] Dump from path failed: {} doesn't exists".format(base_path))
             return None
 
         current_time = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -90,17 +95,17 @@ class Extract:
         #Extract internal data from mount
         path_original_internal = Utils.replace_slash_platform(os.path.join(base_path, self.internal_data_path.format(app_package)[1:])) #clean first / to allow concat
         if os.path.exists(path_original_internal):
-            print("[Dump] Extracting internal app data!")
+            self.log.info("Extracting internal app data!")
             Utils.generate_tar_gz_file(path_original_internal, path_dump_internal)
         else:
-            print("[Dump] Internal app folder {} doesn't exist".format(path_original_internal))
+            self.log.critical("Internal app folder {} doesn't exist".format(path_original_internal))
 
         #Extract external data from mount
         path_original_external = Utils.replace_slash_platform(os.path.join(base_path, self.external_data_path.format(app_package)[1:]))
         if os.path.exists(path_original_external):
-            print("[Dump] Extracting external app data!")
+            self.log.info("Extracting external app data!")
             Utils.generate_tar_gz_file(path_original_external, path_dump_external)
         else:
-            print("[Dump] External app folder {} doesn't exist".format(path_original_external))        
+            self.log.critical("External app folder {} doesn't exist".format(path_original_external))        
 
         return [path_dump_folder]

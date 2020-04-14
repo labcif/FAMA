@@ -42,6 +42,7 @@ class ProjectIngestModule(DataSourceIngestModule):
         self.module_psy = m.ModulePsy(self.app, case = Case.getCurrentCase().getSleuthkitCase(), log = self.log)
 
     def log(self, level, msg):
+        
         self._logger.logp(level, self.__class__.__name__, inspect.stack()[1][3], msg)
 
     def startUp(self, context):

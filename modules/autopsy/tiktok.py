@@ -45,7 +45,7 @@ class ModulePsy:
         # self.att_msg_uid = self.utils.create_attribute_type('TIKTOK_MSG_UID', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Uid", self.case)
         # self.att_msg_uniqueid = self.utils.create_attribute_type('TIKTOK_MSG_UNIQUE_ID', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Unique ID", self.case)
         # self.att_msg_nickname = self.utils.create_attribute_type('TIKTOK_MSG_NICKNAME', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Nickname", self.case)
-        self.att_msg_created_time = self.utils.create_attribute_type('TIKTOK_MSG_CREATED_TIME', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Created TIme", self.case)
+        self.att_msg_created_time = self.utils.create_attribute_type('TIKTOK_MSG_CREATED_TIME', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Created Time", self.case)
         self.att_msg_participant_1 = self.utils.create_attribute_type('TIKTOK_MSG_PARTICIPANT_1', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Participant 1", self.case)
         self.att_msg_participant_2 = self.utils.create_attribute_type('TIKTOK_MSG_PARTICIPANT_2', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Participant 2", self.case)
         self.att_msg_message = self.utils.create_attribute_type('TIKTOK_MSG_MESSAGE', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Message", self.case)
@@ -109,7 +109,7 @@ class ModulePsy:
 
         # self.attributes["log_time"]
         # Create artifacts
-        
+        # self.art_messages = self.utils.create_artifact_type(self.module_name, "TSK_MESSAGE","Messages", self.case)
         self.art_messages = self.utils.create_artifact_type(self.module_name, "TIKTOK_MESSAGES","Messages", self.case)
         self.art_user_profile = self.utils.create_artifact_type(self.module_name, "TIKTOK_PROFILE", "Profile", self.case)
         self.art_profiles = self.utils.create_artifact_type(self.module_name, "TIKTOK_PROFILES_", "Profiles", self.case)
@@ -151,9 +151,6 @@ class ModulePsy:
     def process_messages(self, conversations, file):
         if not conversations:
             return
-        
-        
-            
         for c in conversations:
             self.log(Level.INFO, self.module_name + " Parsing a new conversation")
             participant_1 = c.get("participant_1")
@@ -163,6 +160,7 @@ class ModulePsy:
             for m in c.get("messages"):
                 try:    
                     self.log(Level.INFO, self.module_name + " Parsing a new message")
+
                     art = file.newArtifact(self.art_messages.getTypeID())
                     
                     attributes = []

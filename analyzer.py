@@ -1,8 +1,10 @@
 import os
 from utils import Utils
+from modules.LogSystem import LogSystem
 
 class Analyzer:
     def __init__(self, app, folder, report_folder):
+        self.log = LogSystem("analyser")
         self.folder = folder
         if '.' in app:
             self.app = Utils.find_app_name(app)
@@ -30,14 +32,14 @@ class Analyzer:
 
     def generate_report(self):
         if not self.app_id:
-            print("[Analyzer] Module not found for application {}".format(self.app))
+            self.log.critical("Module not found for application {}".format(self.app))
             return None
 
         if not self.app:
-            print("[Analyzer] Module not found for {} package".format(self.app_id))
+            self.log.critical("Module not found for {} package".format(self.app_id))
             return None
 
-        print("[Analyzer] Module {} for {}".format(self.app, self.app_id))
+        self.log.info("Module {} for {}".format(self.app, self.app_id))
 
         m = __import__("modules.report.{}".format(self.app), fromlist=[None])
         module = m.ModuleReport(self.internal_path, self.external_path, self.report_path, self.app, self.app_id)

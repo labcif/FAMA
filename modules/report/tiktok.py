@@ -5,6 +5,7 @@ import tarfile
 
 from utils import Utils
 from modules.report import ModuleParent
+from modules.LogSystem import LogSystem
 
 if sys.executable and "python" in sys.executable.lower():
     from database import Database
@@ -15,8 +16,12 @@ else: #jython #improve relative imports!!
 class ModuleReport(ModuleParent):
     def __init__(self, internal_path, external_path, report_path, app_name, app_id):
         ModuleParent.__init__(self, internal_path, external_path, report_path, app_name, app_id)
-        print("[Tiktok] Module started")
-        Utils.log("TEST LOG")
+        self.log = LogSystem("Tiktok")
+
+        self.log.info("Module started")
+        
+
+        
     
     def generate_report(self):
 
@@ -29,14 +34,14 @@ class ModuleReport(ModuleParent):
         self.report["freespace"] = self.get_undark_db()
         self.report["log"] = self.get_last_session()
 
-        print("[Tiktok] Generate Report")
+        self.log.info("Report Generated")
 
         Utils.save_report(os.path.join(self.report_path, "Report.json"), self.report)
         return self.report
 
     #TIKTOK
     def get_user_messages(self):
-        print("[Tiktok] Getting User Messages...")
+        self.log.info("Getting User Messages...")
         
         # db1 = os.path.join(self.internal_cache_path, "databases", "db_im_xx")
         # db2 = None
@@ -70,13 +75,13 @@ class ModuleReport(ModuleParent):
             conversation_output["messages"] = []
             
             #messages from conversations
-            messages_list = database.execute_query("select datetime(created_time/1000, 'unixepoch', 'localtime') as created_time, content as message, case when read_status = 0 then 'Not read' when read_status = 1 then 'Read' else read_status end read_not_read, local_info, type, case when deleted = 0 then 'Not deleted' when read_status = 1 then 'Deleted' else deleted end, sender from msg where conversation_id='{}' order by created_time;".format(conversation[0]))
+            messages_list = database.execute_query("select datetime(created_time/1000, 'unixepoch', 'localtime') as created_time, content as message, case when read_status = 0 then 'Not read' when read_status = 1 then 'Read' else read_status end read_not_read, local_info, type, case when deleted = 0 then 'Not deleted' when deleted = 1 then 'Deleted' else deleted end, sender from msg where conversation_id='{}' order by created_time;".format(conversation[0]))
             
             #getting messages from conversations
             for entry in messages_list:
                 message={}
                 message["createdtime"] = entry[0]
-                message["readstatus"] = entry[2]
+                message["readstatus"] = str(entry[2])
                 message["localinfo"] = entry[3]
                 if entry[6] == int(id1):
                     message["sender"] = conversation_output["participant_1"]
@@ -103,16 +108,13 @@ class ModuleReport(ModuleParent):
                     body= str(message_dump)
                 
                 message["message"] = body
-                message["deleted"] = entry[5]
+                message["deleted"] = str(entry[5])
                 conversation_output["messages"].append(message)
             
             #adding conversation and participants information to main array
             conversations_list.append(conversation_output)
 
-        
-
-        
-        print("[Tiktok] {} messages found".format(len(conversation_output.get("messages"))))
+        self.log.info("{} messages found".format(len(conversation_output.get("messages"))))
 
         if not db1 in self.used_databases:
             self.used_databases.append(db1)
@@ -123,7 +125,8 @@ class ModuleReport(ModuleParent):
         return conversations_list
 
     def get_user_profile(self):
-        print("[Tiktok] Get User Profile...")
+        
+        self.log.info("Get User Profile...")
         xml_file = os.path.join(self.internal_cache_path, "shared_prefs", "aweme_user.xml")
         user_profile ={}
         values = Utils.xml_attribute_finder(xml_file)
@@ -138,31 +141,17 @@ class ModuleReport(ModuleParent):
                 break
             
         user_profile["url"] = "https://www.tiktok.com/@{}".format(user_profile["unique_id"])
-                #except ValueError:
-                #    print("[Tiktok] JSON User Error")
 
         return user_profile
     
     def get_user_uniqueid_by_id(self, uid):
-        
         db = os.path.join(self.internal_cache_path, "databases", "db_im_xx")
-
         database = Database(db)
-        # entry = database.execute_query("select UID, UNIQUE_ID, NICK_NAME, AVATAR_THUMB, case when follow_status = 1 then 'Following' when follow_status = 2 then 'Followed and Following ' else 'Invalid' end from SIMPLE_USER where uid={}".format(uid))
         name = database.execute_query("select UNIQUE_ID from SIMPLE_USER where uid={}".format(uid))
         if name:
             name = name[0][0]
         else:
             name = None
-        # profile={}
-        # profile["uid"] = entry[0]
-        # profile["uniqueid"] = entry[1]
-        # profile["nickname"] = entry[2]
-        # dump_avatar = json.loads(entry[3])
-        # profile["avatar"] = dump_avatar["url_list"][0]
-        # profile["follow_status"] = entry[4]
-        # profile["url"] = "https://www.tiktok.com/@{}".format(profile["uniqueid"])
-        
         return name
         
 
@@ -174,7 +163,8 @@ class ModuleReport(ModuleParent):
 
 
     def get_user_searches(self):
-        print("[Tiktok] Getting User Search History...")
+        self.log.info("Getting User Search History...")
+        
         xml_file = os.path.join(self.internal_cache_path, "shared_prefs", "search.xml")
         searches = []
         #verify if recent hisotry tag exists
@@ -183,14 +173,13 @@ class ModuleReport(ModuleParent):
             for i in dump: searches.append(i["keyword"])
         except:
             pass
-        
-        
 
-        print("[Tiktok] {} search entrys found".format(len(searches)))
+        self.log.info("{} search entrys found".format(len(searches)))
         return searches
 
+
     def get_user_profiles(self):
-        print("[Tiktok] Getting User Profiles...")
+        self.log.info("Getting User Profiles...")
         profiles = {}
 
         db = os.path.join(self.internal_cache_path, "databases", "db_im_xx")
@@ -207,21 +196,19 @@ class ModuleReport(ModuleParent):
             message["follow_status"] = entry[4]
             message["url"] = "https://www.tiktok.com/@{}".format(message["uniqueid"])
             profiles[message["uniqueid"]] = message
-        
-        print("[Tiktok] {} profiles found".format(len(profiles.keys())))
 
         if not db in self.used_databases:
             self.used_databases.append(db)
 
+        self.log.info("{} profiles found".format(len(profiles.keys())))
         return profiles
 
     def get_user_id(self):
-        print("[Tiktok] Getting User ID")
         xml_file = os.path.join(self.internal_cache_path, "shared_prefs", "iuserstate.xml")
         return Utils.xml_attribute_finder(xml_file, "userid")["userid"]
 
     def get_videos(self):
-        print("[Tiktok] Getting Videos...")
+        self.log.info("Getting Videos...")
         videos = []
         db = os.path.join(self.internal_cache_path, "databases", "video.db")
 
@@ -243,11 +230,11 @@ class ModuleReport(ModuleParent):
         if not db in self.used_databases:
             self.used_databases.append(db)
 
-        print("[Tiktok] {} video(s) found".format(len(videos)))
+        self.log.info("{} video(s) found".format(len(videos)))
         return videos
     
     def get_undark_db(self):
-        print("[Tiktok] Getting undark output...")
+        self.log.info("Getting undark output...")
         output = {}
 
         for name in self.used_databases:
@@ -264,7 +251,7 @@ class ModuleReport(ModuleParent):
     
 
     def get_videos_publish(self):
-        print("[Tiktok] Getting published videos")
+        self.log.info("Getting published videos")
         videos = []
         base_path = os.path.join(self.internal_cache_path, "cache", "aweme_publish")
         aweme_publish_files = os.listdir(base_path)
@@ -279,13 +266,13 @@ class ModuleReport(ModuleParent):
                     video["video"] = entry.get("video").get("animated_cover").get("url_list")[0]
                     videos.append(video)
     
-        print("[Tiktok] {} video(s) found".format(len(videos)))
+        self.log.info("{} video(s) found".format(len(videos)))
         return videos
 
 
     
     def get_last_session(self):
-        print("[Tiktok] Getting last session...")
+        self.log.info("Getting last session...")
         session = []
 
         relevant_keys = ["page", "request_method", "is_first","duration","is_first","rip","duration","author_id","access2","video_duration","video_quality","access",
@@ -313,6 +300,6 @@ class ModuleReport(ModuleParent):
             
             session_entry["body"] =body
 
-        print("[Tiktok] {} entrys found".format(len(results)))
+        self.log.info("{} entrys found".format(len(results)))
         return session
 

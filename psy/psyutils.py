@@ -42,6 +42,8 @@ class PsyUtils:
         return skCase.getAttributeType(att_name)
     
     def create_artifact_type(self, base_name, art_name, art_desc, skCase):
+
+        
         try:
             skCase.addBlackboardArtifactType(art_name, base_name.capitalize() + art_desc)
         except:

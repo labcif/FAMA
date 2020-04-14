@@ -219,11 +219,3 @@ class Utils:
         f = open(report_name, "w")
         f.write(json.dumps(contents, indent=2))
         f.close()
-    
-    @staticmethod
-    def log(log):
-        
-        # logging.info(log)
-        logging.warning(log)
-        logging.critical(log)
-        logging.debug(log)
