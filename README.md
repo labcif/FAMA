@@ -38,6 +38,7 @@ optional arguments:
   -p PATH, --path PATH                           Dump app data in path (mount or folder structure)
   -o OUTPUT, --output OUTPUT                     Report output path folder
   -a, --adb                                      Dump app data directly from device with ADB
+  -H, --html                                     Generate HTML report
 ```
 
 ### Running from Autopsy

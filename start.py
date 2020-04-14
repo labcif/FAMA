@@ -44,17 +44,12 @@ def start(args):
 
     for folder in folders:
         analyzer = Analyzer(args.app, folder, args.output)
-        analyzer.generate_report()
+        report = analyzer.generate_report()
+
+        if args.html:
+            analyzer.generate_html_report(report, args.output)
 
     log.info("Done")
-
-    #old stuff, hardcoded
-    '''
-    folders = extract.dump_from_adb("com.zhiliaoapp.musically")
-    #folders = extract.dump_from_path("/mnt/exemplomount")
-    #folders = extract.dump_from_path("/Users/Nogueira/Desktop/Projeto/ExemploMount", "com.zhiliaoapp.musically")
-    print(folders)
-    '''
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Forensics Artefacts Analyzer')
@@ -63,6 +58,7 @@ if __name__ == "__main__":
     parser.add_argument('-p', '--path', help='Dump app data in path (mount or folder structure)', required = False)
     parser.add_argument('-o', '--output', help='Report output path folder', required = False)
     parser.add_argument('-a', '--adb', action='store_true', help='Dump app data directly from device with ADB', required = False)
+    parser.add_argument('-H', '--html', action='store_true', help='Generate HTML report', required = False)
     args = parser.parse_args()
     
     start(args)

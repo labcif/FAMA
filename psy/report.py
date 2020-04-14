@@ -5,6 +5,7 @@ import json
 from distutils.dir_util import copy_tree
 
 from package.utils import Utils
+from package.analyzer import Analyzer
 
 from java.util.logging import Level
 from org.sleuthkit.autopsy.casemodule import Case
@@ -30,6 +31,11 @@ class ReportOutput:
 
         self.tempDirectory = os.path.join(Case.getCurrentCase().getModulesOutputDirAbsPath(), "AndroidForensics")
 
+        if not os.path.exists(self.tempDirectory):
+            progressBar.complete(ReportStatus.ERROR)
+            progressBar.updateStatusLabel("Run Ingest Module first!")
+            return
+
         for app_directory in os.listdir(self.tempDirectory):
             for app_report in os.listdir(os.path.join(self.tempDirectory, app_directory)):
                 report = os.path.join(self.tempDirectory, app_directory, app_report, "report", "Report.json")
@@ -39,15 +45,7 @@ class ReportOutput:
 
         progressBar.updateStatusLabel("Creating report")
 
-        copy_tree(os.path.join(Utils.get_base_path_folder(), "template"), baseReportDir)
-
-        report_path = os.path.join(baseReportDir, "index.html")
-        
-        js_code = "var reportData = " + json.dumps(self.reports, indent = 2)
-
-        handler = open(os.path.join(baseReportDir, "Report.js"), "w")
-        handler.write(js_code)
-        handler.close()
+        report_path = Analyzer.generate_html_report(self.reports, baseReportDir, add_folder = False)
 
         Case.getCurrentCase().addReport(report_path, "Report", "Forensics Report")
 

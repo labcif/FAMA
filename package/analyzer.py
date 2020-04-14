@@ -1,6 +1,9 @@
 import os
+import json
 from package.utils import Utils
 from package.logsystem import LogSystem
+
+from distutils.dir_util import copy_tree
 
 class Analyzer:
     def __init__(self, app, folder, report_folder):
@@ -18,7 +21,6 @@ class Analyzer:
         self.external_path = None
         
         self.report_path = os.path.join(report_folder, "report")
-        
         Utils.check_and_generate_folder(self.report_path)
         
         self.initialize_dumps()
@@ -50,4 +52,31 @@ class Analyzer:
         
         # Utils.remove_folder(os.path.join(self.report_path))
         
-        module.generate_report()
+        return {"Report_1": module.generate_report()}
+
+    @staticmethod
+    def generate_html_report(reports, output_folder, add_folder = True):
+        report_path = output_folder
+        
+        if add_folder:
+            report_path = os.path.join(output_folder, "report")
+            Utils.check_and_generate_folder(report_path)
+            
+        log = LogSystem("analyser")
+        log.info("Generating HTML report")
+
+        copy_tree(os.path.join(Utils.get_base_path_folder(), "template"), report_path)
+
+        report_file_path = os.path.join(report_path, "index.html")
+        
+        js_code = "var reportData = " + json.dumps(reports, indent = 2)
+
+        handler = open(os.path.join(report_path, "Report.js"), "w")
+        handler.write(js_code)
+        handler.close()
+
+        return report_file_path
+        
+
+        
+
