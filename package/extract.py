@@ -16,6 +16,11 @@ class Extract:
         self.internal_data_dump_name = "{}_internal.tar.gz"
         self.external_data_dump_name = "{}_external.tar.gz"
 
+        if Utils.get_platform().startswith("windows"): #some linux versions doesn't output if contains errors, so we ignore it. but base64 for windows doesn't have this attribute
+            self.ignore_attribute = ""
+        else:
+            self.ignore_attribute = "i"
+
         self.dumps_path = os.path.join(Utils.get_base_path_folder(), "dumps")
 
         Utils.check_and_generate_folder(self.dumps_path)
@@ -42,8 +47,7 @@ class Extract:
             self.log.info("[{}] Extracting internal app (root) data!".format(serial_number))
 
             sort_out = open(path_dump_internal, 'wb', 0)
-            error_message = ""
-            command = """{} -s {} shell "su -c 'cd {} && tar czf - ./ --exclude='./files'| base64 -w 0' 2>/dev/null" | {} -d""".format(adb_location, serial_number, self.internal_data_path.format(app_package), base64_location)
+            command = """{} -s {} shell "su -c 'cd {} && tar czf - ./ --exclude='./files'| base64' 2>/dev/null" | {} -d{}""".format(adb_location, serial_number, self.internal_data_path.format(app_package), base64_location, self.ignore_attribute)
             subprocess.Popen(command, shell=True, stdout=sort_out).wait()
 
             #Clean the file if it's empty
@@ -60,7 +64,7 @@ class Extract:
             self.log.info("[{}] Extracting external app data!".format(serial_number))
             
             sort_out = open(path_dump_external, 'wb', 0)
-            command = """{} -s {} shell "su -c 'cd {} && tar czf - ./ | base64 -w 0' 2>/dev/null" | {} -d""".format(adb_location, serial_number, self.external_data_path.format(app_package), base64_location)
+            command = """{} -s {} shell "su -c 'cd {} && tar czf - ./ | base64' 2>/dev/null" | {} -d{}""".format(adb_location, serial_number, self.external_data_path.format(app_package), base64_location, self.ignore_attribute)
             subprocess.Popen(command, shell=True, stdout=sort_out).wait()
             
             if os.path.getsize(path_dump_external) == 0:
