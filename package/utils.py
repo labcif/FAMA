@@ -11,11 +11,11 @@ import tarfile
 import json
 import time
 import re
-import logging
+from package.logsystem import LogSystem
 
 #from meaning.meaning import Meaning
 
-class Utils:
+class Utils: 
     @staticmethod
     def get_base_path_folder():
         return os.path.join(os.path.dirname(__file__), '..')
@@ -130,8 +130,11 @@ class Utils:
         if stream:
             header = stream.read(32)
         else:
-            with open(file, "rb") as f:
-                header = f.read(32)
+            try:
+                with open(file, "rb") as f:
+                    header = f.read(32)
+            except Exception as e:
+                LogSystem("extract").warning(str(e))
 
         query = header.find(header_type) #query includes position of header
 
