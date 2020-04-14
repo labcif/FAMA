@@ -4,3 +4,4 @@
 /todo.txt
 __pycache__
 *.class
+*.log
