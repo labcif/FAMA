@@ -39,6 +39,10 @@ class Analyzer:
             self.log.critical("Module not found for {} package".format(self.app_id))
             return None
 
+        if not self.internal_path:
+            self.log.critical("No data file found for {} package".format(self.app_id))
+            return None
+
         self.log.info("Module {} for {}".format(self.app, self.app_id))
 
         m = __import__("modules.report.{}".format(self.app), fromlist=[None])

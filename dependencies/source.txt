@@ -1,4 +1,13 @@
 Instalar ambos os utilitários como variáveis de sistema para obter sucesso na extracção
-adb -> https://developer.android.com/studio/releases/platform-tools
-base64 -> http://rtner.de/software/base64.html
+linux:
+adb (ultima versao 32bits) 23.0.1 - https://dl.google.com/android/repository/platform-tools_r23.0.1-linux.zip
+undark (compilado de https://github.com/witwall/undark/releases)
+
+mac
+adb 29.0.6 -> https://dl.google.com/android/repository/platform-tools_r29.0.6-darwin.zip
 undark -> https://github.com/witwall/undark/releases
+
+window:
+adb 29.0.6 -> https://dl.google.com/android/repository/platform-tools_r29.0.6-windows.zip
+undark -> https://github.com/witwall/undark/releases
+base64 -> http://rtner.de/software/base64.html
