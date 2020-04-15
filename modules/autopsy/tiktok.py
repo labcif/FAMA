@@ -182,31 +182,29 @@ class ModulePsy:
                     #SUBSTITUIR POR TIMESTAMP VINDO DO SCRIPT!!!  #TODO
                     m["createdtime"] = 1586873049
                     
-                    attributes = []
                     # attributes.append(BlackboardAttribute(self.att_msg_participant_1, self.module_name, participant_1))
                     # attributes.append(BlackboardAttribute(self.att_msg_participant_2, self.module_name, participant_2))
-                    attributes.append(BlackboardAttribute(self.att_msg_sender, "db_im_xx", m.get("sender")))
+                    # attributes.append(BlackboardAttribute(self.att_msg_sender, "db_im_xx", m.get("sender")))
                     # attributes.append(BlackboardAttribute(self.att_msg_created_time, self.module_name, m.get("createdtime")))
-                    attributes.append(BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_SUBJECT, "{}_im.db".format(self.uid), m.get("type")))
-                    # attributes.append(BlackboardAttribute(self.att_msg_message, self.module_name, m.get("message")))
-                    attributes.append(BlackboardAttribute(self.att_msg_read_status, "{}_im.db".format(self.uid), m.get("readstatus")))
-                    attributes.append(BlackboardAttribute(self.att_msg_local_info, "{}_im.db".format(self.uid), m.get("localinfo")))
-                    attributes.append(BlackboardAttribute(self.att_msg_deleted, "{}_im.db".format(self.uid), m.get("deleted")))
-                    art.addAttributes(attributes)
-
-                    art.addAttribute(BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_TEXT, "{}_im.db".format(self.uid), m.get("message")))
-                    art.addAttribute(BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_DATETIME, "{}_im.db".format(self.uid), 1586873049))
-                    # self.utils.index_artifact(self.case.getBlackboard(), art, self.art_messages)
-                    # art.addAttribute(BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_PHONE_NUMBER_FROM, self.module_name, m.get("sender")))
-
-                    if m.get("sender") == participant_2:
-                        art.addAttribute(BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_PHONE_NUMBER_TO, self.module_name, participant_2))
-                        self.utils.add_relationship(contact_1, [contact_2], art, Relationship.Type.MESSAGE, m.get("createdtime"))
-                    else:
-                        art.addAttribute(BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_PHONE_NUMBER_TO, self.module_name, "Self (" + participant_1 + ")"))
-                        self.utils.add_relationship(contact_2, [contact_1], art, Relationship.Type.MESSAGE, m.get("createdtime"))
                     
-                    # art.addAttribute(BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_DATETIME, self.module_name,  1586873049))
+                    art.addAttribute(BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_PHONE_NUMBER_FROM, "{}_im.db".format(self.uid), m.get("sender")))
+                    art.addAttribute(BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_SUBJECT, "{}_im.db".format(self.uid), m.get("type")))
+                    # attributes.append(BlackboardAttribute(self.att_msg_message, self.module_name, m.get("message")))
+                    art.addAttribute(BlackboardAttribute(self.att_msg_read_status, "{}_im.db".format(self.uid), m.get("readstatus")))
+                    art.addAttribute(BlackboardAttribute(self.att_msg_local_info, "{}_im.db".format(self.uid), m.get("localinfo")))
+                    art.addAttribute(BlackboardAttribute(self.att_msg_deleted, "{}_im.db".format(self.uid), m.get("deleted")))
+                    art.addAttribute(BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_TEXT, "{}_im.db".format(self.uid), m.get("message")))
+                    art.addAttribute(BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_DATETIME, "{}_im.db".format(self.uid), m.get("createdtime")))
+
+                    if m.get("sender") == participant_1:
+                        art.addAttribute(BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_PHONE_NUMBER_TO, "{}_im.db".format(self.uid), participant_2))
+                        self.utils.add_relationship(contact_2, [contact_1], art, Relationship.Type.MESSAGE, m.get("createdtime"))
+                    else:
+                        art.addAttribute(BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_PHONE_NUMBER_TO, "{}_im.db".format(self.uid), "Self (" + participant_2+ ")"))
+                        self.utils.add_relationship(contact_1, [contact_2], art, Relationship.Type.MESSAGE, m.get("createdtime"))
+
+                    
+                    # self.utils.index_artifact(self.case.getBlackboard(), art, self.art_messages)
                     self.utils.index_artifact(art, BlackboardArtifact.ARTIFACT_TYPE.TSK_MESSAGE)
 
                 except Exception as e:

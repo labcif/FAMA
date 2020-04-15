@@ -65,7 +65,7 @@ class PsyUtils:
         IngestServices.getInstance().fireModuleDataEvent(ModuleDataEvent("test",artifact_type, None))
 
     def add_relationship(self, node1, node2, art, relationship_type,timestamp):
-        Case.getCurrentCase().getSleuthkitCase().addRelationships(node1, node2, art, relationship_type, timestamp)
+        Case.getCurrentCase().getSleuthkitCase().getCommunicationsManager().addRelationships(node1, node2, art, relationship_type, timestamp)
                     
 
     @staticmethod
