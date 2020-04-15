@@ -20,13 +20,16 @@ from package.utils import Utils
 
 from psy.psyutils import PsyUtils
 from psy.progress import ProgressUpdater
+from package.logsystem import LogSystem
 
 class ProjectIngestModule(DataSourceIngestModule):
     def __init__(self, settings):
-        self._logger = Logger.getLogger("ProjectIngest")
+        # self._logger = Logger.getLogger("ProjectIngest")
         self.context = None
         self.settings = settings
         self.utils = PsyUtils()
+        logfile = os.path.join(Case.getCurrentCase().getLogDirectoryPath(), "autopsy.log.0")
+        
         
         self.app = self.settings.getSetting('app')
         self.app_id = Utils.find_package(self.settings.getSetting('app'))
@@ -37,11 +40,13 @@ class ProjectIngestModule(DataSourceIngestModule):
         #    return None
 
         m = __import__("modules.autopsy.{}".format(self.app), fromlist=[None])
-        self.module_psy = m.ModulePsy(self.app, case = Case.getCurrentCase().getSleuthkitCase(), log = self.log)
-
-    def log(self, level, msg):
+        # self.module_psy = m.ModulePsy(self.app, case = Case.getCurrentCase().getSleuthkitCase(), log = self.log)
         
-        self._logger.logp(level, self.__class__.__name__, inspect.stack()[1][3], msg)
+        self.log = LogSystem(self.app, logfile)
+        self.module_psy = m.ModulePsy(self.log)
+
+    # def log(self, level, msg):
+    #     # self._logger.logp(level, self.__class__.__name__, inspect.stack()[1][3], msg)
 
     def startUp(self, context):
         self.context = context
@@ -56,13 +61,13 @@ class ProjectIngestModule(DataSourceIngestModule):
         
     def process(self, dataSource, progressBar):
         progressBar.switchToDeterminate(100)
-        self.log(Level.INFO, str(Case.getCurrentCase().getDataSources()))
+        self.log.info(str(Case.getCurrentCase().getDataSources()))
 
         data_sources = [dataSource]
 
         if self.settings.getSetting('adb') == "true":
             progressBar.progress("Extracting from ADB", 40)
-            self.log(Level.INFO, "Starting ADB")
+            self.log.info("Starting ADB")
             extract = Extract()
             folders = extract.dump_from_adb(self.app_id)
 
@@ -74,11 +79,12 @@ class ProjectIngestModule(DataSourceIngestModule):
                     if case.getName() == datasource_name:
                         data_sources.append(case)
                         break
-
-            self.log(Level.INFO, "Ending ADB")
+            
+            self.log.info("Ending ADB")
 
         if self.settings.getSetting('clean_temp') == "true":
-            self.log(Level.INFO, "Cleaning temp folder") #TODO
+            pass
+            # self.log(Level.INFO, "Cleaning temp folder") #TODO
             # try:
             #     rmtree(os.path.join(Case.getCurrentCase().getModulesOutputDirAbsPath(), "AndroidForensics", app_name))
             # except Exception as e:

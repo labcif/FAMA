@@ -12,7 +12,6 @@ class ModuleReport(ModuleParent):
     def __init__(self, internal_path, external_path, report_path, app_name, app_id):
         ModuleParent.__init__(self, internal_path, external_path, report_path, app_name, app_id)
         self.log = LogSystem("Tiktok")
-
         self.log.info("Module started")
         
 
