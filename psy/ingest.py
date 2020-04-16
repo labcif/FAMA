@@ -2,6 +2,7 @@ import inspect
 import os
 import sys
 import json
+import logging
 from shutil import rmtree, copyfile
 from distutils.dir_util import copy_tree
 
@@ -38,14 +39,12 @@ class ProjectIngestModule(DataSourceIngestModule):
         m = __import__("modules.autopsy.{}".format(self.app), fromlist=[None])
         
         logfile = os.path.join(Case.getCurrentCase().getLogDirectoryPath(), "autopsy.log.0")
-        self.log = Utils.setup_custom_logger(logfile)
+        Utils.setup_custom_logger(logfile)
+
         self.module_psy = m.ModulePsy(self.app)
 
         self.utils.post_message("teste")
         self.utils.post_message(str(os.path.join(Case.getCurrentCase().getLogDirectoryPath(), "autopsy.log.0")))
-
-    # def log(self, level, msg):
-    #     # self._logger.logp(level, self.__class__.__name__, inspect.stack()[1][3], msg)
 
     def startUp(self, context):
         self.context = context
@@ -59,13 +58,13 @@ class ProjectIngestModule(DataSourceIngestModule):
         
     def process(self, dataSource, progressBar):
         progressBar.switchToDeterminate(100)
-        self.log.info(str(Case.getCurrentCase().getDataSources()))
+        logging.info(str(Case.getCurrentCase().getDataSources()))
 
         data_sources = [dataSource]
 
         if self.settings.getSetting('adb') == "true":
             progressBar.progress("Extracting from ADB", 40)
-            self.log.info("Starting ADB")
+            logging.info("Starting ADB")
             extract = Extract()
             folders = extract.dump_from_adb(self.app_id)
 
@@ -78,15 +77,14 @@ class ProjectIngestModule(DataSourceIngestModule):
                         data_sources.append(case)
                         break
             
-            self.log.info("Ending ADB")
+            logging.info("Ending ADB")
 
         if self.settings.getSetting('clean_temp') == "true":
             pass
-            # self.log(Level.INFO, "Cleaning temp folder") #TODO
             # try:
             #     rmtree(os.path.join(Case.getCurrentCase().getModulesOutputDirAbsPath(), "AndroidForensics", app_name))
             # except Exception as e:
-            #     self.log(Level.INFO, "REMOVE TEMPORARY FOLDER ERROR" + str(e))
+            #     logging(Level.INFO, "REMOVE TEMPORARY FOLDER ERROR" + str(e))
             # os.makedirs(os.path.join(Case.getCurrentCase().getModulesOutputDirAbsPath(), "AndroidForensics", app_name))
 
         count = 0
@@ -119,7 +117,7 @@ class ProjectIngestModule(DataSourceIngestModule):
 
         #for dump in dumps:
         #    base_path = os.path.dirname(dump.getLocalPath())
-        #    self.log(Level.INFO, "BASE_PATH" + str(base_path))
+        #    logging(Level.INFO, "BASE_PATH" + str(base_path))
         #    if not base_path in base_paths:
         #        base_paths.append(base_path)
 

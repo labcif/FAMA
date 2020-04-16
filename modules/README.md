@@ -21,6 +21,7 @@ import sys
 import json
 import os
 import tarfile
+import logging
 
 from package.database import Database
 from package.utils import Utils
@@ -29,20 +30,20 @@ from modules.report import ModuleParent
 class ModuleReport(ModuleParent):
     def __init__(self, internal_path, external_path, report_path, app_name, app_id):
         ModuleParent.__init__(self, internal_path, external_path, report_path, app_name, app_id)
-        self.log = Utils.get_logger()
         
         #THIS IS THE LOG FUNCTION
         # TO USE THE LOG FUNCTION, WE ARE USING PYTHON LOGGING PACKAGE:
         # https://github.com/python/cpython/blob/3.8/Lib/logging/__init__.py
         # EXAMPLES:
-        #self.log.info("this is a info log message")
-        #self.log.warning("this is a warning log message")
-        #self.log.critical("this is a critical log message")
-
-        self.log.info("Module started")
+        #logging.info("this is a info log message")
+        #logging.warning("this is a warning log message")
+        #logging.critical("this is a critical log message")
+        
+        logging.info("Module started")
         
         # YOU CAN USE A JSON BASED TIMELINE. IN THIS EXAMPLE WE WILL USE A SINGLE TIMELINE FOR THE ENTIRE MODULE
         self.timeline = Timeline()
+        
 
         #TODO
         #HERE IS SOME CODE THAT YOU CONSIDER NECESSARY TO INITIALIZE THE ANALYSIS MODULE.
@@ -65,14 +66,14 @@ class ModuleReport(ModuleParent):
         
         # self.report["timeline"] = self.timeline.get_sorted_timeline()
 
-        self.log.info("Report Generated")
+        logging.info("Report Generated")
 
         Utils.save_report(os.path.join(self.report_path, "Report.json"), self.report)
         return self.report
 
 
     def get_user_profile(self):
-        self.log.info("Get User Profile...")
+        logging.info("Get User Profile...")
         #TODO
         # EXAMPLE OF HOW TO ACCESS A XML FILE
         # ---------
@@ -87,7 +88,7 @@ class ModuleReport(ModuleParent):
 
 
     def get_user_messages(self):
-        self.log.info("Getting User Messages...")
+        logging.info("Getting User Messages...")
         #TODO
         
         # EXAMPLE OF HOW TO ACCESS A DATABASE
@@ -108,12 +109,12 @@ class ModuleReport(ModuleParent):
         #     self.timeline.add(message["time"], "Message sent/received!")
         #     messages_list.append(message)
         
-        # self.log.info("{} messages found".format(len(messages_list)))
+        # logging.info("{} messages found".format(len(messages_list)))
         #return messages_list
         return
 
     def get_undark_db(self):
-        self.log.info("Getting undark output...")
+        logging.info("Getting undark output...")
         # UNDARK ALLOWS YOU TO RECOVER FRAGMENTS OF LOST ROWS FROM DATABASES
 
         # return Database.get_undark_output(self.databases, self.report_path)
@@ -134,6 +135,8 @@ There are many utilities in this framework which can help you with this process,
 Inside the `/modules/autopsy` folder, create one `.py` file with the same name of the report file.
 
 ```Python
+import logging
+
 from org.sleuthkit.datamodel import BlackboardAttribute
 from org.sleuthkit.datamodel import BlackboardArtifact
 from org.sleuthkit.autopsy.casemodule.services import Blackboard
@@ -189,7 +192,7 @@ class ModulePsy(ModulePsyParent):
         # self.att_undark_output = self.utils.create_attribute_type('UNDARK_OUTPUT', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Output")
 
     def process_user_profile(self, profile, file):
-        self.log.info("Indexing user profile.")
+        logging.info("Indexing user profile.")
         if not profile:
             return
 
@@ -206,10 +209,10 @@ class ModulePsy(ModulePsyParent):
         #     self.utils.index_artifact(art, self.art_user_profile)        
         # 
         # except Exception as e:
-        #     self.log.warning("Error getting user profile: " + str(e))
+        #     logging.warning("Error getting user profile: " + str(e))
 
     def process_messages(self, messages, file):
-        self.log.info("Indexing user messages")
+        logging.info("Indexing user messages")
         if not messages:
             return
 
@@ -236,10 +239,10 @@ class ModulePsy(ModulePsyParent):
         #         self.utils.index_artifact(art, BlackboardArtifact.ARTIFACT_TYPE.TSK_MESSAGE)
         # 
         #     except Exception as e:
-        #         self.log.warning("Error getting a message: " + str(e))
+        #         logging.warning("Error getting a message: " + str(e))
 
     def process_undark(self, undarks, file):
-        self.log.info("Indexing undark output.")
+        logging.info("Indexing undark output.")
         if not undarks:
             return
         
@@ -254,7 +257,7 @@ class ModulePsy(ModulePsyParent):
         #             art.addAttributes(attributes)
         #             self.utils.index_artifact(art, self.art_undark)        
         #         except Exception as e:
-        #             self.log.warning("Error indexing undark output: " + str(e))
+        #             logging.warning("Error indexing undark output: " + str(e))
 
 ```
 

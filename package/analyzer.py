@@ -1,11 +1,11 @@
 import os
 import json
+import logging
 from package.utils import Utils
 from distutils.dir_util import copy_tree
 
 class Analyzer:
     def __init__(self, app, folder, report_folder):
-        self.log = Utils.get_logger()
         self.folder = folder
         if '.' in app:
             self.app = Utils.find_app_name(app)
@@ -32,18 +32,18 @@ class Analyzer:
 
     def generate_report(self):
         if not self.app_id:
-            self.log.critical("Module not found for application {}".format(self.app))
+            logging.critical("Module not found for application {}".format(self.app))
             return None
 
         if not self.app:
-            self.log.critical("Module not found for {} package".format(self.app_id))
+            logging.critical("Module not found for {} package".format(self.app_id))
             return None
 
         if not self.internal_path:
-            self.log.critical("No data file found for {} package".format(self.app_id))
+            logging.critical("No data file found for {} package".format(self.app_id))
             return None
 
-        self.log.info("Module {} for {}".format(self.app, self.app_id))
+        logging.info("Module {} for {}".format(self.app, self.app_id))
 
         m = __import__("modules.report.{}".format(self.app), fromlist=[None])
         module = m.ModuleReport(self.internal_path, self.external_path, self.report_path, self.app, self.app_id)
@@ -60,8 +60,7 @@ class Analyzer:
             report_path = os.path.join(output_folder, "report")
             Utils.check_and_generate_folder(report_path)
             
-        log = Utils.get_logger()
-        log.info("Generating HTML report")
+        logging.info("Generating HTML report")
 
         copy_tree(os.path.join(Utils.get_base_path_folder(), "template"), report_path)
 

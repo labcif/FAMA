@@ -3,8 +3,6 @@ import sys
 
 sys.path.append(os.path.dirname(__file__)) #include this path to module autopsy
 
-from java.util.logging import Level
-
 from org.sleuthkit.autopsy.ingest import GenericIngestModuleJobSettings
 from org.sleuthkit.autopsy.report import GeneralReportModuleAdapter
 from org.sleuthkit.autopsy.ingest import IngestModuleFactoryAdapter

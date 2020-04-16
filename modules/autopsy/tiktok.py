@@ -1,5 +1,6 @@
 import sys
 import os
+import logging
 
 from org.sleuthkit.datamodel import BlackboardAttribute
 from org.sleuthkit.autopsy.ingest import IngestModule
@@ -117,7 +118,7 @@ class ModulePsy(ModulePsyParent):
         
     def process_user_profile(self, profile, file):
         
-        self.log.info("Indexing user profile.")
+        logging.info("Indexing user profile.")
         
         if not profile:
             return
@@ -144,10 +145,10 @@ class ModulePsy(ModulePsyParent):
             art.addAttributes(attributes)
             self.utils.index_artifact(art, self.art_user_profile)        
         except Exception as e:
-            self.log.warning("Error getting user profile: " + str(e))
+            logging.warning("Error getting user profile: " + str(e))
 
     def process_messages(self, conversations, file):
-        self.log.info("Indexing user messages")
+        logging.info("Indexing user messages")
         if not conversations:
             return
 
@@ -194,11 +195,11 @@ class ModulePsy(ModulePsyParent):
                     self.utils.index_artifact(art, BlackboardArtifact.ARTIFACT_TYPE.TSK_MESSAGE)
 
                 except Exception as e:
-                    self.log.warning("Error getting a message: " + str(e))
+                    logging.warning("Error getting a message: " + str(e))
 
 
     def process_searches(self, searches, file):
-        self.log.info("Indexing user searches.")
+        logging.info("Indexing user searches.")
         if not searches:
             return
 
@@ -212,10 +213,10 @@ class ModulePsy(ModulePsyParent):
                 art.addAttributes(attributes)
                 self.utils.index_artifact(art, self.art_searches)        
             except Exception as e:
-                self.log.warning("Error getting a search entry: " + str(e))
+                logging.warning("Error getting a search entry: " + str(e))
 
     def process_undark(self, undarks, file):
-        self.log.info("Indexing undark output.")
+        logging.info("Indexing undark output.")
         if not undarks:
             return
         for database, deleted_rows in undarks.items():
@@ -228,10 +229,10 @@ class ModulePsy(ModulePsyParent):
                     art.addAttributes(attributes)
                     self.utils.index_artifact(art, self.art_undark)        
                 except Exception as e:
-                    self.log.warning("Error indexing undark output: " + str(e))
+                    logging.warning("Error indexing undark output: " + str(e))
 
     def process_users(self, users, file):
-        self.log.info("Indexing user profiles.")
+        logging.info("Indexing user profiles.")
 
         if not users:
             return
@@ -253,10 +254,10 @@ class ModulePsy(ModulePsyParent):
                 
                 self.utils.index_artifact(art, self.art_profiles)        
             except Exception as e:
-                self.log.warning("Error getting user: " + str(e))
+                logging.warning("Error getting user: " + str(e))
     
     def process_videos(self, videos, report_number, file, base_path, datasource_name):
-        self.log.info("Indexing videos.")
+        logging.info("Indexing videos.")
 
         for v in videos:
             try: 
@@ -267,13 +268,13 @@ class ModulePsy(ModulePsyParent):
                 art.addAttributes(attributes)
                 self.utils.index_artifact(art, self.art_videos)        
             except Exception as e:
-                self.log.warning("Error getting a video: " + str(e))
+                logging.warning("Error getting a video: " + str(e))
 
         path = os.path.join(base_path, "Contents", "internal", "cache", "cache")
         try:
             files = os.listdir(path)
         except:
-            self.log.warning("Report doesn't have video files.")
+            logging.warning("Report doesn't have video files.")
             return
         
         for v in files:
@@ -282,7 +283,7 @@ class ModulePsy(ModulePsyParent):
         self.utils.add_to_fileset("{}_Videos".format(datasource_name), [path])
 
     def process_published_videos(self, videos,file):
-        self.log.info("Indexing published videos.")
+        logging.info("Indexing published videos.")
         for v in videos:
             try: 
                 art = file.newArtifact(self.art_publish_videos.getTypeID())
@@ -292,10 +293,10 @@ class ModulePsy(ModulePsyParent):
                 art.addAttributes(attributes)
                 self.utils.index_artifact(art, self.art_publish_videos)        
             except Exception as e:
-                self.log.warning("Error getting a video: " + str(e))
+                logging.warning("Error getting a video: " + str(e))
 
     def process_logs(self, logs, file):
-        self.log.info("Indexing user logs")
+        logging.info("Indexing user logs")
         if not logs:
             return
 
@@ -311,4 +312,4 @@ class ModulePsy(ModulePsyParent):
                 art.addAttributes(attributes)
                 self.utils.index_artifact(art, self.art_logs)        
             except Exception as e:
-                self.log.warning("Error getting log: " + str(e))
+                logging.warning("Error getting log: " + str(e))
