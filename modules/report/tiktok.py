@@ -228,19 +228,7 @@ class ModuleReport(ModuleParent):
     
     def get_undark_db(self):
         self.log.info("Getting undark output...")
-        output = {}
-
-        for name in self.used_databases:
-            listing = []
-            undark_output = Utils.run_undark(name).decode()
-            for line in undark_output.splitlines():
-                listing.append(line)
-            
-            if listing:
-                relative_name = os.path.normpath(name.replace(self.report_path, "")) #clean complete path
-                output[relative_name] = listing
-
-        return output
+        return Database.get_undark_output(self.databases, self.report_path)
     
 
     def get_videos_publish(self):

@@ -1,4 +1,7 @@
 import sys
+import os
+from package.utils import Utils
+
 
 if sys.executable and "python" in sys.executable.lower():
     import sqlite3
@@ -45,8 +48,6 @@ class Database:
             return cursor_msg.fetchall()
     
 
-    
-    
     def execute_pragma(self):
         query = "PRAGMA table_info('%s')" % self.database
 
@@ -56,6 +57,22 @@ class Database:
         else:
             cu = self.dbConn.cursor()
             cu.execute(query)
+    
+    @staticmethod
+    def get_undark_output(databases, report_path):
+        output = {}
+
+        for name in databases:
+            listing = []
+            undark_output = Utils.run_undark(name).decode()
+            for line in undark_output.splitlines():
+                listing.append(line)
+            
+            if listing:
+                relative_name = os.path.normpath(name.replace(report_path, "")) #clean complete path
+                output[relative_name] = listing
+        return output
+
 
 
 ### OLD CODE, MAYBE USEFUL IN FUTURE???
