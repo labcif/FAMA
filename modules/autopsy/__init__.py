@@ -5,7 +5,6 @@ from psy.psyutils import PsyUtils
 
 class ModulePsyParent:
     def __init__(self, module_name):
-        self.log = Utils.get_logger()
         self.context = None
         self.case = Case.getCurrentCase().getSleuthkitCase()
         self.utils = PsyUtils()

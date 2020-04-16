@@ -2,6 +2,7 @@ import sys
 import json
 import os
 import tarfile
+import logging
 
 from package.database import Database
 from package.utils import Utils
@@ -10,8 +11,7 @@ from modules.report import ModuleParent
 class ModuleReport(ModuleParent):
     def __init__(self, internal_path, external_path, report_path, app_name, app_id):
         ModuleParent.__init__(self, internal_path, external_path, report_path, app_name, app_id)
-        self.log = Utils.get_logger()
-        self.log.info("Module started")
+        logging.info("Module started")
     
     def generate_report(self):
 
@@ -24,14 +24,14 @@ class ModuleReport(ModuleParent):
         self.report["freespace"] = self.get_undark_db()
         self.report["log"] = self.get_last_session()
 
-        self.log.info("Report Generated")
+        logging.info("Report Generated")
 
         Utils.save_report(os.path.join(self.report_path, "Report.json"), self.report)
         return self.report
 
     #TIKTOK
     def get_user_messages(self):
-        self.log.info("Getting User Messages...")
+        logging.info("Getting User Messages...")
         
         # db1 = os.path.join(self.internal_cache_path, "databases", "db_im_xx")
         # db2 = None
@@ -104,7 +104,7 @@ class ModuleReport(ModuleParent):
             #adding conversation and participants information to main array
             conversations_list.append(conversation_output)
 
-        self.log.info("{} messages found".format(len(conversation_output.get("messages"))))
+        logging.info("{} messages found".format(len(conversation_output.get("messages"))))
 
         if not db1 in self.used_databases:
             self.used_databases.append(db1)
@@ -116,7 +116,7 @@ class ModuleReport(ModuleParent):
 
     def get_user_profile(self):
         
-        self.log.info("Get User Profile...")
+        logging.info("Get User Profile...")
         xml_file = os.path.join(self.internal_cache_path, "shared_prefs", "aweme_user.xml")
         user_profile ={}
         values = Utils.xml_attribute_finder(xml_file)
@@ -153,7 +153,7 @@ class ModuleReport(ModuleParent):
 
 
     def get_user_searches(self):
-        self.log.info("Getting User Search History...")
+        logging.info("Getting User Search History...")
         
         xml_file = os.path.join(self.internal_cache_path, "shared_prefs", "search.xml")
         searches = []
@@ -164,12 +164,12 @@ class ModuleReport(ModuleParent):
         except:
             pass
 
-        self.log.info("{} search entrys found".format(len(searches)))
+        logging.info("{} search entrys found".format(len(searches)))
         return searches
 
 
     def get_user_profiles(self):
-        self.log.info("Getting User Profiles...")
+        logging.info("Getting User Profiles...")
         profiles = {}
 
         db = os.path.join(self.internal_cache_path, "databases", "db_im_xx")
@@ -190,7 +190,7 @@ class ModuleReport(ModuleParent):
         if not db in self.used_databases:
             self.used_databases.append(db)
 
-        self.log.info("{} profiles found".format(len(profiles.keys())))
+        logging.info("{} profiles found".format(len(profiles.keys())))
         return profiles
 
     def get_user_id(self):
@@ -198,7 +198,7 @@ class ModuleReport(ModuleParent):
         return Utils.xml_attribute_finder(xml_file, "userid")["userid"]
 
     def get_videos(self):
-        self.log.info("Getting Videos...")
+        logging.info("Getting Videos...")
         videos = []
         db = os.path.join(self.internal_cache_path, "databases", "video.db")
 
@@ -220,16 +220,16 @@ class ModuleReport(ModuleParent):
         if not db in self.used_databases:
             self.used_databases.append(db)
 
-        self.log.info("{} video(s) found".format(len(videos)))
+        logging.info("{} video(s) found".format(len(videos)))
         return videos
     
     def get_undark_db(self):
-        self.log.info("Getting undark output...")
+        logging.info("Getting undark output...")
         return Database.get_undark_output(self.databases, self.report_path)
     
 
     def get_videos_publish(self):
-        self.log.info("Getting published videos")
+        logging.info("Getting published videos")
         videos = []
         base_path = os.path.join(self.internal_cache_path, "cache", "aweme_publish")
         aweme_publish_files = os.listdir(base_path)
@@ -244,13 +244,13 @@ class ModuleReport(ModuleParent):
                     video["video"] = entry.get("video").get("animated_cover").get("url_list")[0]
                     videos.append(video)
     
-        self.log.info("{} video(s) found".format(len(videos)))
+        logging.info("{} video(s) found".format(len(videos)))
         return videos
 
 
     
     def get_last_session(self):
-        self.log.info("Getting last session...")
+        logging.info("Getting last session...")
         session = []
 
         relevant_keys = ["page", "request_method", "is_first","duration","is_first","rip","duration","author_id","access2","video_duration","video_quality","access",
@@ -278,6 +278,6 @@ class ModuleReport(ModuleParent):
             
             session_entry["body"] =body
 
-        self.log.info("{} entrys found".format(len(results)))
+        logging.info("{} entrys found".format(len(results)))
         return session
 

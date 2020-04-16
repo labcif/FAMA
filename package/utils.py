@@ -135,7 +135,7 @@ class Utils:
                 with open(file, "rb") as f:
                     header = f.read(32)
             except Exception as e:
-                Utils.get_logger().warning(str(e))
+                logging.warning(str(e))
 
         query = header.find(header_type) #query includes position of header
 
@@ -234,22 +234,17 @@ class Utils:
     
     @staticmethod
     def setup_custom_logger(logfile="module.log"):
+        formatting = '[%(asctime)s] %(levelname)s [%(module)s] - %(message)s'
 
-        file_handler = logging.FileHandler(filename=logfile)
-        stdout_handler = logging.StreamHandler(sys.stdout)
-        handlers = [file_handler, stdout_handler]
+        #FILE HANDLER
+        logging.basicConfig(level=logging.DEBUG, format=formatting, filemode='a', filename=logfile)
 
-        # logging.basicConfig(level=logging.DEBUG, format='[%(asctime)s] {%(filename)s:%(lineno)d} %(levelname)s - %(message)s', handlers=handlers)
-        logging.basicConfig(level=logging.DEBUG, format='[%(asctime)s] %(levelname)s [%(module)s] - %(message)s', handlers=handlers)
+        #STREAM HANDLER
+        console = logging.StreamHandler()
+        console.setLevel(logging.DEBUG)
+        console.setFormatter(logging.Formatter(formatting))
+        logging.getLogger().addHandler(console)
 
+        #logging.basicConfig(level=logging.DEBUG, format='[%(asctime)s] %(levelname)s [%(module)s] - %(message)s', handlers=[logging.FileHandler(logfile, mode='a'), logging.StreamHandler(sys.stdout)])
 
-
-        return Utils.get_logger()
-    
-    @staticmethod
-    def get_logger():
-        return logging.getLogger()
-    
         
-
-
