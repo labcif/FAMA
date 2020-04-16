@@ -11,7 +11,8 @@ import tarfile
 import json
 import time
 import re
-from package.logsystem import LogSystem
+import logging
+
 
 #from meaning.meaning import Meaning
 
@@ -134,7 +135,7 @@ class Utils:
                 with open(file, "rb") as f:
                     header = f.read(32)
             except Exception as e:
-                LogSystem("extract").warning(str(e))
+                Utils.get_logger().warning(str(e))
 
         query = header.find(header_type) #query includes position of header
 
@@ -222,3 +223,33 @@ class Utils:
         f = open(report_name, "w")
         f.write(json.dumps(contents, indent=2))
         f.close()
+    
+    @staticmethod
+    def date_parser(date, format):
+        #python2 suppport
+        try:
+            return int(time.mktime(datetime.datetime.strptime(date,format).timetuple()))
+        except:
+            return 0
+    
+    @staticmethod
+    def setup_custom_logger(logfile="module.log"):
+
+        file_handler = logging.FileHandler(filename=logfile)
+        stdout_handler = logging.StreamHandler(sys.stdout)
+        handlers = [file_handler, stdout_handler]
+
+        # logging.basicConfig(level=logging.DEBUG, format='[%(asctime)s] {%(filename)s:%(lineno)d} %(levelname)s - %(message)s', handlers=handlers)
+        logging.basicConfig(level=logging.DEBUG, format='[%(asctime)s] %(levelname)s [%(module)s] - %(message)s', handlers=handlers)
+
+
+
+        return Utils.get_logger()
+    
+    @staticmethod
+    def get_logger():
+        return logging.getLogger()
+    
+        
+
+

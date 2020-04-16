@@ -5,13 +5,12 @@ import tarfile
 
 from package.database import Database
 from package.utils import Utils
-from package.logsystem import LogSystem
 from modules.report import ModuleParent
 
 class ModuleReport(ModuleParent):
     def __init__(self, internal_path, external_path, report_path, app_name, app_id):
         ModuleParent.__init__(self, internal_path, external_path, report_path, app_name, app_id)
-        self.log = LogSystem("Tiktok")
+        self.log = Utils.get_logger()
         self.log.info("Module started")
         
 
@@ -69,7 +68,7 @@ class ModuleReport(ModuleParent):
             conversation_output["messages"] = []
             
             #messages from conversations
-            messages_list = database.execute_query("select datetime(created_time/1000, 'unixepoch', 'localtime') as created_time, content as message, case when read_status = 0 then 'Not read' when read_status = 1 then 'Read' else read_status end read_not_read, local_info, type, case when deleted = 0 then 'Not deleted' when deleted = 1 then 'Deleted' else deleted end, sender from msg where conversation_id='{}' order by created_time;".format(conversation[0]))
+            messages_list = database.execute_query("select created_time/1000 as created_time, content as message, case when read_status = 0 then 'Not read' when read_status = 1 then 'Read' else read_status end read_not_read, local_info, type, case when deleted = 0 then 'Not deleted' when deleted = 1 then 'Deleted' else deleted end, sender from msg where conversation_id='{}' order by created_time;".format(conversation[0]))
             
             #getting messages from conversations
             for entry in messages_list:
@@ -216,7 +215,7 @@ class ModuleReport(ModuleParent):
             
             for line in dump["responseHeaders"].splitlines():
                 if 'Last-Modified:' in line:
-                    video["last_modified"] = line.split(": ")[1]
+                    video["last_modified"] = Utils.date_parser(line.split(": ")[1], "%a, %d %b %Y %H:%M:%S %Z")
                     break
             videos.append(video)
             #self.access_path_file(self.internal_path, "./cache/cache/{}".format(entry[0]))
@@ -282,7 +281,7 @@ class ModuleReport(ModuleParent):
             session_entry["action"] = entry[0]
             
             body_dump = json.loads(entry[1])
-            session_entry["time"] = entry[2]
+            session_entry["time"] = Utils.date_parser(entry[2], "%Y-%m-%d %H:%M:%S")
             session_entry["session_id"] = entry[3]
             session.append(session_entry)
 

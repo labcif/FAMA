@@ -20,7 +20,6 @@ from package.utils import Utils
 
 from psy.psyutils import PsyUtils
 from psy.progress import ProgressUpdater
-from package.logsystem import LogSystem
 
 class ProjectIngestModule(DataSourceIngestModule):
     def __init__(self, settings):
@@ -28,7 +27,8 @@ class ProjectIngestModule(DataSourceIngestModule):
         self.context = None
         self.settings = settings
         self.utils = PsyUtils()
-        logfile = os.path.join(Case.getCurrentCase().getLogDirectoryPath(), "autopsy.log.0")
+
+        
         
         
         self.app = self.settings.getSetting('app')
@@ -42,8 +42,12 @@ class ProjectIngestModule(DataSourceIngestModule):
         m = __import__("modules.autopsy.{}".format(self.app), fromlist=[None])
         # self.module_psy = m.ModulePsy(self.app, case = Case.getCurrentCase().getSleuthkitCase(), log = self.log)
         
-        self.log = LogSystem(self.app, logfile)
-        self.module_psy = m.ModulePsy(self.log)
+        logfile = os.path.join(Case.getCurrentCase().getLogDirectoryPath(), "autopsy.log.0")
+        self.log = Utils.setup_custom_logger(logfile)
+        self.module_psy = m.ModulePsy()
+
+        self.utils.post_message("teste")
+        self.utils.post_message(str(os.path.join(Case.getCurrentCase().getLogDirectoryPath(), "autopsy.log.0")))
 
     # def log(self, level, msg):
     #     # self._logger.logp(level, self.__class__.__name__, inspect.stack()[1][3], msg)
@@ -54,7 +58,6 @@ class ProjectIngestModule(DataSourceIngestModule):
 
         self.temp_module_path = os.path.join(Case.getCurrentCase().getModulesOutputDirAbsPath(), "AndroidForensics")
         Utils.check_and_generate_folder(self.temp_module_path)
-
         self.tempDirectory = os.path.join(self.temp_module_path, self.app_id)
 
         self.fileManager = Case.getCurrentCase().getServices().getFileManager()
@@ -171,8 +174,7 @@ class ProjectIngestModule(DataSourceIngestModule):
             self.module_psy.process_report(dataSource.getName(), report["file"], number_of_reports, report["report"])
             
         # After all reports, post a message to the ingest messages in box.
-        message = IngestMessage.createMessage(IngestMessage.MessageType.DATA, "Forensics Analyzer", "Found %d files" % fileCount)
-        IngestServices.getInstance().postMessage(message)
+        
 
         return IngestModule.ProcessResult.OK
 

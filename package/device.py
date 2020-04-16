@@ -1,12 +1,11 @@
 import subprocess
 
 from package.utils import Utils
-from package.logsystem import LogSystem
 
 class DeviceCommunication:
     def __init__(self):
         self.devices = []
-        self.log = LogSystem("adb")
+        self.log = Utils.get_logger()
 
     def list_devices(self):
         self.log.info("Getting list of devices")

@@ -17,8 +17,8 @@ from package.utils import Utils
 from psy.psyutils import PsyUtils
 
 class ModulePsy:
-    def __init__(self, log):
-        self.log = log
+    def __init__(self):
+        self.log = Utils.get_logger()
         self.case = Case.getCurrentCase().getSleuthkitCase()
         self.context = None
         self.module_name = "Tiktok:"
@@ -54,7 +54,7 @@ class ModulePsy:
         # self.att_msg_uid = self.utils.create_attribute_type('TIKTOK_MSG_UID', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Uid", self.case)
         # self.att_msg_uniqueid = self.utils.create_attribute_type('TIKTOK_MSG_UNIQUE_ID', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Unique ID", self.case)
         # self.att_msg_nickname = self.utils.create_attribute_type('TIKTOK_MSG_NICKNAME', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Nickname", self.case)
-        self.att_msg_created_time = self.utils.create_attribute_type('TIKTOK_MSG_CREATED_TIME', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Created Time")
+        self.att_msg_created_time = self.utils.create_attribute_type('TIKTOK_MSG_CREATED_TIME', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.DATETIME, "Created Time")
         self.att_msg_participant_1 = self.utils.create_attribute_type('TIKTOK_MSG_PARTICIPANT_1', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Participant 1")
         self.att_msg_participant_2 = self.utils.create_attribute_type('TIKTOK_MSG_PARTICIPANT_2', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Participant 2")
         self.att_msg_message = self.utils.create_attribute_type('TIKTOK_MSG_MESSAGE', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Message")
@@ -74,7 +74,7 @@ class ModulePsy:
         # self.att_prf_is_blocked = self.utils.create_attribute_type('TIKTOK_PROFILE_IS_BLOCKED', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.BYTE, "Is Blocked", self.case)
         # self.att_prf_is_minor = self.utils.create_attribute_type('TIKTOK_PROFILE_IS_MINOR', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.BYTE, "Is Minor", self.case)
         self.att_prf_nickname = self.utils.create_attribute_type('TIKTOK_PROFILE_NICKNAME', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Nickname")
-        self.att_prf_register_time = self.utils.create_attribute_type('TIKTOK_PROFILE_REGISTER_TIME', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.LONG, "Register Time")
+        self.att_prf_register_time = self.utils.create_attribute_type('TIKTOK_PROFILE_REGISTER_TIME', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.DATETIME, "Register Time")
         self.att_prf_sec_uid = self.utils.create_attribute_type('TIKTOK_PROFILE_SEC_UID', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Sec. UID")
         self.att_prf_short_id = self.utils.create_attribute_type('TIKTOK_PROFILE_SHORT_ID', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Short ID")
         self.att_prf_uid = self.utils.create_attribute_type('TIKTOK_PROFILE_UID', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "UID")
@@ -92,18 +92,18 @@ class ModulePsy:
         #videos
 
         self.att_vid_key = self.utils.create_attribute_type('TIKTOK_VIDEO_KEY', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Key")
-        self.att_vid_last_modified = self.utils.create_attribute_type('TIKTOK_VIDEO_LAST_MODIFIED', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Last Modified")
+        self.att_vid_last_modified = self.utils.create_attribute_type('TIKTOK_VIDEO_LAST_MODIFIED', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.DATETIME, "Last Modified")
 
         #published videos
 
-        self.att_publish_vid_created_time = self.utils.create_attribute_type('TIKTOK_PUBLISH_VIDEOS_CREATED_TIME', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.LONG, "Created TIme")
+        self.att_publish_vid_created_time = self.utils.create_attribute_type('TIKTOK_PUBLISH_VIDEOS_CREATED_TIME', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.DATETIME, "Created TIme")
         self.att_publish_vid_url = self.utils.create_attribute_type('TIKTOK_PUBLISH_VIDEOS_URL', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Url")
 
 
 
         #logs
 
-        self.att_log_time = self.utils.create_attribute_type('TIKTOK_LOGS_TIME', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Time")
+        self.att_log_time = self.utils.create_attribute_type('TIKTOK_LOGS_TIME', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.DATETIME, "Time")
         self.att_log_session = self.utils.create_attribute_type('TIKTOK_LOGS_SESSION_ID', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.LONG, "Session ID")
         self.att_log_action = self.utils.create_attribute_type('TIKTOK_LOGS_ACTION', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Action")
         self.att_log_body = self.utils.create_attribute_type('TIKTOK_LOGS_BODY', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Body")
@@ -125,10 +125,11 @@ class ModulePsy:
         self.art_searches = self.utils.create_artifact_type(self.module_name, "TIKTOK_SEARCHES","Search")
         self.art_videos = self.utils.create_artifact_type(self.module_name, "TIKTOK_VIDEOS", "Videos")
         self.art_publish_videos = self.utils.create_artifact_type(self.module_name, "TIKTOK_PUBLISH_VIDEOS", "Publish Videos")
-        self.art_undark = self.utils.create_artifact_type(self.module_name, "TIKTOK_UNDARK", "Undark")
-        self.art_logs = self.utils.create_artifact_type(self.module_name, "TIKTOK_LOGS", "LOGS")
+        self.art_undark = self.utils.create_artifact_type(self.module_name, "TIKTOK_UNDARK", "Deleted rows")
+        self.art_logs = self.utils.create_artifact_type(self.module_name, "TIKTOK_LOGS", "Logs")
         
 
+        
     def process_user_profile(self, profile, file):
         
         self.log.info("Indexing user profile.")
@@ -179,8 +180,8 @@ class ModulePsy:
                     # art = file.newArtifact(self.art_messages.getTypeID())
                     art = file.newArtifact(BlackboardArtifact.ARTIFACT_TYPE.TSK_MESSAGE)
 
-                    #SUBSTITUIR POR TIMESTAMP VINDO DO SCRIPT!!!  #TODO
-                    m["createdtime"] = 1586873049
+
+                    
                     
                     # attributes.append(BlackboardAttribute(self.att_msg_participant_1, self.module_name, participant_1))
                     # attributes.append(BlackboardAttribute(self.att_msg_participant_2, self.module_name, participant_2))
@@ -212,7 +213,7 @@ class ModulePsy:
 
 
     def process_searches(self, searches, file):
-        self.log.info("Indexing user seraches.")
+        self.log.info("Indexing user searches.")
         if not searches:
             return
 
@@ -232,17 +233,17 @@ class ModulePsy:
         self.log.info("Indexing undark output.")
         if not undarks:
             return
-
-        for database, row in undarks.items():
-            try: 
-                art = file.newArtifact(self.art_undark.getTypeID())
-                attributes = []
-                attributes.append(BlackboardAttribute(self.att_undark_key, database, database))
-                attributes.append(BlackboardAttribute(self.att_undark_output, "undark", row))
-                art.addAttributes(attributes)
-                self.utils.index_artifact(art, self.art_undark)        
-            except Exception as e:
-                self.log.warning("Error indexing undark output: " + str(e))
+        for database, deleted_rows in undarks.items():
+            for row in deleted_rows:
+                try: 
+                    art = file.newArtifact(self.art_undark.getTypeID())
+                    attributes = []
+                    attributes.append(BlackboardAttribute(self.att_undark_key, database, database))
+                    attributes.append(BlackboardAttribute(self.att_undark_output, database, row))
+                    art.addAttributes(attributes)
+                    self.utils.index_artifact(art, self.art_undark)        
+                except Exception as e:
+                    self.log.warning("Error indexing undark output: " + str(e))
 
     def process_users(self, users, file):
         self.log.info("Indexing user profiles.")

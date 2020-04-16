@@ -8,19 +8,30 @@ from org.sleuthkit.autopsy.casemodule.services import Blackboard
 from org.sleuthkit.autopsy.ingest import ModuleDataEvent
 from org.sleuthkit.autopsy.ingest import IngestServices
 from org.sleuthkit.datamodel import BlackboardAttribute
+from org.sleuthkit.autopsy.ingest import IngestMessage
+from org.sleuthkit.autopsy.ingest import IngestServices
+from package.utils import Utils
 
 
 from psy.progress import ProgressUpdater
 
 class PsyUtils:
     def __init__(self):
-        self._logger = Logger.getLogger("Ingest Logger")
+        self.log = Utils.get_logger()
+        return
+    #     self._logger = Logger.getLogger("Ingest Logger")
         
 
         
 
-    def log(self, level, msg):
-        self._logger.logp(level, self.__class__.__name__, inspect.stack()[1][3], msg)
+    # def log(self, level, msg):
+    #     self._logger.logp(level, self.__class__.__name__, inspect.stack()[1][3], msg)
+    
+    @staticmethod
+    def post_message(msg):
+        IngestServices.getInstance().postMessage(IngestMessage.createMessage(IngestMessage.MessageType.DATA, "Forensics Analyzer", msg))
+
+
 
     @staticmethod
     def add_to_fileset(name, folder, device_id = UUID.randomUUID()):
@@ -42,16 +53,15 @@ class PsyUtils:
         try:
             Case.getCurrentCase().getSleuthkitCase().addArtifactAttributeType(att_name, type, att_desc)
         except:
-            self.log(Level.INFO, "[Project] Error creating attribute type: " + att_desc)
+            self.log.warning("Error creating attribute type: " + att_desc)
         return Case.getCurrentCase().getSleuthkitCase().getAttributeType(att_name)
     
     def create_artifact_type(self, base_name, art_name, art_desc):
-
         
         try:
             Case.getCurrentCase().getSleuthkitCase().addBlackboardArtifactType(art_name, base_name.capitalize() + art_desc)
         except:
-            self.log(Level.INFO, "[Project]  Error creating artifact type: " + art_desc)
+            self.log.warning("Error creating artifact type: " + art_desc)
         art = Case.getCurrentCase().getSleuthkitCase().getArtifactType(art_name)
         return art
     

@@ -1,13 +1,11 @@
 import os
 import json
 from package.utils import Utils
-from package.logsystem import LogSystem
-
 from distutils.dir_util import copy_tree
 
 class Analyzer:
     def __init__(self, app, folder, report_folder):
-        self.log = LogSystem("analyser")
+        self.log = Utils.get_logger()
         self.folder = folder
         if '.' in app:
             self.app = Utils.find_app_name(app)
@@ -62,7 +60,7 @@ class Analyzer:
             report_path = os.path.join(output_folder, "report")
             Utils.check_and_generate_folder(report_path)
             
-        log = LogSystem("analyser")
+        log = Utils.get_logger()
         log.info("Generating HTML report")
 
         copy_tree(os.path.join(Utils.get_base_path_folder(), "template"), report_path)

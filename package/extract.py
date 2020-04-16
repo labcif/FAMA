@@ -5,11 +5,10 @@ import sys
 
 from package.utils import Utils
 from package.device import DeviceCommunication
-from package.logsystem import LogSystem
 
 class Extract:
     def __init__(self):
-        self.log = LogSystem("Extract")
+        self.log = Utils.get_logger()
 
         self.internal_data_path = "/data/data/{}"
         self.external_data_path = "/sdcard/Android/data/{}"
