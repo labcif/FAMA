@@ -23,14 +23,10 @@ from psy.progress import ProgressUpdater
 
 class ProjectIngestModule(DataSourceIngestModule):
     def __init__(self, settings):
-        # self._logger = Logger.getLogger("ProjectIngest")
         self.context = None
         self.settings = settings
         self.utils = PsyUtils()
 
-        
-        
-        
         self.app = self.settings.getSetting('app')
         self.app_id = Utils.find_package(self.settings.getSetting('app'))
         
@@ -40,11 +36,10 @@ class ProjectIngestModule(DataSourceIngestModule):
         #    return None
 
         m = __import__("modules.autopsy.{}".format(self.app), fromlist=[None])
-        # self.module_psy = m.ModulePsy(self.app, case = Case.getCurrentCase().getSleuthkitCase(), log = self.log)
         
         logfile = os.path.join(Case.getCurrentCase().getLogDirectoryPath(), "autopsy.log.0")
         self.log = Utils.setup_custom_logger(logfile)
-        self.module_psy = m.ModulePsy()
+        self.module_psy = m.ModulePsy(self.app)
 
         self.utils.post_message("teste")
         self.utils.post_message(str(os.path.join(Case.getCurrentCase().getLogDirectoryPath(), "autopsy.log.0")))
