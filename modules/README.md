@@ -40,6 +40,9 @@ class ModuleReport(ModuleParent):
         #self.log.critical("this is a critical log message")
 
         self.log.info("Module started")
+        
+        # YOU CAN USE A JSON BASED TIMELINE. IN THIS EXAMPLE WE WILL USE A SINGLE TIMELINE FOR THE ENTIRE MODULE
+        self.timeline = Timeline()
 
         #TODO
         #HERE IS SOME CODE THAT YOU CONSIDER NECESSARY TO INITIALIZE THE ANALYSIS MODULE.
@@ -56,6 +59,11 @@ class ModuleReport(ModuleParent):
         # self.report["profile"] = self.get_user_profile()
         # self.report["messages"] = self.get_user_messages()
         # self.report["freespace"] = self.get_undark_db()
+        
+        # ALWAYS CALL THE get_sorted_timeline FUNCTION TO ENSURE THAT THE TIMELINE IS RIGHT
+        # YOU CAN PASS THE ARGUMENT "True" IF YOU WANT THE TIMELINE INVERTED
+        
+        # self.report["timeline"] = self.timeline.get_sorted_timeline()
 
         self.log.info("Report Generated")
 
@@ -93,6 +101,11 @@ class ModuleReport(ModuleParent):
         #     message["receiver"] = entry[1]
         #     message["message"] = entry[2]
         #     message["time"] = entry[3]
+
+        # TO ADD CONTENT TO TIMELINE, WE CALL THE ADD FUNCTION
+        # FIRST PARAMETER MUST BE A TIMESTAMP, AND THE SECOND THE CONTENT TO BE ADDED (CAN BE AN OBJECT)
+
+        #     self.timeline.add(message["time"], "Message sent/received!")
         #     messages_list.append(message)
         
         # self.log.info("{} messages found".format(len(messages_list)))
