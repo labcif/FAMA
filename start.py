@@ -1,18 +1,18 @@
 import argparse
 import os
 import sys
+import logging
 
 from package.extract import Extract
 from package.analyzer import Analyzer
 from package.utils import Utils
-from package.logsystem import LogSystem
 
 #python3 start.py tiktok --path "/Users/Nogueira/Desktop/Projeto/ExemploMount" --adb
 #python3 start.py tiktok --dump 20200307_215555 20200307_201252
 
 def start(args):
-    log = LogSystem("app")
-    log.info("Starting")    
+    Utils.setup_custom_logger()
+    logging.info("Starting")    
     
     extract = Extract()
     folders = []
@@ -24,7 +24,7 @@ def start(args):
             if os.path.exists(dump_path):
                 folders.append(dump_path)
             else:
-                log.warning("Invalid dump name: {}. Ignoring".format(dump))
+                logging.warning("Invalid dump name: {}. Ignoring".format(dump))
 
     if args.path:
         folders.extend(extract.dump_from_path(args.path, args.app))
@@ -49,7 +49,7 @@ def start(args):
         if args.html:
             analyzer.generate_html_report(report, args.output)
 
-    log.info("Done")
+    logging.info("Done")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Forensics Artefacts Analyzer')

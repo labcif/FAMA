@@ -1,25 +1,19 @@
 import inspect
 import os
 import json
+import logging
 
 from distutils.dir_util import copy_tree
 
 from package.utils import Utils
 from package.analyzer import Analyzer
 
-from java.util.logging import Level
 from org.sleuthkit.autopsy.casemodule import Case
 from org.sleuthkit.autopsy.report.ReportProgressPanel import ReportStatus
 
 class ReportOutput:
-    def __init__(self):
-        self._logger = Logger.getLogger("ProjectIngestReport")
-
-    def log(self, level, msg):
-        self._logger.logp(level, self.__class__.__name__, inspect.stack()[1][3], msg)
-    
     def generateReport(self, baseReportDir, progressBar):
-        self.log(Level.INFO, "Starting Report Module")
+        logging.info("Starting Report Module")
         progressBar.setIndeterminate(True)
 
         self.fileManager = Case.getCurrentCase().getServices().getFileManager()
@@ -38,7 +32,7 @@ class ReportOutput:
         for app_directory in os.listdir(self.tempDirectory):
             for app_report in os.listdir(os.path.join(self.tempDirectory, app_directory)):
                 report = os.path.join(self.tempDirectory, app_directory, app_report, "report", "Report.json")
-                self.log(Level.INFO, str(report))
+                logging.info(str(report))
                 if os.path.exists(report):
                     self.reports["Report_{}".format(app_report)] = Utils.read_json(report)
 

@@ -102,7 +102,7 @@ class Utils:
                 with open(file, "rb") as f:
                     header = f.read(32)
             except Exception as e:
-                LogSystem("extract").warning(str(e))
+                logging.warning(str(e))
 
         query = header.find(header_type) #query includes position of header
 
@@ -176,7 +176,7 @@ class Utils:
 
     @staticmethod
     def remove_folder(folder):
-        shutil.rmtree(folder)
+        shutil.rmtree(folder, ignore_errors=True)
 
     @staticmethod
     def read_json(path):

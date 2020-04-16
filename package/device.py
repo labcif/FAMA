@@ -1,15 +1,14 @@
 import subprocess
+import logging
 
 from package.utils import Utils
-from package.logsystem import LogSystem
 
 class DeviceCommunication:
     def __init__(self):
         self.devices = []
-        self.log = LogSystem("adb")
 
     def list_devices(self):
-        self.log.info("Getting list of devices")
+        logging.info("Getting list of devices")
         adb_location = Utils.get_adb_location()
         command = """{} devices""".format(adb_location)
         info = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE).stdout.read()
@@ -26,7 +25,7 @@ class DeviceCommunication:
                 continue
             
             if '\tunauthorized' in device:
-                self.log.warning("{} unauthorized. Trust this device. Ignoring...".format(device_serial))
+                logging.warning("{} unauthorized. Trust this device. Ignoring...".format(device_serial))
                 continue
 
             devices.append(device_serial)
@@ -35,7 +34,7 @@ class DeviceCommunication:
         if (len(devices) != 1):
             message += "s"
             
-        self.log.info("{}".format(message))
+        logging.info("{}".format(message))
         return devices
 
 

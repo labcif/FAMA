@@ -1,40 +1,39 @@
 import json
 import os
+import tarfile
 import logging
 
 from package.database import Database
 from package.utils import Utils
-from package.logsystem import LogSystem
+from package.timeline import Timeline
 from modules.report import ModuleParent
 
 class ModuleReport(ModuleParent):
     def __init__(self, internal_path, external_path, report_path, app_name, app_id):
         ModuleParent.__init__(self, internal_path, external_path, report_path, app_name, app_id)
-        self.log = LogSystem("Tiktok")
-        self.log.info("Module started")
-        
 
-        
+        self.timeline = Timeline()
+        logging.info("Module started")
     
     def generate_report(self):
-
+        self.report["freespace"] = self.get_undark_db()
         self.report["profile"] = self.get_user_profile()
         self.report["messages"] = self.get_user_messages()
         self.report["users"] = self.get_user_profiles()
         self.report["searches"] = self.get_user_searches()
         self.report["videos"] = self.get_videos()
         self.report["published_videos"] = self.get_videos_publish()
-        self.report["freespace"] = self.get_undark_db()
         self.report["log"] = self.get_last_session()
+        self.report["timeline"] = self.timeline.get_sorted_timeline()
 
-        self.log.info("Report Generated")
+        logging.info("Report Generated")
 
         Utils.save_report(os.path.join(self.report_path, "Report.json"), self.report)
         return self.report
 
     #TIKTOK
     def get_user_messages(self):
-        self.log.info("Getting User Messages...")
+        logging.info("Getting User Messages...")
         
         # db1 = os.path.join(self.internal_cache_path, "databases", "db_im_xx")
         # db2 = None
@@ -68,7 +67,7 @@ class ModuleReport(ModuleParent):
             conversation_output["messages"] = []
             
             #messages from conversations
-            messages_list = database.execute_query("select datetime(created_time/1000, 'unixepoch', 'localtime') as created_time, content as message, case when read_status = 0 then 'Not read' when read_status = 1 then 'Read' else read_status end read_not_read, local_info, type, case when deleted = 0 then 'Not deleted' when deleted = 1 then 'Deleted' else deleted end, sender from msg where conversation_id='{}' order by created_time;".format(conversation[0]))
+            messages_list = database.execute_query("select created_time/1000 as created_time, content as message, case when read_status = 0 then 'Not read' when read_status = 1 then 'Read' else read_status end read_not_read, local_info, type, case when deleted = 0 then 'Not deleted' when deleted = 1 then 'Deleted' else deleted end, sender from msg where conversation_id='{}' order by created_time;".format(conversation[0]))
             
             #getting messages from conversations
             for entry in messages_list:
@@ -78,8 +77,10 @@ class ModuleReport(ModuleParent):
                 message["localinfo"] = entry[3]
                 if entry[6] == int(id1):
                     message["sender"] = conversation_output["participant_1"]
+                    message["receiver"] = conversation_output["participant_2"]
                 else:
                     message["sender"] = conversation_output["participant_2"]
+                    message["receiver"] = conversation_output["participant_1"]
                 message_type = entry[4]
 
                 message_dump = json.loads(entry[1])
@@ -103,23 +104,24 @@ class ModuleReport(ModuleParent):
                 message["message"] = body
                 message["deleted"] = str(entry[5])
                 conversation_output["messages"].append(message)
+
+                timeline_event = {}
+                timeline_event["event"]= "Message"
+                timeline_event["from"]= message["sender"]
+                timeline_event["to"]= message["receiver"]
+                timeline_event["message"]= message["message"]
+                self.timeline.add(message["createdtime"], timeline_event)
             
             #adding conversation and participants information to main array
             conversations_list.append(conversation_output)
 
-        self.log.info("{} messages found".format(len(conversation_output.get("messages"))))
-
-        if not db1 in self.used_databases:
-            self.used_databases.append(db1)
-        
-        # if not db2 in self.used_databases:
-        #     self.used_databases.append(db2)
+        logging.info("{} messages found".format(len(conversation_output.get("messages"))))
 
         return conversations_list
 
     def get_user_profile(self):
         
-        self.log.info("Get User Profile...")
+        logging.info("Get User Profile...")
         xml_file = os.path.join(self.internal_cache_path, "shared_prefs", "aweme_user.xml")
         user_profile ={}
         values = Utils.xml_attribute_finder(xml_file)
@@ -134,7 +136,15 @@ class ModuleReport(ModuleParent):
                 break
             
         user_profile["url"] = "https://www.tiktok.com/@{}".format(user_profile["unique_id"])
+        
+        
+        timeline_event = {}
+        timeline_event["event"]= "User resgistration"
+        timeline_event["uniqueid"] = user_profile["unique_id"] 
+        timeline_event["url"]= user_profile["url"]
 
+        self.timeline.add(user_profile["register_time"], timeline_event)
+        
         return user_profile
     
     def get_user_uniqueid_by_id(self, uid):
@@ -148,7 +158,7 @@ class ModuleReport(ModuleParent):
         return name
         
     def get_user_searches(self):
-        self.log.info("Getting User Search History...")
+        logging.info("Getting User Search History...")
         
         xml_file = os.path.join(self.internal_cache_path, "shared_prefs", "search.xml")
         searches = []
@@ -159,12 +169,12 @@ class ModuleReport(ModuleParent):
         except:
             pass
 
-        self.log.info("{} search entrys found".format(len(searches)))
+        logging.info("{} search entrys found".format(len(searches)))
         return searches
 
 
     def get_user_profiles(self):
-        self.log.info("Getting User Profiles...")
+        logging.info("Getting User Profiles...")
         profiles = {}
 
         db = os.path.join(self.internal_cache_path, "databases", "db_im_xx")
@@ -182,10 +192,7 @@ class ModuleReport(ModuleParent):
             message["url"] = "https://www.tiktok.com/@{}".format(message["uniqueid"])
             profiles[message["uniqueid"]] = message
 
-        if not db in self.used_databases:
-            self.used_databases.append(db)
-
-        self.log.info("{} profiles found".format(len(profiles.keys())))
+        logging.info("{} profiles found".format(len(profiles.keys())))
         return profiles
 
     def get_user_id(self):
@@ -193,7 +200,7 @@ class ModuleReport(ModuleParent):
         return Utils.xml_attribute_finder(xml_file, "userid")["userid"]
 
     def get_videos(self):
-        self.log.info("Getting Videos...")
+        logging.info("Getting Videos...")
         videos = []
         db = os.path.join(self.internal_cache_path, "databases", "video.db")
 
@@ -207,36 +214,27 @@ class ModuleReport(ModuleParent):
             
             for line in dump["responseHeaders"].splitlines():
                 if 'Last-Modified:' in line:
-                    video["last_modified"] = line.split(": ")[1]
+                    video["last_modified"] = Utils.date_parser(line.split(": ")[1], "%a, %d %b %Y %H:%M:%S %Z")
+                    
+
+                    timeline_event = {}
+                    timeline_event["event"]= "Video loaded"
+                    timeline_event["video"]= video["key"]
+
+                    self.timeline.add(video["last_modified"], timeline_event)
                     break
             videos.append(video)
-            #self.access_path_file(self.internal_path, "./cache/cache/{}".format(entry[0]))
         
-        if not db in self.used_databases:
-            self.used_databases.append(db)
-
-        self.log.info("{} video(s) found".format(len(videos)))
+        logging.info("{} video(s) found".format(len(videos)))
         return videos
     
     def get_undark_db(self):
-        self.log.info("Getting undark output...")
-        output = {}
-
-        for name in self.used_databases:
-            listing = []
-            undark_output = Utils.run_undark(name).decode()
-            for line in undark_output.splitlines():
-                listing.append(line)
-            
-            if listing:
-                relative_name = os.path.normpath(name.replace(self.report_path, "")) #clean complete path
-                output[relative_name] = listing
-
-        return output
+        logging.info("Getting undark output...")
+        return Database.get_undark_output(self.databases, self.report_path)
     
 
     def get_videos_publish(self):
-        self.log.info("Getting published videos")
+        logging.info("Getting published videos")
         videos = []
         base_path = os.path.join(self.internal_cache_path, "cache", "aweme_publish")
         aweme_publish_files = os.listdir(base_path)
@@ -249,15 +247,22 @@ class ModuleReport(ModuleParent):
                     video ={}
                     video["created_time"] = entry.get("create_time")
                     video["video"] = entry.get("video").get("animated_cover").get("url_list")[0]
+                    
+                    
+                    timeline_event = {}
+                    timeline_event["event"]= "Video Published"
+                    timeline_event["url"]= video["video"]
+                    
+                    self.timeline.add(video["created_time"], timeline_event)
                     videos.append(video)
     
-        self.log.info("{} video(s) found".format(len(videos)))
+        logging.info("{} video(s) found".format(len(videos)))
         return videos
 
 
     
     def get_last_session(self):
-        self.log.info("Getting last session...")
+        logging.info("Getting last session...")
         session = []
 
         relevant_keys = ["page", "request_method", "is_first","duration","is_first","rip","duration","author_id","access2","video_duration","video_quality","access",
@@ -265,7 +270,6 @@ class ModuleReport(ModuleParent):
 
         db = os.path.join(self.internal_cache_path, "databases", "ss_app_log.db")
         database = Database(db)
-        database.execute_pragma()
         results = database.execute_query("select tag, ext_json, datetime(timestamp/1000, 'unixepoch', 'localtime'), session_id from event order by timestamp")
         
         for entry in results:
@@ -273,8 +277,15 @@ class ModuleReport(ModuleParent):
             session_entry["action"] = entry[0]
             
             body_dump = json.loads(entry[1])
-            session_entry["time"] = entry[2]
+            session_entry["time"] = Utils.date_parser(entry[2], "%Y-%m-%d %H:%M:%S")
             session_entry["session_id"] = entry[3]
+            
+            timeline_event = {}
+            timeline_event["event"]= "System Action"
+            timeline_event["action"]= session_entry["action"]
+            
+            self.timeline.add(session_entry["time"], timeline_event)
+            
             session.append(session_entry)
 
             #json body parser
@@ -285,6 +296,6 @@ class ModuleReport(ModuleParent):
             
             session_entry["body"] =body
 
-        self.log.info("{} entrys found".format(len(results)))
+        logging.info("{} entrys found".format(len(results)))
         return session
 

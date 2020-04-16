@@ -1,7 +1,6 @@
 import logging
 
 from java.util import UUID
-from java.util.logging import Level
 from org.sleuthkit.autopsy.casemodule import Case
 from org.sleuthkit.autopsy.casemodule.services import Blackboard
 from org.sleuthkit.autopsy.ingest import ModuleDataEvent
@@ -12,14 +11,9 @@ from org.sleuthkit.autopsy.ingest import IngestMessage
 from psy.progress import ProgressUpdater
 
 class PsyUtils:
-    def __init__(self):
-        self._logger = Logger.getLogger("Ingest Logger")
-        
-
-        
-
-    def log(self, level, msg):
-        self._logger.logp(level, self.__class__.__name__, inspect.stack()[1][3], msg)
+    @staticmethod
+    def post_message(msg):
+        IngestServices.getInstance().postMessage(IngestMessage.createMessage(IngestMessage.MessageType.DATA, "Forensics Analyzer", msg))
 
     @staticmethod
     def add_to_fileset(name, folder, device_id = UUID.randomUUID()):
@@ -40,15 +34,15 @@ class PsyUtils:
         try:
             Case.getCurrentCase().getSleuthkitCase().addArtifactAttributeType(att_name, type, att_desc)
         except:
-            self.log(Level.INFO, "[Project] Error creating attribute type: " + att_desc)
+            logging.warning("Error creating attribute type: " + att_desc)
         return Case.getCurrentCase().getSleuthkitCase().getAttributeType(att_name)
-    
+ 
     @staticmethod
     def create_artifact_type(base_name, art_name, art_desc):
         try:
             Case.getCurrentCase().getSleuthkitCase().addBlackboardArtifactType(art_name, base_name.capitalize() + art_desc)
         except:
-            self.log(Level.INFO, "[Project]  Error creating artifact type: " + art_desc)
+            logging.warning("Error creating artifact type: " + art_desc)
         art = Case.getCurrentCase().getSleuthkitCase().getArtifactType(art_name)
         return art
     
@@ -72,5 +66,5 @@ class PsyUtils:
         }.get(attribute)
     
     @staticmethod
-    def get_or_create_account(self, account_type,  file, uniqueid):
+    def get_or_create_account(account_type, file, uniqueid):
         return Case.getCurrentCase().getSleuthkitCase().getCommunicationsManager().createAccountFileInstance(account_type, uniqueid, "test", file.getDataSource())

@@ -16,13 +16,10 @@ from psy.psyutils import PsyUtils
 
 class ProjectIngestModule(DataSourceIngestModule):
     def __init__(self, settings):
-        # self._logger = Logger.getLogger("ProjectIngest")
         self.context = None
         self.settings = settings
         self.utils = PsyUtils()
-        logfile = os.path.join(Case.getCurrentCase().getLogDirectoryPath(), "autopsy.log.0")
-        
-        
+
         self.app = self.settings.getSetting('app')
         self.app_id = Utils.find_package(self.settings.getSetting('app'))
         
@@ -33,7 +30,6 @@ class ProjectIngestModule(DataSourceIngestModule):
             return None
 
         m = __import__("modules.autopsy.{}".format(self.app), fromlist=[None])
-        # self.module_psy = m.ModulePsy(self.app, case = Case.getCurrentCase().getSleuthkitCase(), log = self.log)
         
         logfile = os.path.join(Case.getCurrentCase().getLogDirectoryPath(), "autopsy.log.0")
         Utils.setup_custom_logger(logfile)
@@ -55,13 +51,13 @@ class ProjectIngestModule(DataSourceIngestModule):
         
     def process(self, dataSource, progressBar):
         progressBar.switchToDeterminate(100)
-        self.log.info(str(Case.getCurrentCase().getDataSources()))
+        logging.info(str(Case.getCurrentCase().getDataSources()))
 
         data_sources = [dataSource]
 
         if self.settings.getSetting('adb') == "true":
             progressBar.progress("Extracting from ADB", 40)
-            self.log.info("Starting ADB")
+            logging.info("Starting ADB")
             extract = Extract()
             folders = extract.dump_from_adb(self.app_id)
 
@@ -74,8 +70,9 @@ class ProjectIngestModule(DataSourceIngestModule):
                         data_sources.append(case)
                         break
             
-            self.log.info("Ending ADB")
+            logging.info("Ending ADB")
 
+        Utils.remove_folder(self.tempDirectory)
 
         count = 0
         for source in data_sources:

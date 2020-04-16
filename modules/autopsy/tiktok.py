@@ -1,38 +1,25 @@
 import sys
 import os
+import logging
 
-from java.util.logging import Level
-from org.sleuthkit.datamodel import BlackboardAttribute
 from org.sleuthkit.datamodel import BlackboardArtifact
-from org.sleuthkit.autopsy.casemodule.services import Blackboard
+from org.sleuthkit.datamodel import BlackboardAttribute
 from org.sleuthkit.autopsy.ingest import IngestModule
-from org.sleuthkit.autopsy.ingest import IngestMessage
-from org.sleuthkit.autopsy.ingest import IngestServices
 from org.sleuthkit.datamodel import Relationship
 from org.sleuthkit.datamodel import Account
-from org.sleuthkit.autopsy.casemodule import Case
 
-from package.database import Database
 from package.utils import Utils
-from psy.psyutils import PsyUtils
 
-class ModulePsy:
-    def __init__(self, log):
-        self.log = log
-        self.case = Case.getCurrentCase().getSleuthkitCase()
-        self.context = None
-        self.module_name = "Tiktok:"
-        self.utils = PsyUtils()
-        
-        
+from modules.autopsy import ModulePsyParent
 
+class ModulePsy(ModulePsyParent):
+    def __init__(self, module_name):
+        ModulePsyParent.__init__(self, module_name)
 
     def process_report(self, datasource_name, file, report_number, path):
         # Check if the user pressed cancel while we were busy
         if self.context.isJobCancelled():
             return IngestModule.ProcessResult.OK
-
-        
 
         data = Utils.read_json(path)
         
@@ -53,7 +40,7 @@ class ModulePsy:
         # self.att_msg_uid = self.utils.create_attribute_type('TIKTOK_MSG_UID', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Uid", self.case)
         # self.att_msg_uniqueid = self.utils.create_attribute_type('TIKTOK_MSG_UNIQUE_ID', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Unique ID", self.case)
         # self.att_msg_nickname = self.utils.create_attribute_type('TIKTOK_MSG_NICKNAME', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Nickname", self.case)
-        self.att_msg_created_time = self.utils.create_attribute_type('TIKTOK_MSG_CREATED_TIME', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Created Time")
+        self.att_msg_created_time = self.utils.create_attribute_type('TIKTOK_MSG_CREATED_TIME', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.DATETIME, "Created Time")
         self.att_msg_participant_1 = self.utils.create_attribute_type('TIKTOK_MSG_PARTICIPANT_1', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Participant 1")
         self.att_msg_participant_2 = self.utils.create_attribute_type('TIKTOK_MSG_PARTICIPANT_2', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Participant 2")
         self.att_msg_message = self.utils.create_attribute_type('TIKTOK_MSG_MESSAGE', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Message")
@@ -73,7 +60,7 @@ class ModulePsy:
         # self.att_prf_is_blocked = self.utils.create_attribute_type('TIKTOK_PROFILE_IS_BLOCKED', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.BYTE, "Is Blocked", self.case)
         # self.att_prf_is_minor = self.utils.create_attribute_type('TIKTOK_PROFILE_IS_MINOR', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.BYTE, "Is Minor", self.case)
         self.att_prf_nickname = self.utils.create_attribute_type('TIKTOK_PROFILE_NICKNAME', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Nickname")
-        self.att_prf_register_time = self.utils.create_attribute_type('TIKTOK_PROFILE_REGISTER_TIME', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.LONG, "Register Time")
+        self.att_prf_register_time = self.utils.create_attribute_type('TIKTOK_PROFILE_REGISTER_TIME', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.DATETIME, "Register Time")
         self.att_prf_sec_uid = self.utils.create_attribute_type('TIKTOK_PROFILE_SEC_UID', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Sec. UID")
         self.att_prf_short_id = self.utils.create_attribute_type('TIKTOK_PROFILE_SHORT_ID', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Short ID")
         self.att_prf_uid = self.utils.create_attribute_type('TIKTOK_PROFILE_UID', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "UID")
@@ -91,18 +78,18 @@ class ModulePsy:
         #videos
 
         self.att_vid_key = self.utils.create_attribute_type('TIKTOK_VIDEO_KEY', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Key")
-        self.att_vid_last_modified = self.utils.create_attribute_type('TIKTOK_VIDEO_LAST_MODIFIED', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Last Modified")
+        self.att_vid_last_modified = self.utils.create_attribute_type('TIKTOK_VIDEO_LAST_MODIFIED', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.DATETIME, "Last Modified")
 
         #published videos
 
-        self.att_publish_vid_created_time = self.utils.create_attribute_type('TIKTOK_PUBLISH_VIDEOS_CREATED_TIME', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.LONG, "Created TIme")
+        self.att_publish_vid_created_time = self.utils.create_attribute_type('TIKTOK_PUBLISH_VIDEOS_CREATED_TIME', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.DATETIME, "Created TIme")
         self.att_publish_vid_url = self.utils.create_attribute_type('TIKTOK_PUBLISH_VIDEOS_URL', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Url")
 
 
 
         #logs
 
-        self.att_log_time = self.utils.create_attribute_type('TIKTOK_LOGS_TIME', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Time")
+        self.att_log_time = self.utils.create_attribute_type('TIKTOK_LOGS_TIME', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.DATETIME, "Time")
         self.att_log_session = self.utils.create_attribute_type('TIKTOK_LOGS_SESSION_ID', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.LONG, "Session ID")
         self.att_log_action = self.utils.create_attribute_type('TIKTOK_LOGS_ACTION', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Action")
         self.att_log_body = self.utils.create_attribute_type('TIKTOK_LOGS_BODY', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Body")
@@ -124,13 +111,14 @@ class ModulePsy:
         self.art_searches = self.utils.create_artifact_type(self.module_name, "TIKTOK_SEARCHES","Search")
         self.art_videos = self.utils.create_artifact_type(self.module_name, "TIKTOK_VIDEOS", "Videos")
         self.art_publish_videos = self.utils.create_artifact_type(self.module_name, "TIKTOK_PUBLISH_VIDEOS", "Publish Videos")
-        self.art_undark = self.utils.create_artifact_type(self.module_name, "TIKTOK_UNDARK", "Undark")
-        self.art_logs = self.utils.create_artifact_type(self.module_name, "TIKTOK_LOGS", "LOGS")
+        self.art_undark = self.utils.create_artifact_type(self.module_name, "TIKTOK_UNDARK", "Deleted rows")
+        self.art_logs = self.utils.create_artifact_type(self.module_name, "TIKTOK_LOGS", "Logs")
         
 
+        
     def process_user_profile(self, profile, file):
         
-        self.log.info("Indexing user profile.")
+        logging.info("Indexing user profile.")
         
         if not profile:
             return
@@ -157,10 +145,10 @@ class ModulePsy:
             art.addAttributes(attributes)
             self.utils.index_artifact(art, self.art_user_profile)        
         except Exception as e:
-            self.log.warning("Error getting user profile: " + str(e))
+            logging.warning("Error getting user profile: " + str(e))
 
     def process_messages(self, conversations, file):
-        self.log.info("Indexing user messages")
+        logging.info("Indexing user messages")
         if not conversations:
             return
 
@@ -178,8 +166,8 @@ class ModulePsy:
                     # art = file.newArtifact(self.art_messages.getTypeID())
                     art = file.newArtifact(BlackboardArtifact.ARTIFACT_TYPE.TSK_MESSAGE)
 
-                    #SUBSTITUIR POR TIMESTAMP VINDO DO SCRIPT!!!  #TODO
-                    m["createdtime"] = 1586873049
+
+                    
                     
                     # attributes.append(BlackboardAttribute(self.att_msg_participant_1, self.module_name, participant_1))
                     # attributes.append(BlackboardAttribute(self.att_msg_participant_2, self.module_name, participant_2))
@@ -199,7 +187,7 @@ class ModulePsy:
                         art.addAttribute(BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_PHONE_NUMBER_TO, "{}_im.db".format(self.uid), participant_2))
                         self.utils.add_relationship(contact_2, [contact_1], art, Relationship.Type.MESSAGE, m.get("createdtime"))
                     else:
-                        art.addAttribute(BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_PHONE_NUMBER_TO, "{}_im.db".format(self.uid), "Self (" + participant_2+ ")"))
+                        art.addAttribute(BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_PHONE_NUMBER_TO, "{}_im.db".format(self.uid), participant_1))
                         self.utils.add_relationship(contact_1, [contact_2], art, Relationship.Type.MESSAGE, m.get("createdtime"))
 
                     
@@ -207,11 +195,11 @@ class ModulePsy:
                     self.utils.index_artifact(art, BlackboardArtifact.ARTIFACT_TYPE.TSK_MESSAGE)
 
                 except Exception as e:
-                    self.log.warning("Error getting a message: " + str(e))
+                    logging.warning("Error getting a message: " + str(e))
 
 
     def process_searches(self, searches, file):
-        self.log.info("Indexing user seraches.")
+        logging.info("Indexing user searches.")
         if not searches:
             return
 
@@ -225,26 +213,26 @@ class ModulePsy:
                 art.addAttributes(attributes)
                 self.utils.index_artifact(art, self.art_searches)        
             except Exception as e:
-                self.log.warning("Error getting a search entry: " + str(e))
+                logging.warning("Error getting a search entry: " + str(e))
 
     def process_undark(self, undarks, file):
-        self.log.info("Indexing undark output.")
+        logging.info("Indexing undark output.")
         if not undarks:
             return
-
-        for database, row in undarks.items():
-            try: 
-                art = file.newArtifact(self.art_undark.getTypeID())
-                attributes = []
-                attributes.append(BlackboardAttribute(self.att_undark_key, database, database))
-                attributes.append(BlackboardAttribute(self.att_undark_output, "undark", row))
-                art.addAttributes(attributes)
-                self.utils.index_artifact(art, self.art_undark)        
-            except Exception as e:
-                self.log.warning("Error indexing undark output: " + str(e))
+        for database, deleted_rows in undarks.items():
+            for row in deleted_rows:
+                try: 
+                    art = file.newArtifact(self.art_undark.getTypeID())
+                    attributes = []
+                    attributes.append(BlackboardAttribute(self.att_undark_key, database, database))
+                    attributes.append(BlackboardAttribute(self.att_undark_output, database, row))
+                    art.addAttributes(attributes)
+                    self.utils.index_artifact(art, self.art_undark)        
+                except Exception as e:
+                    logging.warning("Error indexing undark output: " + str(e))
 
     def process_users(self, users, file):
-        self.log.info("Indexing user profiles.")
+        logging.info("Indexing user profiles.")
 
         if not users:
             return
@@ -266,10 +254,10 @@ class ModulePsy:
                 
                 self.utils.index_artifact(art, self.art_profiles)        
             except Exception as e:
-                self.log.warning("Error getting user: " + str(e))
+                logging.warning("Error getting user: " + str(e))
     
     def process_videos(self, videos, report_number, file, base_path, datasource_name):
-        self.log.info("Indexing videos.")
+        logging.info("Indexing videos.")
 
         for v in videos:
             try: 
@@ -280,13 +268,13 @@ class ModulePsy:
                 art.addAttributes(attributes)
                 self.utils.index_artifact(art, self.art_videos)        
             except Exception as e:
-                self.log.warning("Error getting a video: " + str(e))
+                logging.warning("Error getting a video: " + str(e))
 
         path = os.path.join(base_path, "Contents", "internal", "cache", "cache")
         try:
             files = os.listdir(path)
         except:
-            self.log.warning("Report doesn't have video files.")
+            logging.warning("Report doesn't have video files.")
             return
         
         for v in files:
@@ -295,7 +283,7 @@ class ModulePsy:
         self.utils.add_to_fileset("{}_Videos".format(datasource_name), [path])
 
     def process_published_videos(self, videos,file):
-        self.log.info("Indexing published videos.")
+        logging.info("Indexing published videos.")
         for v in videos:
             try: 
                 art = file.newArtifact(self.art_publish_videos.getTypeID())
@@ -305,10 +293,10 @@ class ModulePsy:
                 art.addAttributes(attributes)
                 self.utils.index_artifact(art, self.art_publish_videos)        
             except Exception as e:
-                self.log.warning("Error getting a video: " + str(e))
+                logging.warning("Error getting a video: " + str(e))
 
     def process_logs(self, logs, file):
-        self.log.info("Indexing user logs")
+        logging.info("Indexing user logs")
         if not logs:
             return
 
@@ -324,4 +312,4 @@ class ModulePsy:
                 art.addAttributes(attributes)
                 self.utils.index_artifact(art, self.art_logs)        
             except Exception as e:
-                self.log.warning("Error getting log: " + str(e))
+                logging.warning("Error getting log: " + str(e))

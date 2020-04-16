@@ -7,7 +7,6 @@ class ModuleParent:
         self.internal_path = internal_path
         self.external_path = external_path
         
-        
         # self.report_path = os.path.join(report_path, "report", self.report_name)
         self.report_path = report_path
         Utils.check_and_generate_folder(self.report_path)
@@ -26,7 +25,6 @@ class ModuleParent:
         self.databases = self.set_databases()
         self.shared_preferences = self.set_shared_preferences()
         
-        self.used_databases = []
         self.report = {}
         self.app_name = app_name
         self.app_id = app_id
