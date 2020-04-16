@@ -68,7 +68,7 @@ class ProjectIngestSettingsPanel(IngestModuleIngestJobSettingsPanel):
         self.adb = JCheckBox("Extract data from ADB and analyze it", actionPerformed=self.event)
         self.add(self.adb)
 
-        self.json_reports = JCheckBox("Include old JSON reports")
+        self.json_reports = JCheckBox("Include old JSON reports", actionPerformed=self.event)
         self.add(self.json_reports)
 
         self.clean_temp = JCheckBox("Clean temporary folder if exists", actionPerformed=self.event)

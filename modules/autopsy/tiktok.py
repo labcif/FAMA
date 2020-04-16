@@ -2,6 +2,7 @@ import sys
 import os
 import logging
 
+from org.sleuthkit.datamodel import BlackboardArtifact
 from org.sleuthkit.datamodel import BlackboardAttribute
 from org.sleuthkit.autopsy.ingest import IngestModule
 from org.sleuthkit.datamodel import Relationship
