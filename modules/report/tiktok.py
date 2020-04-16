@@ -5,6 +5,7 @@ import tarfile
 
 from package.database import Database
 from package.utils import Utils
+from package.timeline import Timeline
 from modules.report import ModuleParent
 
 class ModuleReport(ModuleParent):
@@ -12,6 +13,8 @@ class ModuleReport(ModuleParent):
         ModuleParent.__init__(self, internal_path, external_path, report_path, app_name, app_id)
         self.log = Utils.get_logger()
         self.log.info("Module started")
+
+        self.timeline = Timeline()
     
     def generate_report(self):
 
@@ -23,6 +26,7 @@ class ModuleReport(ModuleParent):
         self.report["published_videos"] = self.get_videos_publish()
         self.report["freespace"] = self.get_undark_db()
         self.report["log"] = self.get_last_session()
+        self.report["timeline"] = self.timeline.get_sorted_timeline()
 
         self.log.info("Report Generated")
 
@@ -75,8 +79,10 @@ class ModuleReport(ModuleParent):
                 message["localinfo"] = entry[3]
                 if entry[6] == int(id1):
                     message["sender"] = conversation_output["participant_1"]
+                    message["receiver"] = conversation_output["participant_2"]
                 else:
                     message["sender"] = conversation_output["participant_2"]
+                    message["receiver"] = conversation_output["participant_1"]
                 message_type = entry[4]
 
                 message_dump = json.loads(entry[1])
@@ -100,6 +106,13 @@ class ModuleReport(ModuleParent):
                 message["message"] = body
                 message["deleted"] = str(entry[5])
                 conversation_output["messages"].append(message)
+
+                timeline_event = {}
+                timeline_event["event"]= "Message"
+                timeline_event["from"]= message["sender"]
+                timeline_event["to"]= message["receiver"]
+                timeline_event["message"]= message["message"]
+                self.timeline.add(message["createdtime"], timeline_event)
             
             #adding conversation and participants information to main array
             conversations_list.append(conversation_output)
@@ -131,7 +144,15 @@ class ModuleReport(ModuleParent):
                 break
             
         user_profile["url"] = "https://www.tiktok.com/@{}".format(user_profile["unique_id"])
+        
+        
+        timeline_event = {}
+        timeline_event["event"]= "User resgistration"
+        timeline_event["uniqueid"] = user_profile["unique_id"] 
+        timeline_event["url"]= user_profile["url"]
 
+        self.timeline.add(user_profile["register_time"], timeline_event)
+        
         return user_profile
     
     def get_user_uniqueid_by_id(self, uid):
@@ -213,6 +234,13 @@ class ModuleReport(ModuleParent):
             for line in dump["responseHeaders"].splitlines():
                 if 'Last-Modified:' in line:
                     video["last_modified"] = Utils.date_parser(line.split(": ")[1], "%a, %d %b %Y %H:%M:%S %Z")
+                    
+
+                    timeline_event = {}
+                    timeline_event["event"]= "Video loaded"
+                    timeline_event["video"]= video["key"]
+
+                    self.timeline.add(video["last_modified"], timeline_event)
                     break
             videos.append(video)
             #self.access_path_file(self.internal_path, "./cache/cache/{}".format(entry[0]))
@@ -242,6 +270,13 @@ class ModuleReport(ModuleParent):
                     video ={}
                     video["created_time"] = entry.get("create_time")
                     video["video"] = entry.get("video").get("animated_cover").get("url_list")[0]
+                    
+                    
+                    timeline_event = {}
+                    timeline_event["event"]= "Video Published"
+                    timeline_event["url"]= video["video"]
+                    
+                    self.timeline.add(video["created_time"], timeline_event)
                     videos.append(video)
     
         self.log.info("{} video(s) found".format(len(videos)))
@@ -268,6 +303,13 @@ class ModuleReport(ModuleParent):
             body_dump = json.loads(entry[1])
             session_entry["time"] = Utils.date_parser(entry[2], "%Y-%m-%d %H:%M:%S")
             session_entry["session_id"] = entry[3]
+            
+            timeline_event = {}
+            timeline_event["event"]= "System Action"
+            timeline_event["action"]= session_entry["action"]
+            
+            self.timeline.add(session_entry["time"], timeline_event)
+            
             session.append(session_entry)
 
             #json body parser
