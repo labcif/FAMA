@@ -56,7 +56,7 @@ class ProjectIngestModule(DataSourceIngestModule):
         data_sources = [dataSource]
 
         if self.settings.getSetting('adb') == "true":
-            progressBar.progress("Extracting from ADB", 40)
+            progressBar.progress("Extracting from ADB", 0)
             logging.info("Starting ADB")
             extract = Extract()
             folders = extract.dump_from_adb(self.app_id)
@@ -77,7 +77,7 @@ class ProjectIngestModule(DataSourceIngestModule):
         count = 0
         for source in data_sources:
             count += 1
-            percent = count / (len(data_sources) + 4) * 100
+            percent = int(count / float(len(data_sources) + 1) * 100)
             self.process_by_datasource(source, progressBar, percent)
         
         progressBar.progress("Done", 100)

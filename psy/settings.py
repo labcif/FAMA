@@ -47,7 +47,7 @@ class ProjectIngestSettingsPanel(IngestModuleIngestJobSettingsPanel):
 
     def event(self, event):
         self.local_settings.setSetting('adb', 'true' if self.adb.isSelected() else 'false')
-        self.local_settings.setSetting('clean_temp', 'true' if self.clean_temp.isSelected() else 'false')
+        #self.local_settings.setSetting('clean_temp', 'true' if self.clean_temp.isSelected() else 'false')
         self.local_settings.setSetting('old_report', 'true' if self.json_reports.isSelected() else 'false')
         self.local_settings.setSetting('app', self.app.getSelectedItem().split(' (')[0].lower())
 
