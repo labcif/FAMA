@@ -1,31 +1,18 @@
-import sys
-import os
-
-from java.util.logging import Level
 from org.sleuthkit.datamodel import BlackboardAttribute
 from org.sleuthkit.datamodel import BlackboardArtifact
 from org.sleuthkit.autopsy.casemodule.services import Blackboard
 from org.sleuthkit.autopsy.ingest import IngestModule
-from org.sleuthkit.autopsy.ingest import IngestMessage
-from org.sleuthkit.autopsy.ingest import IngestServices
 from org.sleuthkit.datamodel import Relationship
 from org.sleuthkit.datamodel import Account
-from org.sleuthkit.autopsy.casemodule import Case
 
 from package.database import Database
 from package.utils import Utils
-from psy.psyutils import PsyUtils
 
-class ModulePsy:
-    def __init__(self):
-        self.log = Utils.get_logger()
-        self.case = Case.getCurrentCase().getSleuthkitCase()
-        self.context = None
-        self.module_name = "Tiktok:"
-        self.utils = PsyUtils()
-        
-        
+from modules.autopsy import ModulePsyParent
 
+class ModulePsy(ModulePsyParent):
+    def __init__(self, module_name):
+        ModulePsyParent.__init__(self, module_name)
 
     def process_report(self, datasource_name, file, report_number, path):
         if self.context.isJobCancelled():
@@ -65,11 +52,6 @@ class ModulePsy:
         # self.att_undark_key = self.utils.create_attribute_type('UNDARK_KEY', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Database")
         # self.att_undark_output = self.utils.create_attribute_type('UNDARK_OUTPUT', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Output")
 
-
-        
-        
-
-        
     def process_user_profile(self, profile, file):
         self.log.info("Indexing user profile.")
         if not profile:
@@ -89,8 +71,6 @@ class ModulePsy:
         # 
         # except Exception as e:
         #     self.log.warning("Error getting user profile: " + str(e))
-
-
 
     def process_messages(self, messages, file):
         self.log.info("Indexing user messages")
@@ -121,9 +101,6 @@ class ModulePsy:
         # 
         #     except Exception as e:
         #         self.log.warning("Error getting a message: " + str(e))
-
-
-
 
     def process_undark(self, undarks, file):
         self.log.info("Indexing undark output.")

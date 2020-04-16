@@ -12,9 +12,6 @@ class ModuleReport(ModuleParent):
         ModuleParent.__init__(self, internal_path, external_path, report_path, app_name, app_id)
         self.log = Utils.get_logger()
         self.log.info("Module started")
-        
-
-        
     
     def generate_report(self):
 

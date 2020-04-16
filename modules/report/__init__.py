@@ -7,7 +7,6 @@ class ModuleParent:
         self.internal_path = internal_path
         self.external_path = external_path
         
-        
         # self.report_path = os.path.join(report_path, "report", self.report_name)
         self.report_path = report_path
         Utils.check_and_generate_folder(self.report_path)
@@ -57,3 +56,6 @@ class ModuleParent:
             "app_id": self.app_id
         }
         self.report["header"] = report_header
+
+    def generate_report(self):
+        raise NotImplementedError

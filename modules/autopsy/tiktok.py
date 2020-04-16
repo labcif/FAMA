@@ -1,38 +1,23 @@
 import sys
 import os
 
-from java.util.logging import Level
 from org.sleuthkit.datamodel import BlackboardAttribute
-from org.sleuthkit.datamodel import BlackboardArtifact
-from org.sleuthkit.autopsy.casemodule.services import Blackboard
 from org.sleuthkit.autopsy.ingest import IngestModule
-from org.sleuthkit.autopsy.ingest import IngestMessage
-from org.sleuthkit.autopsy.ingest import IngestServices
 from org.sleuthkit.datamodel import Relationship
 from org.sleuthkit.datamodel import Account
-from org.sleuthkit.autopsy.casemodule import Case
 
-from package.database import Database
 from package.utils import Utils
-from psy.psyutils import PsyUtils
 
-class ModulePsy:
-    def __init__(self):
-        self.log = Utils.get_logger()
-        self.case = Case.getCurrentCase().getSleuthkitCase()
-        self.context = None
-        self.module_name = "Tiktok:"
-        self.utils = PsyUtils()
-        
-        
+from modules.autopsy import ModulePsyParent
 
+class ModulePsy(ModulePsyParent):
+    def __init__(self, module_name):
+        ModulePsyParent.__init__(self, module_name)
 
     def process_report(self, datasource_name, file, report_number, path):
         # Check if the user pressed cancel while we were busy
         if self.context.isJobCancelled():
             return IngestModule.ProcessResult.OK
-
-        
 
         data = Utils.read_json(path)
         
