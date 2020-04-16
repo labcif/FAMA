@@ -24,15 +24,20 @@ class ModuleParent:
             Utils.extract_tar(self.external_path, self.external_cache_path)
 
         self.databases = self.set_databases()
-        self.shared_preferences = self.set_shared_preferences() #we can comment this
-        #print(self.databases)
-        #print(self.shared_preferences)
+        self.shared_preferences = self.set_shared_preferences()
         
         self.used_databases = []
         self.report = {}
         self.app_name = app_name
         self.app_id = app_id
+        
         self.set_header()
+
+    def get_databases(self):
+        return self.databases
+    
+    def get_shared_preferences(self):
+        return self.shared_preferences
 
     def set_databases(self):
         dbs = []
@@ -50,10 +55,12 @@ class ModuleParent:
     
     def set_header(self):
         self.report = {}
-        report_header = {
+        self.report["header"] = {
             "report_name": Utils.get_current_time(),
             "report_date": Utils.get_current_millis(),
             "app_name" : self.app_name,
             "app_id": self.app_id
         }
-        self.report["header"] = report_header
+
+    def generate_report(self):
+        raise NotImplementedError

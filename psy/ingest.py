@@ -1,26 +1,18 @@
-import inspect
 import os
-import sys
 import json
-from shutil import rmtree, copyfile
+import logging
+from shutil import copyfile
 from distutils.dir_util import copy_tree
 
-from java.util.logging import Level
 from java.util import UUID
 from org.sleuthkit.autopsy.ingest import IngestModule
 from org.sleuthkit.autopsy.ingest import DataSourceIngestModule
-from org.sleuthkit.autopsy.ingest import IngestMessage
-from org.sleuthkit.autopsy.ingest import IngestServices
-from org.sleuthkit.autopsy.coreutils import Logger
 from org.sleuthkit.autopsy.casemodule import Case
 
 from package.analyzer import Analyzer
 from package.extract import Extract
 from package.utils import Utils
-
 from psy.psyutils import PsyUtils
-from psy.progress import ProgressUpdater
-from package.logsystem import LogSystem
 
 class ProjectIngestModule(DataSourceIngestModule):
     def __init__(self, settings):
@@ -35,28 +27,30 @@ class ProjectIngestModule(DataSourceIngestModule):
         self.app_id = Utils.find_package(self.settings.getSetting('app'))
         
         #ABORTAR TO DO IN AUTOPSY
-        #if not module_file:
-        #    print("[Analyzer] Module not found for {}".format(self.app_id))
-        #    return None
+        if not self.app_id:
+            logging.critical("Module not found for {}".format(self.app_id))
+            self.utils.post_message("Module not found for {}".format(self.app_id))
+            return None
 
         m = __import__("modules.autopsy.{}".format(self.app), fromlist=[None])
         # self.module_psy = m.ModulePsy(self.app, case = Case.getCurrentCase().getSleuthkitCase(), log = self.log)
         
-        self.log = LogSystem(self.app, logfile)
-        self.module_psy = m.ModulePsy(self.log)
-
-    # def log(self, level, msg):
-    #     # self._logger.logp(level, self.__class__.__name__, inspect.stack()[1][3], msg)
+        logfile = os.path.join(Case.getCurrentCase().getLogDirectoryPath(), "autopsy.log.0")
+        Utils.setup_custom_logger(logfile)
+        
+        self.module_psy = m.ModulePsy(self.app)
 
     def startUp(self, context):
         self.context = context
         self.module_psy.initialize(context)
 
         self.temp_module_path = os.path.join(Case.getCurrentCase().getModulesOutputDirAbsPath(), "AndroidForensics")
+
+        Utils.remove_folder(self.temp_module_path)
+        
         Utils.check_and_generate_folder(self.temp_module_path)
-
+        
         self.tempDirectory = os.path.join(self.temp_module_path, self.app_id)
-
         self.fileManager = Case.getCurrentCase().getServices().getFileManager()
         
     def process(self, dataSource, progressBar):
@@ -82,26 +76,16 @@ class ProjectIngestModule(DataSourceIngestModule):
             
             self.log.info("Ending ADB")
 
-        if self.settings.getSetting('clean_temp') == "true":
-            pass
-            # self.log(Level.INFO, "Cleaning temp folder") #TODO
-            # try:
-            #     rmtree(os.path.join(Case.getCurrentCase().getModulesOutputDirAbsPath(), "AndroidForensics", app_name))
-            # except Exception as e:
-            #     self.log(Level.INFO, "REMOVE TEMPORARY FOLDER ERROR" + str(e))
-            # os.makedirs(os.path.join(Case.getCurrentCase().getModulesOutputDirAbsPath(), "AndroidForensics", app_name))
 
         count = 0
         for source in data_sources:
             count += 1
-            #percent = int(count / (len(data_sources) + 1) * 100)
-            self.process_by_datasource(source, progressBar)
+            percent = count / (len(data_sources) + 4) * 100
+            self.process_by_datasource(source, progressBar, percent)
         
         progressBar.progress("Done", 100)
 
-    def process_by_datasource(self, dataSource, progressBar):
-        fileCount = 0
-
+    def process_by_datasource(self, dataSource, progressBar, percent):
         internal = self.app_id + "_internal.tar.gz"
         external = self.app_id + "_external.tar.gz"
         json_report = "%.json"
@@ -119,13 +103,7 @@ class ProjectIngestModule(DataSourceIngestModule):
         base_paths = []
         reports = []
 
-        #for dump in dumps:
-        #    base_path = os.path.dirname(dump.getLocalPath())
-        #    self.log(Level.INFO, "BASE_PATH" + str(base_path))
-        #    if not base_path in base_paths:
-        #        base_paths.append(base_path)
-
-        progressBar.progress("Analyzing Information for {}".format(dataSource.getName()), 80)
+        progressBar.progress("Analyzing Information for {}".format(dataSource.getName()), percent)
 
         # Analyse and generate and processing reports 
         for base in dumps:
@@ -165,14 +143,11 @@ class ProjectIngestModule(DataSourceIngestModule):
                 item["file"] = report
                 reports.append(item)
 
-        progressBar.progress("Processing Data for {}".format(dataSource.getName()), 80)
+        progressBar.progress("Processing Data for {}".format(dataSource.getName()), percent)
 
         for report in reports:
             self.module_psy.process_report(dataSource.getName(), report["file"], number_of_reports, report["report"])
             
         # After all reports, post a message to the ingest messages in box.
-        message = IngestMessage.createMessage(IngestMessage.MessageType.DATA, "Forensics Analyzer", "Found %d files" % fileCount)
-        IngestServices.getInstance().postMessage(message)
-
         return IngestModule.ProcessResult.OK
 

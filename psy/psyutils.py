@@ -1,14 +1,13 @@
-import inspect
+import logging
 
 from java.util import UUID
 from java.util.logging import Level
 from org.sleuthkit.autopsy.casemodule import Case
-from org.sleuthkit.autopsy.coreutils import Logger
 from org.sleuthkit.autopsy.casemodule.services import Blackboard
 from org.sleuthkit.autopsy.ingest import ModuleDataEvent
 from org.sleuthkit.autopsy.ingest import IngestServices
 from org.sleuthkit.datamodel import BlackboardAttribute
-
+from org.sleuthkit.autopsy.ingest import IngestMessage
 
 from psy.progress import ProgressUpdater
 
@@ -29,25 +28,23 @@ class PsyUtils:
         #skcase_data.notifyAddingDataSource(device_id)
         progress_updater = ProgressUpdater() 
         
-        #newDataSources = []
-        newDataSource = fileManager.addLocalFilesDataSource(device_id.toString(), name, "", folder, progress_updater)
-        #newDataSources.append(newDataSource.getRootDirectory())
+        fileManager.addLocalFilesDataSource(device_id.toString(), name, "", folder, progress_updater)
         
         files_added = progress_updater.getFiles()
         
         for file_added in files_added:
             skcase_data.notifyDataSourceAdded(file_added, device_id)
 
-    def create_attribute_type(self, att_name, type, att_desc):
+    @staticmethod
+    def create_attribute_type(att_name, type, att_desc):
         try:
             Case.getCurrentCase().getSleuthkitCase().addArtifactAttributeType(att_name, type, att_desc)
         except:
             self.log(Level.INFO, "[Project] Error creating attribute type: " + att_desc)
         return Case.getCurrentCase().getSleuthkitCase().getAttributeType(att_name)
     
-    def create_artifact_type(self, base_name, art_name, art_desc):
-
-        
+    @staticmethod
+    def create_artifact_type(base_name, art_name, art_desc):
         try:
             Case.getCurrentCase().getSleuthkitCase().addBlackboardArtifactType(art_name, base_name.capitalize() + art_desc)
         except:
@@ -55,19 +52,14 @@ class PsyUtils:
         art = Case.getCurrentCase().getSleuthkitCase().getArtifactType(art_name)
         return art
     
-    def index_artifact(self, artifact, artifact_type):
-        # try:
-        #     # Index the artifact for keyword search
-        #     blackboard.indexArtifact(artifact)
-        # except Blackboard.BlackboardException as e:
-        #     self.log(Level.INFO, "[Project] Error indexing artifact " + artifact.getDisplayName() + "" +str(e))
-        # # Fire an event to notify the UI and others that there is a new log artifact
+    @staticmethod
+    def index_artifact(artifact, artifact_type):
         IngestServices.getInstance().fireModuleDataEvent(ModuleDataEvent("test",artifact_type, None))
 
-    def add_relationship(self, node1, node2, art, relationship_type,timestamp):
+    @staticmethod
+    def add_relationship(node1, node2, art, relationship_type, timestamp):
         Case.getCurrentCase().getSleuthkitCase().getCommunicationsManager().addRelationships(node1, node2, art, relationship_type, timestamp)
                     
-
     @staticmethod
     def blackboard_attribute(attribute):
         return {
@@ -79,5 +71,6 @@ class PsyUtils:
             "string": BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING
         }.get(attribute)
     
+    @staticmethod
     def get_or_create_account(self, account_type,  file, uniqueid):
         return Case.getCurrentCase().getSleuthkitCase().getCommunicationsManager().createAccountFileInstance(account_type, uniqueid, "test", file.getDataSource())

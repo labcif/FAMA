@@ -1,6 +1,4 @@
 import os
-import sys
-import csv
 import platform
 import tarfile
 import xml.etree.ElementTree as ET
@@ -11,9 +9,7 @@ import tarfile
 import json
 import time
 import re
-from package.logsystem import LogSystem
-
-#from meaning.meaning import Meaning
+import logging
 
 class Utils: 
     @staticmethod
@@ -84,34 +80,6 @@ class Utils:
     def get_current_millis():
         return int(round(time.time() * 1000))
     
-    #not necessary, remove in future?
-    '''
-    @staticmethod
-    def export_columns_from_database(folder_path):
-        meaning = Meaning()
-        path = os.path.join(folder_path, 'DumpColumns.csv')
-        print("[Utils] Dumping Columns to CSV. Base path {}".format(path))
-        with open(path, 'w', newline='') as csvfile:
-            fieldnames = ['database', 'table', 'column', 'description']
-            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            writer.writeheader()
-        
-            for db in Utils.list_files(folder_path, filter_type = [".db"]):
-                database_name = db.split("/")[-1]
-                for table, columns in DatabaseParser.dump_columns(database = db).items():
-                    meanings = meaning.get_meaning(database_name, table)
-                    item = {}
-                    item["database"] = db.replace(folder_path, '') #remove basepath
-                    item["table"] = table
-                    
-                    for column in columns:
-                        item["column"] = column
-                        if meanings:
-                            item["description"] = meanings.get(column)
-
-                        writer.writerow(item)
-    '''
-
     @staticmethod
     def safe_members(members): #used to clean : in folders
         for finfo in members:
@@ -222,3 +190,25 @@ class Utils:
         f = open(report_name, "w")
         f.write(json.dumps(contents, indent=2))
         f.close()
+    
+    @staticmethod
+    def date_parser(date, format):
+        #python2 suppport
+        try:
+            return int(time.mktime(datetime.datetime.strptime(date,format).timetuple()))
+        except:
+            return 0
+    
+    @staticmethod
+    def setup_custom_logger(logfile="module.log"):
+        formatting = '[%(asctime)s] %(levelname)s [%(module)s] - %(message)s'
+
+        #FILE HANDLER
+        logging.basicConfig(level=logging.DEBUG, format=formatting, filemode='a', filename=logfile)
+
+        #STREAM HANDLER
+        console = logging.StreamHandler()
+        console.setLevel(logging.DEBUG)
+        console.setFormatter(logging.Formatter(formatting))
+        logging.getLogger().addHandler(console)
+        

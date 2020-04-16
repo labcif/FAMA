@@ -38,7 +38,6 @@ class ModulePsy:
         
         self.uid = data.get("profile").get("uid")
 
-
         self.process_messages(data.get("messages"), file)
         self.process_user_profile(data.get("profile"), file)
         self.process_users(data.get("users"), file)

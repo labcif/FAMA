@@ -1,7 +1,6 @@
-import sys
 import json
 import os
-import tarfile
+import logging
 
 from package.database import Database
 from package.utils import Utils
@@ -148,14 +147,6 @@ class ModuleReport(ModuleParent):
             name = None
         return name
         
-
-
-
-
-
-
-
-
     def get_user_searches(self):
         self.log.info("Getting User Search History...")
         

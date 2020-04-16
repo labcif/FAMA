@@ -9,7 +9,6 @@ from package.analyzer import Analyzer
 
 from java.util.logging import Level
 from org.sleuthkit.autopsy.casemodule import Case
-from org.sleuthkit.autopsy.coreutils import Logger
 from org.sleuthkit.autopsy.report.ReportProgressPanel import ReportStatus
 
 class ReportOutput:
