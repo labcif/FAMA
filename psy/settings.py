@@ -71,15 +71,15 @@ class ProjectIngestSettingsPanel(IngestModuleIngestJobSettingsPanel):
         self.json_reports = JCheckBox("Include old JSON reports", actionPerformed=self.event)
         self.add(self.json_reports)
 
-        self.clean_temp = JCheckBox("Clean temporary folder if exists", actionPerformed=self.event)
-        self.clean_temp.setSelected(True)
-        self.add(self.clean_temp)
+        #self.clean_temp = JCheckBox("Clean temporary folder if exists", actionPerformed=self.event)
+        #self.clean_temp.setSelected(True)
+        #self.add(self.clean_temp)
 
     def customizeComponents(self):
         self.app.setSelectedItem("Tiktok (com.zhiliaoapp.musically)")
 
         self.local_settings.setSetting('adb', 'false')
-        self.local_settings.setSetting('clean_temp', 'true')
+        #self.local_settings.setSetting('clean_temp', 'true')
         self.local_settings.setSetting('old_report', 'false')
         self.local_settings.setSetting('app', self.app.getSelectedItem().split(' (')[0].lower())
 

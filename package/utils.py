@@ -209,7 +209,7 @@ class Utils:
 
     @staticmethod
     def remove_folder(folder):
-        shutil.rmtree(folder)
+        shutil.rmtree(folder, ignore_errors=True)
 
     @staticmethod
     def read_json(path):

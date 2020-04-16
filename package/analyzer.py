@@ -19,6 +19,8 @@ class Analyzer:
         self.external_path = None
         
         self.report_path = os.path.join(report_folder, "report")
+
+        Utils.remove_folder(self.report_path)
         Utils.check_and_generate_folder(self.report_path)
         
         self.initialize_dumps()

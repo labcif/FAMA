@@ -51,6 +51,7 @@ class ProjectIngestModule(DataSourceIngestModule):
         self.module_psy.initialize(context)
 
         self.temp_module_path = os.path.join(Case.getCurrentCase().getModulesOutputDirAbsPath(), "AndroidForensics")
+
         Utils.check_and_generate_folder(self.temp_module_path)
         self.tempDirectory = os.path.join(self.temp_module_path, self.app_id)
 
@@ -79,13 +80,7 @@ class ProjectIngestModule(DataSourceIngestModule):
             
             logging.info("Ending ADB")
 
-        if self.settings.getSetting('clean_temp') == "true":
-            pass
-            # try:
-            #     rmtree(os.path.join(Case.getCurrentCase().getModulesOutputDirAbsPath(), "AndroidForensics", app_name))
-            # except Exception as e:
-            #     logging(Level.INFO, "REMOVE TEMPORARY FOLDER ERROR" + str(e))
-            # os.makedirs(os.path.join(Case.getCurrentCase().getModulesOutputDirAbsPath(), "AndroidForensics", app_name))
+        Utils.remove_folder(self.tempDirectory)
 
         count = 0
         for source in data_sources:
