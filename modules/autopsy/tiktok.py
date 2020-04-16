@@ -201,7 +201,7 @@ class ModulePsy:
                         art.addAttribute(BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_PHONE_NUMBER_TO, "{}_im.db".format(self.uid), participant_2))
                         self.utils.add_relationship(contact_2, [contact_1], art, Relationship.Type.MESSAGE, m.get("createdtime"))
                     else:
-                        art.addAttribute(BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_PHONE_NUMBER_TO, "{}_im.db".format(self.uid), "Self (" + participant_2+ ")"))
+                        art.addAttribute(BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_PHONE_NUMBER_TO, "{}_im.db".format(self.uid), participant_1))
                         self.utils.add_relationship(contact_1, [contact_2], art, Relationship.Type.MESSAGE, m.get("createdtime"))
 
                     
