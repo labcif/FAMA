@@ -17,14 +17,13 @@ class ModuleReport(ModuleParent):
         logging.info("Module started")
     
     def generate_report(self):
-
+        self.report["freespace"] = self.get_undark_db()
         self.report["profile"] = self.get_user_profile()
         self.report["messages"] = self.get_user_messages()
         self.report["users"] = self.get_user_profiles()
         self.report["searches"] = self.get_user_searches()
         self.report["videos"] = self.get_videos()
         self.report["published_videos"] = self.get_videos_publish()
-        self.report["freespace"] = self.get_undark_db()
         self.report["log"] = self.get_last_session()
         self.report["timeline"] = self.timeline.get_sorted_timeline()
 
@@ -119,12 +118,6 @@ class ModuleReport(ModuleParent):
 
         logging.info("{} messages found".format(len(conversation_output.get("messages"))))
 
-        if not db1 in self.used_databases:
-            self.used_databases.append(db1)
-        
-        # if not db2 in self.used_databases:
-        #     self.used_databases.append(db2)
-
         return conversations_list
 
     def get_user_profile(self):
@@ -208,9 +201,6 @@ class ModuleReport(ModuleParent):
             message["url"] = "https://www.tiktok.com/@{}".format(message["uniqueid"])
             profiles[message["uniqueid"]] = message
 
-        if not db in self.used_databases:
-            self.used_databases.append(db)
-
         logging.info("{} profiles found".format(len(profiles.keys())))
         return profiles
 
@@ -243,11 +233,7 @@ class ModuleReport(ModuleParent):
                     self.timeline.add(video["last_modified"], timeline_event)
                     break
             videos.append(video)
-            #self.access_path_file(self.internal_path, "./cache/cache/{}".format(entry[0]))
         
-        if not db in self.used_databases:
-            self.used_databases.append(db)
-
         logging.info("{} video(s) found".format(len(videos)))
         return videos
     
@@ -293,7 +279,6 @@ class ModuleReport(ModuleParent):
 
         db = os.path.join(self.internal_cache_path, "databases", "ss_app_log.db")
         database = Database(db)
-        database.execute_pragma()
         results = database.execute_query("select tag, ext_json, datetime(timestamp/1000, 'unixepoch', 'localtime'), session_id from event order by timestamp")
         
         for entry in results:

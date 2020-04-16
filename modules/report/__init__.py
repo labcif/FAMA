@@ -27,7 +27,6 @@ class ModuleParent:
         #print(self.databases)
         #print(self.shared_preferences)
         
-        self.used_databases = []
         self.report = {}
         self.app_name = app_name
         self.app_id = app_id

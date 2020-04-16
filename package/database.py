@@ -14,13 +14,15 @@ else:
 import subprocess
 
 class Database:
-    def __init__(self, database):
+    def __init__(self, database, pragma = True):
         self.database = database
         if jython:
             self.dbConn = DriverManager.getConnection("jdbc:sqlite:{}".format(self.database))
         else:
             self.dbConn = sqlite3.connect(self.database)
 
+        if pragma:
+            self.execute_pragma()
     
     def execute_query(self, query, attach = None):
         if jython:
@@ -49,14 +51,9 @@ class Database:
     
 
     def execute_pragma(self):
-        query = "PRAGMA table_info('%s')" % self.database
-
-        if jython:
-            stmt = self.dbConn.createStatement()
-            stmt.executeQuery(query)
-        else:
-            cu = self.dbConn.cursor()
-            cu.execute(query)
+        self.execute_query("PRAGMA journal_mode = DELETE")
+        self.execute_query("PRAGMA wal_checkpoint(FULL)")
+        
     
     @staticmethod
     def get_undark_output(databases, report_path):

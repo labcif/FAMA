@@ -57,10 +57,12 @@ class ModuleReport(ModuleParent):
         #REMEMBER THAT THE FINAL RESULT MUST BE AN OBJECT THAT WILL BE CONVERTED TO JSON
         
         #EXAMPLE:
+        # self.report["freespace"] = self.get_undark_db()
         # self.report["profile"] = self.get_user_profile()
         # self.report["messages"] = self.get_user_messages()
-        # self.report["freespace"] = self.get_undark_db()
         
+        # UNDARK SHOULD BE FIRST TO ENSURE WE CAN RECOVER OLD DATA
+
         # ALWAYS CALL THE get_sorted_timeline FUNCTION TO ENSURE THAT THE TIMELINE IS RIGHT
         # YOU CAN PASS THE ARGUMENT "True" IF YOU WANT THE TIMELINE INVERTED
         
