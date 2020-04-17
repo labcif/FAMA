@@ -107,7 +107,7 @@ class Utils:
 
         query = header.find(header_type) #query includes position of header
 
-        return True if query == offset else False
+        return query == offset
 
     @staticmethod
     def xml_attribute_finder(xml_path, attrib_values = None):

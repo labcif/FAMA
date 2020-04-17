@@ -17,6 +17,7 @@ class ModuleReport(ModuleParent):
     
     def generate_report(self):
         self.report["freespace"] = self.get_undark_db()
+        self.report["sqlparse"] = self.get_sqlparse()
         self.report["profile"] = self.get_user_profile()
         self.report["messages"] = self.get_user_messages()
         self.report["users"] = self.get_user_profiles()
@@ -228,7 +229,10 @@ class ModuleReport(ModuleParent):
     def get_undark_db(self):
         logging.info("Getting undark output...")
         return Database.get_undark_output(self.databases, self.report_path)
-    
+
+    def get_sqlparse(self):
+        logging.info("Getting sqlparse...")
+        return Database.get_drp_output(self.databases, self.report_path)
 
     def get_videos_publish(self):
         logging.info("Getting published videos")

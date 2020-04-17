@@ -30,6 +30,7 @@ class ModulePsy(ModulePsyParent):
         self.process_users(data.get("users"), file)
         self.process_searches(data.get("searches"), file)
         self.process_undark(data.get("freespace"), file)
+        self.process_drp(data.get("sqlparse"), file)
         self.process_videos(data.get("videos"), report_number, file, os.path.dirname(path), datasource_name)
         self.process_logs(data.get("log"), file)
         self.process_published_videos(data.get("published_videos"), file)
@@ -75,6 +76,14 @@ class ModulePsy(ModulePsyParent):
         self.att_undark_key = self.utils.create_attribute_type('TIKTOK_UNDARK_KEY', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Database")
         self.att_undark_output = self.utils.create_attribute_type('TIKTOK_UNDARK_OUTPUT', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Output")
 
+        #drp
+        self.att_drp_key = self.utils.create_attribute_type('TIKTOK_DRP_KEY', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Database")
+        self.att_drp_type = self.utils.create_attribute_type('TIKTOK_DRP_TYPE', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Type")
+        self.att_drp_offset = self.utils.create_attribute_type('TIKTOK_DRP_OFFSET', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Offset")
+        self.att_drp_length = self.utils.create_attribute_type('TIKTOK_DRP_LENGTH', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Length")
+        self.att_drp_unallocated = self.utils.create_attribute_type('TIKTOK_DRP_UNALLOCATED', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Unallocated")
+        self.att_drp_data = self.utils.create_attribute_type('TIKTOK_DRP_DATA', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Data")
+
         #videos
 
         self.att_vid_key = self.utils.create_attribute_type('TIKTOK_VIDEO_KEY', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Key")
@@ -82,8 +91,8 @@ class ModulePsy(ModulePsyParent):
 
         #published videos
 
-        self.att_publish_vid_created_time = self.utils.create_attribute_type('TIKTOK_PUBLISH_VIDEOS_CREATED_TIME', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.DATETIME, "Created TIme")
-        self.att_publish_vid_url = self.utils.create_attribute_type('TIKTOK_PUBLISH_VIDEOS_URL', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Url")
+        self.att_publish_vid_created_time = self.utils.create_attribute_type('TIKTOK_PUBLISHED_VIDEOS_CREATED_TIME', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.DATETIME, "Created TIme")
+        self.att_publish_vid_url = self.utils.create_attribute_type('TIKTOK_PUBLISHED_VIDEOS_URL', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Url")
 
 
 
@@ -110,8 +119,9 @@ class ModulePsy(ModulePsyParent):
         self.art_profiles = self.utils.create_artifact_type(self.module_name, "TIKTOK_PROFILES_", "Profiles")
         self.art_searches = self.utils.create_artifact_type(self.module_name, "TIKTOK_SEARCHES","Search")
         self.art_videos = self.utils.create_artifact_type(self.module_name, "TIKTOK_VIDEOS", "Videos")
-        self.art_publish_videos = self.utils.create_artifact_type(self.module_name, "TIKTOK_PUBLISH_VIDEOS", "Publish Videos")
-        self.art_undark = self.utils.create_artifact_type(self.module_name, "TIKTOK_UNDARK", "Deleted rows")
+        self.art_publish_videos = self.utils.create_artifact_type(self.module_name, "TIKTOK_PUBLISHED_VIDEOS", "Published Videos")
+        self.art_undark = self.utils.create_artifact_type(self.module_name, "TIKTOK_UNDARK", "Deleted rows (Undark)")
+        self.art_drp = self.utils.create_artifact_type(self.module_name, "TIKTOK_DRP", "Deleted rows (SQLite-Deleted-Records-Parser)")
         self.art_logs = self.utils.create_artifact_type(self.module_name, "TIKTOK_LOGS", "Logs")
         
 
@@ -230,6 +240,27 @@ class ModulePsy(ModulePsyParent):
                     self.utils.index_artifact(art, self.art_undark)        
                 except Exception as e:
                     logging.warning("Error indexing undark output: " + str(e))
+
+    def process_drp(self, drps, file):
+        logging.info("Indexing drp output.")
+        if not drps:
+            return
+        for database, deleted_rows in drps.items():
+            for row in deleted_rows:
+                try: 
+                    art = file.newArtifact(self.art_drp.getTypeID())
+                    attributes = []
+                    attributes.append(BlackboardAttribute(self.att_drp_key, database, database))
+                    attributes.append(BlackboardAttribute(self.att_drp_type, database, row.get("type")))
+                    attributes.append(BlackboardAttribute(self.att_drp_offset, database, row.get("offset")))
+                    attributes.append(BlackboardAttribute(self.att_drp_length, database, row.get("length")))
+                    attributes.append(BlackboardAttribute(self.att_drp_unallocated, database, row.get("unallocated")))
+                    attributes.append(BlackboardAttribute(self.att_drp_data, database, row.get("data")))
+
+                    art.addAttributes(attributes)
+                    self.utils.index_artifact(art, self.art_drp) 
+                except Exception as e:
+                    logging.warning("Error indexing drp output: " + str(e))
 
     def process_users(self, users, file):
         logging.info("Indexing user profiles.")

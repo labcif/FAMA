@@ -1,4 +1,4 @@
-# Unnamed Project (...)
+# LabCIF - Android Forensics
 
 ## Getting Started
 
@@ -74,14 +74,15 @@ Project developed as final project for Computer Engineering course in Escola Sup
 
 ## License
 
-Project License (...)
+This project is licensed under the terms of the MIT license.
 
-* [ADB](https://developer.android.com/studio/releases/platform-tools) - license (...)
-* [Base64](http://rtner.de/software/base64.html) - license (...)
-* [Undark](https://github.com/witwall/undark) - license (...)
-* [Bootstrap](https://getbootstrap.com/) - license (...)
-* [jQuery](https://jquery.com/) - license (...)
-* [feather](https://github.com/feathericons/feather) - license (...)
+* [ADB](https://developer.android.com/studio/releases/platform-tools) - Android Software Development Kit License Agreement
+* [Base64](http://rtner.de/software/base64.html) - GNU GPL v2 License
+* [Undark](https://github.com/witwall/undark) - BSD License 2.0
+* [SQLite-Deleted-Records-Parser](https://github.com/mdegrazia/SQLite-Deleted-Records-Parser) - GNU GPL v3 License
+* [Bootstrap](https://getbootstrap.com/) - MIT License
+* [jQuery](https://jquery.com/) - MIT License
+* [feather](https://github.com/feathericons/feather) - MIT License
 
 ## Notes
 

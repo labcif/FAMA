@@ -1,7 +1,8 @@
+import subprocess
 import sys
 import os
 from package.utils import Utils
-
+from package.sqlparse import SQLParse
 
 if sys.executable and "python" in sys.executable.lower():
     import sqlite3
@@ -11,7 +12,6 @@ else:
     from java.sql import DriverManager
     jython = True
 
-import subprocess
 
 class Database:
     def __init__(self, database, pragma = True):
@@ -69,6 +69,16 @@ class Database:
                 relative_name = os.path.normpath(name.replace(report_path, "")) #clean complete path
                 output[relative_name] = listing
         return output
+
+    @staticmethod
+    def get_drp_output(databases, report_path):
+        listing = {}
+        for database in databases:
+            path = os.path.normpath(database.replace(report_path, ""))
+            content = SQLParse.read_contents(database)
+            if content:
+                listing[path] = content
+        return listing
 
     #not necessary, remove in future?
     '''

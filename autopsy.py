@@ -14,7 +14,7 @@ from psy.settings import ProjectReportSettingsPanel
 
 
 class ProjectIngestModuleFactory(IngestModuleFactoryAdapter):
-    moduleName = "TikTok (to be changed)"
+    moduleName = "LabCif - Android Forensics"
 
     def __init__(self):
         self.settings = None
@@ -51,7 +51,7 @@ class ProjectIngestModuleFactory(IngestModuleFactoryAdapter):
         return ProjectIngestSettingsPanel(self.settings)
 
 class ProjectIngestModuleReport(GeneralReportModuleAdapter):
-    moduleName = "Unnamed Project Report"
+    moduleName = "LabCif - Android Forensics Report"
 
     def __init__(self):
         self.settings = None
