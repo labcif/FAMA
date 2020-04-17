@@ -1,4 +1,5 @@
 #sqlparse.py
+#FORKED FROM https://github.com/mdegrazia/SQLite-Deleted-Records-Parser WITH PYTHON2/3 COMPATIBILITY AND IMPROVEMENTS
 #
 #This program parses an SQLite3 database for deleted entires and
 #places the output into either and TSV file, or text file
@@ -46,7 +47,11 @@ from package.utils import Utils
 class SQLParse:
     @staticmethod
     def remove_ascii_non_printable(chunk):
-        chunk = ''.join(map(chr, chunk))
+        try: #py3
+            chunk = ''.join(map(chr, chunk))
+        except: #py2
+            chunk = ' '.join(chunk.split())
+
         return ''.join([ch for ch in chunk if ord(ch) > 31 and ord(ch) < 126 or ord(ch) ==9])
 
     @staticmethod

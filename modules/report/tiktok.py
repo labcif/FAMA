@@ -7,7 +7,6 @@ from package.database import Database
 from package.utils import Utils
 from package.timeline import Timeline
 from modules.report import ModuleParent
-from package.sqlparse import SQLParse
 
 class ModuleReport(ModuleParent):
     def __init__(self, internal_path, external_path, report_path, app_name, app_id):
@@ -235,16 +234,8 @@ class ModuleReport(ModuleParent):
         return Database.get_undark_output(self.databases, self.report_path)
 
     def get_sqlparse(self):
-        listing = {}
         logging.info("Getting sqlparse...")
-        for database in self.databases:
-            path = os.path.normpath(database.replace(self.report_path, ""))
-            content = SQLParse.read_contents(database)
-            if content:
-                listing[path] = content
-        
-        return listing
-    
+        return Database.get_drp_output(self.databases, self.report_path)
 
     def get_videos_publish(self):
         logging.info("Getting published videos")
