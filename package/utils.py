@@ -196,7 +196,8 @@ class Utils:
         #python2 suppport
         try:
             return int(time.mktime(datetime.datetime.strptime(date,format).timetuple()))
-        except:
+        except Exception as e:
+            logging.warning(e)
             return 0
     
     @staticmethod
