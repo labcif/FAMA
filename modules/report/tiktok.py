@@ -7,6 +7,7 @@ from package.database import Database
 from package.utils import Utils
 from package.timeline import Timeline
 from modules.report import ModuleParent
+from package.sqlparse import SQLParse
 
 class ModuleReport(ModuleParent):
     def __init__(self, internal_path, external_path, report_path, app_name, app_id):
@@ -17,6 +18,7 @@ class ModuleReport(ModuleParent):
     
     def generate_report(self):
         self.report["freespace"] = self.get_undark_db()
+        self.report["sqlparse"] = self.get_sqlparse()
         self.report["profile"] = self.get_user_profile()
         self.report["messages"] = self.get_user_messages()
         self.report["users"] = self.get_user_profiles()
@@ -231,6 +233,17 @@ class ModuleReport(ModuleParent):
     def get_undark_db(self):
         logging.info("Getting undark output...")
         return Database.get_undark_output(self.databases, self.report_path)
+
+    def get_sqlparse(self):
+        listing = {}
+        logging.info("Getting sqlparse...")
+        for database in self.databases:
+            path = os.path.normpath(database.replace(self.report_path, ""))
+            content = SQLParse.read_contents(database)
+            if content:
+                listing[path] = content
+        
+        return listing
     
 
     def get_videos_publish(self):
