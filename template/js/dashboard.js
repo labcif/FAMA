@@ -27,6 +27,7 @@ function initializeMenus(){
     }
   });
   list += `<button class="btn btn-secondary mt-5" id="timeline-btn">Timeline chart</button>`
+  list += `<button class="btn btn-secondary mt-1" id="media-btn">Media</button>`
   $("#menu-list").html(list);
 }
 
@@ -68,7 +69,9 @@ function renderTimeline(){
   let entrys = Object.keys(report["timeline"]).length
   // console.log(last_date)
 
-  content = `<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom"><h1 class="h2">Timeline</h1></div><div class="row"><div class="tracking-list">` 
+  content = getHeader("timeline")
+  
+  content+= `<div class="row"><div class="tracking-list">` 
   
 
 
@@ -114,6 +117,32 @@ function renderTimeline(){
 
 }
 
+function getHeader(title){
+  return `<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom"><h1 class="h2">${capitalize(title)}</h1></div>`
+}
+ 
+
+function renderMedia(){
+//   content = `<div class="embed-responsive embed-responsive-21by9">
+//   <iframe class="embed-responsive-item" src="C:\\Users\\josef\\Desktop\\Autopsy_tests\\asdasd\\ModuleOutput\\AndroidForensics\\com.zhiliaoapp.musically\\2\\report\\Contents\\external\\cache\\welcome_screen_video4.mp4"></iframe>
+// </div>`;
+
+src = `C:\\Users\\josef\\Desktop\\Autopsy_tests\\test.mp4`
+
+content = `
+${getHeader("Media")}
+<div class="row">
+  <div class="col-lg-4 col-md-12 mb-4">
+    <div class="embed-responsive embed-responsive-4by3 z-depth-1-half">
+      <iframe class="embed-responsive-item" src="${src}" allowfullscreen></iframe>
+    </div>
+  </div>
+</div>`
+
+$("#page-builder").html(content);
+
+}
+
 
 function pageBuilder(title){
   report = getReportData()
@@ -123,7 +152,7 @@ function pageBuilder(title){
 
   let content = "";
 
-  content += `<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom"><h1 class="h2">${capitalize(title)}</h1></div>`
+  content += getHeader(title)
 
   //Array of objects
   if (Array.isArray(report[title]) && typeof report[title][0] === 'object'){
@@ -178,6 +207,7 @@ function pageBuilder(title){
 function startUp(){
   initializeMenus()
   renderTimeline()
+  // renderMedia()
   //generatedDate()
 
   let defined = false

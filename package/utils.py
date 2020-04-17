@@ -10,6 +10,7 @@ import json
 import time
 import re
 import logging
+import sys
 
 class Utils: 
     @staticmethod
@@ -193,12 +194,32 @@ class Utils:
     
     @staticmethod
     def date_parser(date, format):
-        #python2 suppport
+         #python2 suppport
+        date = Utils.compat_py23str(date)
+        
+       
         try:
-            return int(time.mktime(datetime.datetime.strptime(date,format).timetuple()))
+            return int(time.mktime(datetime.datetime.strptime(str(date),format).timetuple()))
         except Exception as e:
             logging.warning(e)
             return 0
+
+
+    @staticmethod
+    def compat_py23str(x):
+        if sys.version_info > (3, 0):
+            return str(x)
+        else:
+            if isinstance(x, unicode):
+                try:
+                    return unicode(x).encode("utf-8")
+                except UnicodeEncodeError:
+                    try:
+                        return unicode(x).encode("utf-8")
+                    except:
+                        return str(x)
+            else:
+                return str(x)
     
     @staticmethod
     def setup_custom_logger(logfile="module.log"):
