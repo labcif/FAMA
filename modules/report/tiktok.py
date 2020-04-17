@@ -106,11 +106,10 @@ class ModuleReport(ModuleParent):
                 conversation_output["messages"].append(message)
 
                 timeline_event = {}
-                timeline_event["event"]= "Message"
                 timeline_event["from"]= message["sender"]
                 timeline_event["to"]= message["receiver"]
                 timeline_event["message"]= message["message"]
-                self.timeline.add(message["createdtime"], timeline_event)
+                self.timeline.add(message["createdtime"],"message", timeline_event)
             
             #adding conversation and participants information to main array
             conversations_list.append(conversation_output)
@@ -139,11 +138,10 @@ class ModuleReport(ModuleParent):
         
         
         timeline_event = {}
-        timeline_event["event"]= "User resgistration"
         timeline_event["uniqueid"] = user_profile["unique_id"] 
         timeline_event["url"]= user_profile["url"]
 
-        self.timeline.add(user_profile["register_time"], timeline_event)
+        self.timeline.add(user_profile["register_time"],"user", timeline_event)
         
         return user_profile
     
@@ -218,10 +216,9 @@ class ModuleReport(ModuleParent):
                     
 
                     timeline_event = {}
-                    timeline_event["event"]= "Video loaded"
                     timeline_event["video"]= video["key"]
 
-                    self.timeline.add(video["last_modified"], timeline_event)
+                    self.timeline.add(video["last_modified"],"video", timeline_event)
                     break
             videos.append(video)
         
@@ -250,10 +247,9 @@ class ModuleReport(ModuleParent):
                     
                     
                     timeline_event = {}
-                    timeline_event["event"]= "Video Published"
                     timeline_event["url"]= video["video"]
                     
-                    self.timeline.add(video["created_time"], timeline_event)
+                    self.timeline.add(video["created_time"],"publish", timeline_event)
                     videos.append(video)
     
         logging.info("{} video(s) found".format(len(videos)))
@@ -281,10 +277,9 @@ class ModuleReport(ModuleParent):
             session_entry["session_id"] = entry[3]
             
             timeline_event = {}
-            timeline_event["event"]= "System Action"
             timeline_event["action"]= session_entry["action"]
             
-            self.timeline.add(session_entry["time"], timeline_event)
+            self.timeline.add(session_entry["time"],"system", timeline_event)
             
             session.append(session_entry)
 

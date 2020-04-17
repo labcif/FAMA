@@ -26,13 +26,14 @@ function initializeMenus(){
       list += `<li class="nav-item"><a id="menulink-${item}" class="nav-link menu-item" href="#"><span data-feather="file-text"></span>${capitalize(item)}</a></li>`;
     }
   });
-  
+  list += `<button class="btn btn-secondary mt-5" id="timeline-btn">Timeline chart</button>`
   $("#menu-list").html(list);
 }
 
 function generatedDate(){
   $("#generated-date").html("Generated at " + (new Date(Number(reportData["header"]["report_date"])).toISOString().slice(0, 19).replace(/-/g, "/").replace("T", " ")));
 }
+
 
 function menuClick(event){
   if (event.target){
@@ -54,38 +55,45 @@ function menuClick(event){
   pageBuilder(name);
 }
 
-function getEventIcon(event){
-  var icons ={}
-  icons["video"] = `
-  <svg x="0px" y="0px" viewBox="0 0 426.667 426.667">
-  <g>
-     <polygon points="170.667,309.333 298.667,213.333 170.667,117.333" />
-     <path d="M213.333,0C95.467,0,0,95.467,0,213.333s95.467,213.333,213.333,213.333S426.667,331.2,426.667,213.333
-     S331.2,0,213.333,0z M213.333,384c-94.08,0-170.667-76.587-170.667-170.667S119.253,42.667,213.333,42.667
-     S384,119.253,384,213.333S307.413,384,213.333,384z" />
-  </g>
-  </svg>`;
 
-  return icons[event];
-}
 
 
 function renderTimeline(){
-  content = `<div class="container"><h2>TIMELINE</h2><div class="row"><div class="col-md-12 col-lg-12"><div id="tracking-pre"></div><div id="tracking"><div class="text-center tracking-status-intransit"><p class="tracking-status text-tight">in transit</p></div><div class="tracking-list">` 
-  report = getReportData();
+  console.log("entrou");
 
-  report["timeline"].forEach(item => {
-    d = new Date(item["timestamp"] * 1000);
-    // console.log( d.toLocaleDateString("pt-PT") +" "+ d.toLocaleTimeString("pt-PT"))
-    
-    let date = d.toLocaleDateString("pt-PT");
-    let time = d.toLocaleTimeString("pt-PT");
+  report = getReportData();
+  console.log(report);
+  // let first_date = new Date(report["timeline"][0]["timestamp"]*1000).toLocaleDateString("pt-PT")
+  // let last_date = new Date(report["timeline"][report["timeline"].length-1]["timestamp"]*1000).toLocaleDateString("pt-PT")
+  let entrys = Object.keys(report["timeline"]).length
+  // console.log(last_date)
+
+  content = `<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom"><h1 class="h2">Timeline</h1></div><div class="row"><div class="tracking-list">` 
+  
+
+
+
+    report["timeline"].forEach(item => {
+      let date ="";
+      let time ="";
+      if(item["timestamp"] == 0){
+        date = `<span class="badge badge-pill badge-danger text-white ml-3">Invalid date</span>`
+        time = ``
+      }else{
+        timestamp = new Date(item["timestamp"] * 1000);
+        date = timestamp.toLocaleDateString("pt-PT");
+        time = timestamp.toLocaleTimeString("pt-PT");
+      }
 
     content += ` <div class="tracking-item">
-    <div class="tracking-icon status-intransit"> ${getEventIcon("video".toLowerCase())}
+    <div class="tracking-icon status-intransit"> 
+    <object data="svg/${item["event"]}.svg" type="image/svg+xml" class="w-100"></object>
+    
+    
+    
     </div>
     <div class="tracking-date">${date}<span>${time}</span></div>
-    <div class="tracking-content">${item["value"]["event"]}`
+    <div class="tracking-content">`
 
     Object.keys(item["value"]).forEach(function (body) {
       content += `<span><strong>${body + ": </strong>" + item["value"][body]}</span>`;
@@ -100,7 +108,7 @@ function renderTimeline(){
 
   });
 
-  content += `</div></div></div></div></div>`
+  content += `</div></div></div></div>`
   
   $("#page-builder").html(content);
 
@@ -190,7 +198,8 @@ function startUp(){
   startUp()
 
   $(".menu-item").on("click", menuClick);
+  $(".timeline-btn").on("click", renderTimeline);
   $("#reports-list").change(startUp);
-
+  
 }())
 

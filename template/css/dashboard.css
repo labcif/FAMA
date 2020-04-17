@@ -143,41 +143,10 @@ body {
 }
 
 .tracking-status-intransit {
-  background-color: #65aee0
+  background-color: #292b2c
 }
 
-.tracking-status-outfordelivery {
-  background-color: #f5a551
-}
 
-.tracking-status-deliveryoffice {
-  background-color: #f7dc6f
-}
-
-.tracking-status-delivered {
-  background-color: #4cbb87
-}
-
-.tracking-status-attemptfail {
-  background-color: #b789c7
-}
-
-.tracking-status-error,
-.tracking-status-exception {
-  background-color: #d26759
-}
-
-.tracking-status-expired {
-  background-color: #616e7d
-}
-
-.tracking-status-pending {
-  background-color: #ccc
-}
-
-.tracking-status-inforeceived {
-  background-color: #214977
-}
 
 .tracking-list {
   border: 1px solid #e5e5e5

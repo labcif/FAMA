@@ -9,9 +9,10 @@ class Timeline:
         self.timeline = []
     
 
-    def add(self, timestamp, obj):
+    def add(self, timestamp, event, obj):
         entry= {
             "timestamp": timestamp,
+            "event": str(event),
             "value": obj 
             }
         self.timeline.append(entry)
