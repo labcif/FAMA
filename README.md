@@ -74,7 +74,7 @@ Project developed as final project for Computer Engineering course in Escola Sup
 
 ## License
 
-This project is licensed under the terms of the MIT license.
+This project is licensed under the terms of the GNU GPL v3 License.
 
 * [ADB](https://developer.android.com/studio/releases/platform-tools) - Android Software Development Kit License Agreement
 * [Base64](http://rtner.de/software/base64.html) - GNU GPL v2 License
