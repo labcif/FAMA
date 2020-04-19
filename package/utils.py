@@ -49,6 +49,18 @@ class Utils:
             archive.add(folder_path, recursive=True, arcname = arcname)
     
     @staticmethod
+    def list_folders(folder_path):
+        folders = []
+        if not folder_path or not os.path.exists(folder_path):
+            return folders
+
+        for root, directories, files in os.walk(folder_path):
+            for directory in directories:
+                folders.append(os.path.join(root, directory))
+
+        return folders
+
+    @staticmethod
     def list_files(folder_name, filter_type = None):
         files_list = []
         if not folder_name or not os.path.exists(folder_name):
@@ -234,3 +246,14 @@ class Utils:
         console.setFormatter(logging.Formatter(formatting))
         logging.getLogger().addHandler(console)
         
+    @staticmethod
+    def find_folder_has_folder(path, folder):
+        folders = Utils.list_folders(folder)
+        final_path = None
+
+        for x in filter(lambda x: path in x, folders):
+            if x.endswith(path):
+                final_path = x
+                break
+
+        return final_path

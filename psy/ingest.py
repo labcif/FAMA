@@ -51,7 +51,6 @@ class ProjectIngestModule(DataSourceIngestModule):
         
     def process(self, dataSource, progressBar):
         progressBar.switchToDeterminate(100)
-        logging.info(str(Case.getCurrentCase().getDataSources()))
 
         data_sources = [dataSource]
 
@@ -83,6 +82,8 @@ class ProjectIngestModule(DataSourceIngestModule):
         progressBar.progress("Done", 100)
 
     def process_by_datasource(self, dataSource, progressBar, percent):
+        logging.critical(str(dataSource.getRootDirectory()))
+
         internal = self.app_id + "_internal.tar.gz"
         external = self.app_id + "_external.tar.gz"
         json_report = "%.json"
@@ -101,29 +102,59 @@ class ProjectIngestModule(DataSourceIngestModule):
         reports = []
 
         progressBar.progress("Analyzing Information for {}".format(dataSource.getName()), percent)
-
         # Analyse and generate and processing reports 
-        for base in dumps:
-            base_path = os.path.dirname(base.getLocalPath())
-            if base_path in base_paths:
-                continue
+        if dumps:
+            for base in dumps:
+                base_path = os.path.dirname(base.getLocalPath())
+                if base_path in base_paths:
+                    continue
 
-            base_paths.append(base_path)
+                base_paths.append(base_path)
 
-            number_of_reports+=1
-            report_folder_path = os.path.join(self.tempDirectory,str(number_of_reports)) #report path
-            copy_tree(base_path, report_folder_path) #copy from dump to report path
-            Utils.check_and_generate_folder(report_folder_path)
+                number_of_reports+=1
+                report_folder_path = os.path.join(self.tempDirectory,str(number_of_reports)) #report path
+                copy_tree(base_path, report_folder_path) #copy from dump to report path
+                Utils.check_and_generate_folder(report_folder_path)
+                
+                analyzer = Analyzer(self.app, report_folder_path, report_folder_path)
+                analyzer.generate_report()
+
+                report_location = os.path.join(report_folder_path, "report", "Report.json")
+
+                item = {}
+                item["report"] = report_location
+                item["file"] = base
+                reports.append(item)
+        else:
+            #little hack to know datasource real path
+            base_path = None
+            base = None
+            files = self.fileManager.findFiles(dataSource, "%")
+            for x in files:
+                if x.getLocalPath() and '/data/data/' in x.getParentPath():
+                    local = Utils.replace_slash_platform(x.getLocalPath()) #normalize
+                    if Utils.get_platform().startswith("windows"):    
+                        base_path = local.split("\\data\\data\\")[0]
+                    else:
+                        base_path = local.split("/data/data/")[0]
+
+                    base = x
+                    break
             
-            analyzer = Analyzer(self.app, report_folder_path, report_folder_path)
-            analyzer.generate_report()
+            if base_path:
+                number_of_reports+=1
+                report_folder_path = os.path.join(self.tempDirectory,str(number_of_reports)) #report path
+                #copy_tree(base_path, report_folder_path) #copy from dump to report path
+                Utils.check_and_generate_folder(report_folder_path)
 
-            report_location = os.path.join(report_folder_path, "report", "Report.json")
-
-            item = {}
-            item["report"] = report_location
-            item["file"] = base
-            reports.append(item)
+                analyzer = Analyzer(self.app, base_path, report_folder_path)
+                analyzer.generate_report()
+                
+                report_location = os.path.join(report_folder_path, "report", "Report.json")
+                item = {}
+                item["report"] = report_location
+                item["file"] = base
+                reports.append(item)
 
         if self.settings.getSetting('old_report') == "true":
             # Processing datasource json reports

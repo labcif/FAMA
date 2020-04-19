@@ -27,7 +27,8 @@ def start(args):
                 logging.warning("Invalid dump name: {}. Ignoring".format(dump))
 
     if args.path:
-        folders.extend(extract.dump_from_path(args.path, args.app))
+        folders.append(args.path)
+        #folders.extend(extract.dump_from_path(args.path, args.app))
 
     if args.adb:
         if '.' in args.app:
@@ -46,7 +47,7 @@ def start(args):
         analyzer = Analyzer(args.app, folder, args.output)
         report = analyzer.generate_report()
 
-        if args.html:
+        if args.html and report:
             analyzer.generate_html_report(report, args.output)
 
     logging.info("Done")

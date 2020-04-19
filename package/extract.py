@@ -10,7 +10,7 @@ from package.device import DeviceCommunication
 class Extract:
     def __init__(self):
         self.internal_data_path = "/data/data/{}"
-        self.external_data_path = "/sdcard/Android/data/{}"
+        self.external_data_path = "/data/media/0/Android/data/{}"
         self.internal_data_dump_name = "{}_internal.tar.gz"
         self.external_data_dump_name = "{}_external.tar.gz"
 
@@ -79,36 +79,3 @@ class Extract:
             folders[serial_number] = path_dump_folder
         
         return folders
-
-    def dump_from_path(self, base_path, app_package):
-        base_path = Utils.replace_slash_platform(base_path)
-
-        if not os.path.exists(base_path):
-            logging.critical("[Dump] Dump from path failed: {} doesn't exists".format(base_path))
-            return None
-
-        current_time = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-        path_dump_folder = os.path.join(self.dumps_path, current_time)
-        path_dump_internal = os.path.join(path_dump_folder, self.internal_data_dump_name.format(app_package))
-        path_dump_external = os.path.join(path_dump_folder, self.external_data_dump_name.format(app_package))
-        
-        #Check if we have dump folder
-        Utils.check_and_generate_folder(path_dump_folder)
-
-        #Extract internal data from mount
-        path_original_internal = Utils.replace_slash_platform(os.path.join(base_path, self.internal_data_path.format(app_package)[1:])) #clean first / to allow concat
-        if os.path.exists(path_original_internal):
-            logging.info("Extracting internal app data!")
-            Utils.generate_tar_gz_file(path_original_internal, path_dump_internal)
-        else:
-            logging.critical("Internal app folder {} doesn't exist".format(path_original_internal))
-
-        #Extract external data from mount
-        path_original_external = Utils.replace_slash_platform(os.path.join(base_path, self.external_data_path.format(app_package)[1:]))
-        if os.path.exists(path_original_external):
-            logging.info("Extracting external app data!")
-            Utils.generate_tar_gz_file(path_original_external, path_dump_external)
-        else:
-            logging.critical("External app folder {} doesn't exist".format(path_original_external))        
-
-        return [path_dump_folder]
