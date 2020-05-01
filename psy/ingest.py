@@ -113,15 +113,21 @@ class ProjectIngestModule(DataSourceIngestModule):
                     self.process_by_datasource(source, progressBar, percent, tempDirectory, app_id)
             
             logging.info("Ending ADB")
-            # TODO FIX
-        Utils.remove_folder(self.tempDirectory)
+            
+            
+            # TODO FIND ALL APPS APPS PRESENT AT DUMPS AND REPALCE WITH FOR EACH AND APP_ID
+             
+        app_id = "com.zhiliaoapp.musically"
+        self.temp_module_path = os.path.join(Case.getCurrentCase().getModulesOutputDirAbsPath(), "AndroidForensics", Utils.find_app_name(app_id))
+        tempDirectory = os.path.join(self.temp_module_path, app_id)
+        Utils.remove_folder(tempDirectory)
         
         # Normal ingest
         count = 0
         for source in data_sources:
             count += 1
             percent = int(count / float(len(data_sources) + 1) * 100)
-            self.process_by_datasource(source, progressBar, percent, app_id)
+            self.process_by_datasource(source, progressBar, percent, tempDirectory, app_id)
         
         progressBar.progress("Done", 100)
 
