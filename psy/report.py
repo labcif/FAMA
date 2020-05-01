@@ -38,7 +38,7 @@ class ReportOutput:
 
         progressBar.updateStatusLabel("Creating report")
 
-        report_path = Analyzer.generate_html_report(self.reports, baseReportDir, add_folder = False)
+        report_path = Analyzer.generate_html_report(self.reports, baseReportDir)
 
         Case.getCurrentCase().addReport(report_path, "Report", "Forensics Report")
 

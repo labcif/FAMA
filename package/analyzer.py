@@ -16,8 +16,10 @@ class Analyzer:
         self.internal_path = None
         self.external_path = None
         self.folder = folder
+
+        Utils.check_and_generate_folder(report_folder)
         
-        self.report_path = os.path.join(report_folder, "report")
+        self.report_path = os.path.join(report_folder, self.app_id)
         Utils.remove_folder(self.report_path)
 
         Utils.check_and_generate_folder(self.report_path)
@@ -26,9 +28,9 @@ class Analyzer:
     
     def initialize_dumps(self):
         for name in Utils.list_files(self.folder, ".tar.gz"):
-            if '_internal.tar.gz' in name:
+            if self.app_id + '_internal.tar.gz' in name:
                 self.internal_path = name
-            elif '_external.tar.gz' in name:
+            elif self.app_id +  '_external.tar.gz' in name:
                 self.external_path = name
 
     def generate_report(self):
@@ -81,13 +83,7 @@ class Analyzer:
         return {"Report_1": module.generate_report()}
 
     @staticmethod
-    def generate_html_report(reports, output_folder, add_folder = True):
-        report_path = output_folder
-        
-        if add_folder:
-            report_path = os.path.join(output_folder, "report")
-            Utils.check_and_generate_folder(report_path)
-            
+    def generate_html_report(reports, report_path):
         logging.info("Generating HTML report")
 
         copy_tree(os.path.join(Utils.get_base_path_folder(), "template"), report_path)

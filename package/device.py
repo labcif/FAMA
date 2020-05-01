@@ -4,10 +4,8 @@ import logging
 from package.utils import Utils
 
 class DeviceCommunication:
-    def __init__(self):
-        self.devices = []
-
-    def list_devices(self):
+    @staticmethod
+    def list_devices():
         logging.info("Getting list of devices")
         adb_location = Utils.get_adb_location()
         command = """{} devices""".format(adb_location)

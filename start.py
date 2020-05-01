@@ -12,49 +12,51 @@ from package.utils import Utils
 
 def start(args):
     Utils.setup_custom_logger()
-    logging.info("Starting")    
+    logging.info("Starting")
     
     extract = Extract()
-    folders = []
-    
 
-    if args.dump:
-        for dump in args.dump:
-            dump_path = os.path.join(Utils.get_base_path_folder(), "dumps", dump)
-            if os.path.exists(dump_path):
-                folders.append(dump_path)
-            else:
-                logging.warning("Invalid dump name: {}. Ignoring".format(dump))
-
-    if args.path:
-        folders.append(args.path)
-        #folders.extend(extract.dump_from_path(args.path, args.app))
-
-    if args.adb:
-        if '.' in args.app:
-            app_id = args.app
-        else:
-            app_id = Utils.find_package(args.app)
-
-        for serial, folder in extract.dump_from_adb(app_id).items():
-            folders.append(folder)
-    
     if not args.output:
-        args.output = Utils.get_base_path_folder()
+        args.output = os.path.join(Utils.get_base_path_folder(), "report")
 
+    Utils.remove_folder(args.output) #clean report folder
 
-    for folder in folders:
-        analyzer = Analyzer(args.app, folder, args.output)
-        report = analyzer.generate_report()
+    for app in args.app:
+        folders = []
 
-        if args.html and report:
-            analyzer.generate_html_report(report, args.output)
+        if '.' in app:
+            app_id = app
+        else:
+            app_id = Utils.find_package(app)
+
+        if args.dump:
+            for dump in args.dump:
+                dump_path = os.path.join(Utils.get_base_path_folder(), "dumps", dump)
+                if os.path.exists(dump_path):
+                    for folder in os.listdir(dump_path):
+                        folders.append(os.path.join(dump_path, folder))
+                else:
+                    logging.warning("Invalid dump name: {}. Ignoring".format(dump))
+
+        if args.path:
+            folders.append(args.path)
+
+        if args.adb:
+            for serial, folder in extract.dump_from_adb(app_id).items():
+                folders.append(folder)
+        
+        for folder in folders:
+            analyzer = Analyzer(app, folder, args.output)
+            report = analyzer.generate_report()
+
+            if args.html and report:
+                analyzer.generate_html_report(report, os.path.join(args.output, app_id))
 
     logging.info("Done")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Forensics Artefacts Analyzer')
-    parser.add_argument('app', help='Application or package to be analyzed <tiktok> or <com.zhiliaoapp.musically>')
+    parser.add_argument('app', help='Application or package to be analyzed <tiktok> or <com.zhiliaoapp.musically>', nargs='+')
     parser.add_argument('-d', '--dump', help='Analyze specific(s) dump(s) <20200307_215555 ...>', nargs='+', required = False)
     parser.add_argument('-p', '--path', help='Dump app data in path (mount or folder structure)', required = False)
     parser.add_argument('-o', '--output', help='Report output path folder', required = False)
