@@ -3,7 +3,7 @@ from javax.swing import BoxLayout
 from javax.swing import JButton
 from javax.swing import ButtonGroup
 from javax.swing import JComboBox
-#from javax.swing import JRadioButton
+from javax.swing import JRadioButton
 from javax.swing import JList
 from javax.swing import JLabel
 from javax.swing import JTextArea
@@ -12,6 +12,7 @@ from javax.swing import JLabel
 from java.awt import GridLayout
 from java.awt import GridBagLayout
 from java.awt import GridBagConstraints
+from java.awt import Component
 from javax.swing import JPanel
 from javax.swing import JScrollPane
 from javax.swing import JFileChooser
@@ -45,46 +46,149 @@ class ProjectIngestSettingsPanel(IngestModuleIngestJobSettingsPanel):
         self.initComponents()
         self.customizeComponents()
 
-    def event(self, event):
-        self.local_settings.setSetting('adb', 'true' if self.adb.isSelected() else 'false')
-        #self.local_settings.setSetting('clean_temp', 'true' if self.clean_temp.isSelected() else 'false')
-        self.local_settings.setSetting('old_report', 'true' if self.json_reports.isSelected() else 'false')
-        self.local_settings.setSetting('app', self.app.getSelectedItem().split(' (')[0].lower())
+        
+
+    # def event(self, event):
+    #     self.local_settings.setSetting('adb', 'true' if self.adb.isSelected() else 'false')
+    #     #self.local_settings.setSetting('clean_temp', 'true' if self.clean_temp.isSelected() else 'false')
+    #     self.local_settings.setSetting('old_report', 'true' if self.json_reports.isSelected() else 'false')
+    #     # self.local_settings.setSetting('app', self.app.getSelectedItem().split(' (')[0].lower())
 
     def initComponents(self):
-        self.setLayout(BoxLayout(self, BoxLayout.Y_AXIS))
+        self.apps_checkboxes_list = []
 
-        self.label = JLabel("Application to be analyzed")
-        self.label.setBounds(120,20,60,20)
-        self.add(self.label)
+        self.setLayout(BoxLayout(self, BoxLayout.PAGE_AXIS))
+        
+        # title 
+        self.p_title = createPanel()
+        self.lb_title = JLabel("Android Forensics")
+        self.p_title.add(self.lb_title)
+        self.add(self.p_title)
+        # end of title
+        
+        
+        # info menu
+        self.p_info = createPanel()
+        self.lb_info = JLabel("")
+        self.lb_info2 = JLabel("")
+        self.p_info.add(self.lb_info)
+        self.p_info.add(self.lb_info2)
+        
+       
+        self.add(self.p_info)
 
-        self.combobox_data = []
+        # end of info menu
+
+        # method menu
+
+        self.p_method = createPanel()
+        self.bg_method = ButtonGroup()
+        self.rb_selectedDatasouce = createRadioButton("Analyse selected datasource", "method_datasource", self.onMethodChange)
+        self.rb_importReportFile = createRadioButton("Import previous generated report file","method_importfile" ,self.onMethodChange)
+        self.rb_liveExtraction = createRadioButton("Live extraction with ADB","method_adb", self.onMethodChange)
+        self.rb_selectedDatasouce.setSelected(True)
+
+        self.bg_method.add(self.rb_selectedDatasouce)
+        self.bg_method.add(self.rb_importReportFile)
+        self.bg_method.add(self.rb_liveExtraction)
+
+        self.p_method.add(JLabel("Analsis method"))
+        self.p_method.add(self.rb_selectedDatasouce)
+        self.p_method.add(self.rb_importReportFile)
+        self.p_method.add(self.rb_liveExtraction)
+        self.add(self.p_method)
+
+        # end of method menu
+
+
+        #app checkboxes menu
+        self.p_apps = createPanel()
+        
         for app, app_id in Utils.get_all_packages().items():
-            self.combobox_data.append("{} ({})".format(app.capitalize(), app_id))
+            
+            checkbox = addApplicationCheckbox(app, app_id)
+            self.add(checkbox)
+            self.apps_checkboxes_list.append(checkbox)
+            self.p_apps.add(checkbox)
 
-        self.app = JComboBox(sorted(self.combobox_data), itemStateChanged = self.event)
-        self.add(self.app)
+        
+        self.add(self.p_apps)
+        # end of checkboxes menu
 
-        self.adb = JCheckBox("Extract data from ADB and analyze it", actionPerformed=self.event)
-        self.add(self.adb)
-
-        self.json_reports = JCheckBox("Include old JSON reports", actionPerformed=self.event)
-        self.add(self.json_reports)
-
-        #self.clean_temp = JCheckBox("Clean temporary folder if exists", actionPerformed=self.event)
-        #self.clean_temp.setSelected(True)
-        #self.add(self.clean_temp)
+        
 
     def customizeComponents(self):
-        self.app.setSelectedItem("Tiktok (com.zhiliaoapp.musically)")
 
-        self.local_settings.setSetting('adb', 'false')
-        #self.local_settings.setSetting('clean_temp', 'true')
-        self.local_settings.setSetting('old_report', 'false')
-        self.local_settings.setSetting('app', self.app.getSelectedItem().split(' (')[0].lower())
+        self.local_settings.setSetting("method", "method_adb")
+        # self.local_settings.setSetting("apps", self.getSelectedApps())
+    
+    def onMethodChange(self, event):
+        self.method = self.bg_method.getSelection().getActionCommand()
+        self.local_settings.setSetting("method", self.method)
+
+        if self.method == "method_datasource":
+            self.lb_info.setText("This method is used when there is no data source but you have the device.")
+            self.lb_info2.setText("It will extract the content of the selected applications from the device, analyze and index the forensic artifacts.")
+            self.toggleCheckboxes(False)
+            
+
+        elif self.method == "method_importfile":
+        
+            self.lb_info.setText("This method is used when you already have a report in json format previously generated by the application.")
+            self.lb_info2.setText("It will analyze the report previously added to the data source and index the forensic artifacts.")
+            self.toggleCheckboxes(False)
+    
+        elif self.method == "method_adb":
+            self.lb_info.setText("This method is used when the application data has already been collected.")
+            self.lb_info2.setText("It will analyze the data source previously added to the data source and index the forensic artifacts.")
+            self.toggleCheckboxes(True)
+
+        self.local_settings.setSetting("apps", self.getSelectedApps())
+        
 
     def getSettings(self):
         return self.local_settings
+    
+    def getMethod(self):
+        return self.bg_method.getSelection().getActionCommand()
+    
+    def getSelectedApps(self):
+        selected_apps = ""
+        
+        for cb_app in self.apps_checkboxes_list:
+            if cb_app.isSelected():
+                selected_apps+= cb_app.getActionCommand()+";"
+
+        # self.local_settings.setSetting("apps", self.getSelectedApps())
+        return selected_apps
+
+
+    
+    def toggleCheckboxes(self, visible):
+        for cb_app in self.apps_checkboxes_list:
+            cb_app.setVisible(visible)
+
+
+def createPanel():
+    panel = JPanel()
+    panel.setLayout(BoxLayout(panel, BoxLayout.PAGE_AXIS))
+    panel.setAlignmentX(Component.LEFT_ALIGNMENT)
+    return panel
+
+def addApplicationCheckbox(app, app_id):
+        checkbox = JCheckBox("{} ({})".format(app.capitalize(), app_id))
+        checkbox.setActionCommand(app)
+        checkbox.setSelected(True)
+        checkbox.setVisible(False)
+        checkbox.setActionCommand(app_id)
+        
+        return checkbox
+
+
+def createRadioButton(name, ac, ap):
+    button = JRadioButton(name, actionPerformed= ap)
+    button.setActionCommand(ac)
+    return button   
 
 class ProjectReportSettingsPanel(JPanel):
     def __init__(self):
