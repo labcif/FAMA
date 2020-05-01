@@ -167,8 +167,9 @@ class ModulePsy(ModulePsyParent):
             participant_1 = c.get("participant_1")
             participant_2 = c.get("participant_2")
 
-            contact_1 = self.utils.get_or_create_account(Account.Type.MESSAGING_APP, file, participant_1)
-            contact_2 = self.utils.get_or_create_account(Account.Type.MESSAGING_APP, file, participant_2)
+            account = self.utils.add_account_type("Tiktok", "Tiktok")
+            contact_1 = self.utils.get_or_create_account(account, file, participant_1)
+            contact_2 = self.utils.get_or_create_account(account, file, participant_2)
                 
             
             for m in c.get("messages"):

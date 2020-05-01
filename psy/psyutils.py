@@ -7,6 +7,7 @@ from org.sleuthkit.autopsy.ingest import ModuleDataEvent
 from org.sleuthkit.autopsy.ingest import IngestServices
 from org.sleuthkit.datamodel import BlackboardAttribute
 from org.sleuthkit.autopsy.ingest import IngestMessage
+from org.sleuthkit.datamodel import CommunicationsManager 
 
 from psy.progress import ProgressUpdater
 
@@ -68,3 +69,8 @@ class PsyUtils:
     @staticmethod
     def get_or_create_account(account_type, file, uniqueid):
         return Case.getCurrentCase().getSleuthkitCase().getCommunicationsManager().createAccountFileInstance(account_type, uniqueid, "test", file.getDataSource())
+
+    @staticmethod
+    def add_account_type(accountTypeName, displayName):
+        communication_manager = Case.getCurrentCase().getSleuthkitCase().getCommunicationsManager()
+        return CommunicationsManager.addAccountType(communication_manager,accountTypeName, displayName)
