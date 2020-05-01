@@ -106,7 +106,7 @@ class ProjectIngestSettingsPanel(IngestModuleIngestJobSettingsPanel):
         
         for app, app_id in Utils.get_all_packages().items():
             
-            checkbox = addApplicationCheckbox(app, app_id)
+            checkbox = addApplicationCheckbox(app, app_id, self.getSelectedApps)
             self.add(checkbox)
             self.apps_checkboxes_list.append(checkbox)
             self.p_apps.add(checkbox)
@@ -143,7 +143,7 @@ class ProjectIngestSettingsPanel(IngestModuleIngestJobSettingsPanel):
             self.lb_info2.setText("It will analyze the data source previously added to the data source and index the forensic artifacts.")
             self.toggleCheckboxes(True)
 
-        self.local_settings.setSetting("apps", self.getSelectedApps())
+        # self.local_settings.setSetting("apps", self.getSelectedApps())
         
 
     def getSettings(self):
@@ -159,8 +159,8 @@ class ProjectIngestSettingsPanel(IngestModuleIngestJobSettingsPanel):
             if cb_app.isSelected():
                 selected_apps+= cb_app.getActionCommand()+";"
 
-        # self.local_settings.setSetting("apps", self.getSelectedApps())
-        return selected_apps
+        self.local_settings.setSetting("apps", selected_apps)
+        # return selected_apps
 
 
     
@@ -175,8 +175,9 @@ def createPanel():
     panel.setAlignmentX(Component.LEFT_ALIGNMENT)
     return panel
 
-def addApplicationCheckbox(app, app_id):
-        checkbox = JCheckBox("{} ({})".format(app.capitalize(), app_id))
+
+def addApplicationCheckbox(app, app_id, ap):
+        checkbox = JCheckBox("{} ({})".format(app.capitalize(), app_id), actionPerformed= ap)
         checkbox.setActionCommand(app)
         checkbox.setSelected(True)
         checkbox.setVisible(False)
