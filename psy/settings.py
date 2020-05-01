@@ -152,13 +152,14 @@ class ProjectIngestSettingsPanel(IngestModuleIngestJobSettingsPanel):
     def getMethod(self):
         return self.bg_method.getSelection().getActionCommand()
     
-    def getSelectedApps(self):
+    def getSelectedApps(self, event):
         selected_apps = ""
         
         for cb_app in self.apps_checkboxes_list:
             if cb_app.isSelected():
                 selected_apps+= cb_app.getActionCommand()+";"
-
+        
+        selected_apps = selected_apps[:-1]
         self.local_settings.setSetting("apps", selected_apps)
         # return selected_apps
 
