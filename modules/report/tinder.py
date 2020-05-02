@@ -14,9 +14,11 @@ class ModuleReport(ModuleParent):
         logging.info("Module started")
         
     def generate_report(self):
-        #self.report["profile"] = self.get_user_profile()
+        self.report["freespace"] = self.get_undark_db()
+        self.report["profile"] = self.get_user_profile()
         self.report["messages"] = self.get_user_messages()
-        #self.report["freespace"] = self.get_undark_db()
+        self.report["credit_cards"] = self.get_credit_cards()
+        self.report["locations"] = self.get_locations()
 
         logging.info("Report Generated")
 
@@ -32,22 +34,22 @@ class ModuleReport(ModuleParent):
         database = Database(db)
         messages_list =[] #each entry means 1 conversation, including participants information and messages
             #messages from conversations
-        messages = database.execute_query("select message_to_id, message_from_id , message_text, message_sent_date, message_is_liked from message_view order by message_sent_date;")
+        messages = database.execute_query("select message_to_id, message_from_id , message_text, message_sent_date, case when message_is_liked = 0 then 'Not liked' when message_is_liked = 1 then 'Liked' else message_is_liked end, case when message_is_seen = 0 then 'Not seen' when message_is_seen = 1 then 'Seen' else message_is_seen end, message_delivery_status from message_view order by message_sent_date;")
         
         #getting messages from conversations
         for entry in messages:
             message={}
             message["to"] = entry[0]
-            message["from"] = entry[2]
-            message["message"] = entry[3]
-            message["createdtime"] = entry[4]
-            #message["isliked"] = entry[5]
+            message["from"] = entry[1]
+            message["message"] = entry[2]
+            message["created_time"] = entry[3]
+            message["is_liked"] = str(entry[4])
+            message["is_seen"] = str(entry[5])
+            message["delivery_status"] = str(entry[6]).lower()
             messages_list.append(message)
 
         logging.info("{} messages found".format(len(messages_list)))
 
-        #if not db in self.used_databases:
-        #    self.used_databases.append(db)
         return messages_list
 
     def get_user_profile(self):
@@ -57,7 +59,7 @@ class ModuleReport(ModuleParent):
         db = os.path.join(self.internal_cache_path, "databases", "tinder-3.db")
         
         database = Database(db)
-        photos_list = database.execute_query("select image_uir from profile_media")
+        photos_list = database.execute_query("select image_uri from profile_media")
         user_profile["photos_url"] = []
         for photo in photos_list: user_profile["photos_url"].append(photo[0])
 
@@ -95,4 +97,69 @@ class ModuleReport(ModuleParent):
 
         logging.info("{} matches found".format(len(matches)))
         return matches
+    
+    def get_undark_db(self):
+        logging.info("Getting undark output...")
+        return Database.get_undark_output(self.databases, self.report_path)
+
+    def get_credit_cards(self):
+
+        logging.info("Getting User credit cards...")
+
+        db = os.path.join(self.internal_cache_path,"app_webview","Default", "Web Data")
+
+        
+
+        database = Database(db)
+        cards_list =[] #each entry means 1 conversation, including participants information and messages
+            #messages from conversations
+        cards = database.execute_query("select name_on_card, expiration_month, expiration_year, card_number_encrypted, date_modified, origin, use_count, use_date from credit_cards;")
+        
+        #getting messages from conversations
+        for entry in cards:
+            card={}
+            card["name"] = entry[0]
+            card["expiration_date"] = "{}/{}".format(entry[1], entry[2])
+            card["card_number_encrypted"] = str(entry[3])
+            card["date_modified"] = str(entry[4])
+            card["origin"] = str(entry[5])
+            card["use_count"] = entry[6]
+            card["use_date"] = str(entry[7])
+            cards_list.append(card)
+
+        logging.info("{} messages found".format(len(cards_list)))
+
+        return cards_list
+
+    def get_locations(self):
+
+        logging.info("Getting User locations...")
+
+        db = os.path.join(self.internal_cache_path, "databases", "legacy_tinder-1.db")
+
+        database = Database(db)
+        locations_list =[] #each entry means 1 conversation, including participants information and messages
+            #messages from conversations
+        cards = database.execute_query("select latitude, longitude, state_province_long, country_short_name, country_long_name, address,route,street_number,city, last_seen_date/1000 as last_seen_date from tinder_locations;")
+        
+        #getting messages from conversations
+        for entry in cards:
+            location={}
+            location["latitude"] = str(entry[0])
+            location["longitude"] = str(entry[1])
+            location["province"] = entry[2]
+            location["country_short"] = entry[3]
+            location["country_long"] = entry[4]
+            location["address"] = entry[5]
+            location["route"] = entry[6]
+            location["street_number"] = str(entry[7])
+            location["city"] = entry[8]
+            location["last_seen_date"] = entry[9]
+            locations_list.append(location)
+
+        logging.info("{} locations found".format(len(locations_list)))
+
+        return locations_list
+        
+
 
