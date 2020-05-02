@@ -10,7 +10,7 @@ function initializeReports(){
 
     let addLetter = item.artifacts !== 1 ? "s" : ""
 
-    text += `<a href="../../ModuleOutput/AndroidForensics/${item.link}" class="text-muted list-group-item list-group-item-action">
+    text += `<a href="${item.link}" class="text-muted list-group-item list-group-item-action">
       <div class="py-1 mb-0 small">
         <div class="d-flex justify-content-between align-items-center w-100">
           <strong class="text-gray-dark">Report for ${app_name} (${item.app_id})</strong>

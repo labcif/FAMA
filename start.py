@@ -19,7 +19,22 @@ def start(args):
     #If we don't found an output folder, we use the "report" folder
     if not args.output:
         args.output = os.path.join(Utils.get_base_path_folder(), "report")
-    
+
+    #Remove previous index.html from output folder
+    try:
+        os.remove(os.path.join(args.output, "index.html"))
+    except:
+        pass
+
+    #Remove previous assets from output folder
+    try:
+        Utils.remove_folder(os.path.join(args.output, "assets"))
+    except:
+        pass
+        
+    #List of reports for html output
+    reports = []
+
     for app in args.app:
         folders = []
 
@@ -71,6 +86,9 @@ def start(args):
         
         #For each folder previously added
         index = 0
+
+        
+
         for folder in folders:
             index += 1
 
@@ -83,7 +101,15 @@ def start(args):
 
             #If we set html report output, generate it
             if args.html and report:
+                #Generate individual html report
                 analyzer.generate_html_report(report, report_path)
+                
+                #Add to list to create index
+                reports.append(analyzer.generate_report_summary(report, str(index)))
+    
+    #Generate html index
+    if args.html and reports:
+        analyzer.generate_html_index(reports, args.output)
 
     logging.info("Done")
 

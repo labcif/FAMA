@@ -83,7 +83,7 @@ function renderTimeline(){
 
     content += ` <div class="tracking-item">
     <div class="tracking-icon status-intransit"> 
-    <object data="svg/${item["event"]}.svg" type="image/svg+xml" class="w-100"></object>
+    <object data="assets/svg/${item["event"]}.svg" type="image/svg+xml" class="w-100"></object>
     
     
     
