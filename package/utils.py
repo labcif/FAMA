@@ -12,6 +12,9 @@ import re
 import logging
 import sys
 
+from distutils.dir_util import mkpath
+from distutils.errors import DistutilsFileError, DistutilsInternalError
+
 class Utils: 
     @staticmethod
     def get_base_path_folder():
@@ -216,7 +219,7 @@ class Utils:
             logging.warning(e)
             return 0
 
-
+    #REMOVE IN FUTURE
     @staticmethod
     def compat_py23str(x):
         if sys.version_info > (3, 0):
@@ -257,3 +260,75 @@ class Utils:
                 break
 
         return final_path
+
+    @staticmethod
+    def copy_tree(src, dst, preserve_mode=1, preserve_times=1,
+              preserve_symlinks=0, update=0, verbose=1, dry_run=0):
+        #OVERRIDE FROM DSTUTILS METHOD
+        """Copy an entire directory tree 'src' to a new location 'dst'.
+        Both 'src' and 'dst' must be directory names.  If 'src' is not a
+        directory, raise DistutilsFileError.  If 'dst' does not exist, it is
+        created with 'mkpath()'.  The end result of the copy is that every
+        file in 'src' is copied to 'dst', and directories under 'src' are
+        recursively copied to 'dst'.  Return the list of files that were
+        copied or might have been copied, using their output name.  The
+        return value is unaffected by 'update' or 'dry_run': it is simply
+        the list of all files under 'src', with the names changed to be
+        under 'dst'.
+        'preserve_mode' and 'preserve_times' are the same as for
+        'copy_file'; note that they only apply to regular files, not to
+        directories.  If 'preserve_symlinks' is true, symlinks will be
+        copied as symlinks (on platforms that support them!); otherwise
+        (the default), the destination of the symlink will be copied.
+        'update' and 'verbose' are the same as for 'copy_file'.
+        """
+        from distutils.file_util import copy_file
+
+        if not dry_run and not os.path.isdir(src):
+            raise DistutilsFileError(
+                "cannot copy tree '%s': not a directory" % src)
+        try:
+            names = os.listdir(src)
+        except OSError as e:
+            if dry_run:
+                names = []
+            else:
+                raise DistutilsFileError(
+                    "error listing files in '%s': %s" % (src, e.strerror))
+
+        if not dry_run:
+            mkpath(dst, verbose=verbose)
+
+        outputs = []
+
+        for n in names:
+            src_name = os.path.join(src, n)
+            dst_name = os.path.join(dst, n)
+
+            if n.startswith('.nfs'):
+                # skip NFS rename files
+                continue
+
+            if preserve_symlinks and os.path.islink(src_name):
+                link_dest = os.readlink(src_name)
+                if verbose >= 1:
+                    logging.info("linking %s -> %s", dst_name, link_dest)
+                if not dry_run:
+                    os.symlink(link_dest, dst_name)
+                outputs.append(dst_name)
+
+            elif os.path.isdir(src_name):
+                outputs.extend(
+                    Utils.copy_tree(src_name, dst_name, preserve_mode,
+                            preserve_times, preserve_symlinks, update,
+                            verbose=verbose, dry_run=dry_run))
+            else:
+                try:
+                    copy_file(src_name, dst_name, preserve_mode,
+                            preserve_times, update, verbose=verbose,
+                            dry_run=dry_run)
+                    outputs.append(dst_name)
+                except:
+                    pass
+
+        return outputs

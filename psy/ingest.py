@@ -2,7 +2,6 @@ import os
 import json
 import logging
 from shutil import copyfile
-from distutils.dir_util import copy_tree
 
 from java.util import UUID
 from org.sleuthkit.autopsy.ingest import IngestModule
@@ -16,275 +15,131 @@ from psy.psyutils import PsyUtils
 
 class ProjectIngestModule(DataSourceIngestModule):
     def __init__(self, settings):
-        logfile = os.path.join(Case.getCurrentCase().getLogDirectoryPath(), "autopsy.log.0")
-        Utils.setup_custom_logger(logfile)
+        #Set logging path to autopsy log
+        Utils.setup_custom_logger(os.path.join(Case.getCurrentCase().getLogDirectoryPath(), "autopsy.log.0"))
         
+        #Context of the ingest
         self.context = None
+        
+        #Module Settings choosed in ingest settings
         self.settings = settings
+
+        #Autopsy utils methods instance 
         self.utils = PsyUtils()
 
-        
-
-        
-        
-        
-        # #TODO for each para percorrer as apps e encontrar os packages
-        # self.apps_ids =[]
-        # for app in self.apps:
-        #     if app == None:
-        #         continue
-
-        #     self.apps_ids.append(Utils.find_package(app))
-
-        # self.apps_ids = Utils.find_package(self.settings.getSetting('apps'))
-        
-        #ABORTAR TO DO IN AUTOPSY
-        # if not self.apps_ids:
-        #     logging.critical("Module not found for {}".format(self.app_id))
-        #     self.utils.post_message("Module not found for {}".format(self.app_id))
-        #     return None
-        logfile = os.path.join(Case.getCurrentCase().getLogDirectoryPath(), "autopsy.log.0")
-        Utils.setup_custom_logger(logfile)
-
-        
-
-        
-        
-        
-        
-
-    def startUp(self, context):
-        self.context = context
+        #Filemanager for this case
         self.fileManager = Case.getCurrentCase().getServices().getFileManager()
-        
 
-        self.method = self.settings.getSetting('method')
-        self.apps = self.settings.getSetting('apps')
-        self.apps =self.apps.split(";")
+        #Initialize output folder path
+        self.temp_module_path = os.path.join(Case.getCurrentCase().getModulesOutputDirAbsPath(), "AndroidForensics")
+        Utils.check_and_generate_folder(self.temp_module_path)
     
-        logging.info("APPSSS:::: "+ str(self.apps))
-        logging.info("METHOD::::::{}".format(self.method))
-
-        # for app in self.apps:
-        #     m = __import__("modules.autopsy.{}".format(app), fromlist=[None])  
-        #     self.module_psy = m.ModulePsy(app)
-        #     self.module_psy.initialize(context)
-        #     self.temp_module_path = os.path.join(Case.getCurrentCase().getModulesOutputDirAbsPath(), "AndroidForensics", app)
-        #     Utils.remove_folder(self.temp_module_path)
-        #     Utils.check_and_generate_folder(self.temp_module_path)
-            # self.tempDirectory = os.path.join(self.temp_module_path, self.app_id)
+    #This method runs when we click ok in ingest module selection
+    def startUp(self, context):
+        #Set the environment context
+        self.context = context
         
-        
+        #Method selected in settings
+        self.method = self.settings.getSetting('method')
+        logging.info("METHOD::::::{}".format(self.method)) #REMOVE
         
     def process(self, dataSource, progressBar):
+        #Set progressbar to an scale of 100%
         progressBar.switchToDeterminate(100)
 
-        data_sources = [dataSource]
-
+        #Initialize list of possible data sources
+        data_sources = []
+        
+        #Extract method for adb selected
         if self.method == "method_adb":
+            #Get list of selected apps to extract
+            self.apps = json.loads(self.settings.getSetting('apps'))
+        
+            logging.info("APPSSS:::: "+ str(self.apps)) #REMOVE
+
+            #Extract instance, the dump folder is going to be the same for all apps dumps
+            extract = Extract()
+
             progressBar.progress("Extracting from ADB", 0)
             logging.info("Starting ADB")
 
+            #Auxiliar variable used to store all folders for each device
+            folders = {}
+
             for app_id in self.apps:
-                if app_id == None:
-                    continue
+                # For each extract of the app with device context
+                for serial, folder in extract.dump_from_adb(app_id).items():
+                    # If the device not in the list
+                    if not folders.get(serial):
+                        folders[serial] = []
 
-                extract = Extract()
-                folders = extract.dump_from_adb(app_id)
-
-                for serial, folder in folders.items():
-                    datasource_name = dataSource.getName() + "_ADB_{}".format(serial)
-                    self.utils.add_to_fileset(datasource_name, [folder], device_id = UUID.fromString(dataSource.getDeviceId()))
-
-                    for case in Case.getCurrentCase().getDataSources():
-                        if case.getName() == datasource_name:
-                            data_sources.append(case)
-                            break
-                logging.info("{} extracted".format(app_id))
-
-                # count = 0
-                # for source in data_sources:
-                #     count += 1
-                #     percent = int(count / float(len(data_sources) + 1) * 100)
-
-                #     # self.app_id = app_id
-                #     self.temp_module_path = os.path.join(Case.getCurrentCase().getModulesOutputDirAbsPath(), "AndroidForensics", Utils.find_app_name(app_id))
-                #     tempDirectory = os.path.join(self.temp_module_path, app_id)
-                #     self.process_by_datasource(source, progressBar, percent, tempDirectory, app_id)
+                    # If the folder is not the list for the device, add it
+                    if not folder in folders[serial]:
+                        folders[serial].append(folder)
             
+            # Add one datasource for each device, with the list of the possible folders
+            for serial, folders_list in folders.items():
+                datasource_name = dataSource.getName() + "_ADB_{}".format(serial)
+                self.utils.add_to_fileset(datasource_name, folders_list, device_id = UUID.fromString(dataSource.getDeviceId()))
+                
+                # Add data source to case to be analised
+                for case_datasources in Case.getCurrentCase().getDataSources():
+                    if case_datasources.getName() == datasource_name:
+                        data_sources.append(case_datasources)
+                        break
+
             logging.info("Ending ADB")
-            
-
-
-        # elif self.method == "method_importfile":
-
-            # json_report = "%.json"
-            # json_reports = self.fileManager.findFiles(dataSource, json_report)
-
-            # tempDirectory = os.path.join(self.temp_module_path, app_id)
-            # Processing datasource json reports
-            # reports = []
-            # for report in json_reports:
-                
-                
-                # report_dump = Utils.read_json(report.get)
-                # app_id = report_dump.get("header").get("app_id")
-                
-                # tempDirectory = os.path.join(Case.getCurrentCase().getModulesOutputDirAbsPath(), "AndroidForensics", Utils.find_app_name(app_id))
-                
-                # # tempDirectory = os.path.join(temp_module_path, app_id)
-                # number_of_reports = len(os.listdir(tempDirectory))
-
-
-                # number_of_reports+=1
-                # report_folder_path = os.path.join(tempDirectory, str(number_of_reports), "report")
-                # Utils.check_and_generate_folder(report_folder_path)
-
-                
-
-                # logging.info("CAMINHOOOOOOOOOOOO:  "+ report.getLocalPath())
-
-
-
-
-                # report_location = os.path.join(report_folder_path, "Report.json")
-                # copyfile(report.getLocalPath(), report_location)
-
-
-                # item = {}
-                # # item["report"] = report_location
-                # item["report"] = report.getName()
-                # item["file"] = report
-                # item["app"] = Utils.find_app_name(app_id)
-                # reports.append(item)
-
-            # TODO FIND ALL APPS APPS PRESENT AT DUMPS AND REPALCE WITH FOR EACH AND APP_ID
-
-        # elif self.method == "method_datasource":
-        #     dataSource =[dataSource]
-
-            # app_id = "com.zhiliaoapp.musically"
-            # self.temp_module_path = os.path.join(Case.getCurrentCase().getModulesOutputDirAbsPath(), "AndroidForensics", Utils.find_app_name(app_id))
-            # tempDirectory = os.path.join(self.temp_module_path, app_id)
-            # Utils.remove_folder(tempDirectory)
         
-            # Normal ingest
-
+        # Add the selected files for the datasource (json, dumps or mount case)
         else:
-            PsyUtils.post_message("Analysis method not defined!")
+            logging.info("Using Selected Datasource")
+            data_sources.append(dataSource)
         
+        # For each data source, we will process it each one
         count = 0
         for source in data_sources:
             count += 1
             percent = int(count / float(len(data_sources) + 1) * 100)
 
-            app_id = "com.zhiliaoapp.musically"
-            self.temp_module_path = os.path.join(Case.getCurrentCase().getModulesOutputDirAbsPath(), "AndroidForensics", Utils.find_app_name(app_id))
-            tempDirectory = os.path.join(self.temp_module_path, app_id)
-            Utils.remove_folder(tempDirectory)
-
-            self.process_by_datasource(source, progressBar, percent, tempDirectory, app_id)
-
-        # for report in reports:
-
-        #     if report["app"]:
-        #         m = __import__("modules.autopsy.{}".format(report["app"]), fromlist=[None])  
-        #         self.module_psy = m.ModulePsy(report["app"])
-        #         self.module_psy.initialize(self.context)
-        #         self.module_psy.process_report(dataSource.getName(), report["file"], number_of_reports, report["report"])
+            self.process_by_datasource(source, progressBar, percent)
 
         progressBar.progress("Done", 100)
 
-    def process_by_datasource(self, dataSource, progressBar, percent, tempDirectory, app_id):
-        logging.critical(str(dataSource.getRootDirectory()))
-
-        internal = app_id + "_internal.tar.gz"
-        external = app_id + "_external.tar.gz"
-        json_report = "%.json"
-        
-        Utils.check_and_generate_folder(tempDirectory)
-
-        number_of_reports = len(os.listdir(tempDirectory))
-
-        dumps = []
-        dumps.extend(self.fileManager.findFiles(dataSource, internal))
-        dumps.extend(self.fileManager.findFiles(dataSource, external))
-
-        json_reports = self.fileManager.findFiles(dataSource, json_report)
-
-        base_paths = []
-        reports = []
+    def process_by_datasource(self, dataSource, progressBar, percent):
+        #Since we are running ingest for the same datasource, we remove the output folder first but only for the datasource!
+        temp_directory = os.path.join(self.temp_module_path, dataSource.getName())
+        Utils.remove_folder(temp_directory)
+        Utils.check_and_generate_folder(self.temp_module_path)
 
         progressBar.progress("Analyzing Information for {}".format(dataSource.getName()), percent)
-        # Analyse and generate and processing reports 
-        if self.method == "method_datasource" or self.method == "method_adb":
-        
-            if dumps:
-                for base in dumps:
-                    base_path = os.path.dirname(base.getLocalPath())
-                    if base_path in base_paths:
-                        continue
 
-                    base_paths.append(base_path)
-
-                    number_of_reports+=1
-                    report_folder_path = os.path.join(tempDirectory,str(number_of_reports)) #report path
-                    copy_tree(base_path, report_folder_path) #copy from dump to report path
-                    Utils.check_and_generate_folder(report_folder_path)
-                    
-                    analyzer = Analyzer(Utils.find_app_name(app_id), report_folder_path, report_folder_path)
-                    analyzer.generate_report()
-
-                    report_location = os.path.join(report_folder_path, "report", "Report.json")
-
-                    item = {}
-                    item["report"] = report_location
-                    item["file"] = base
-                    item["app"] = Utils.find_app_name(app_id)
-                    reports.append(item)
-            else:
-                #little hack to know datasource real path
-                base_path = None
-                base = None
-                files = self.fileManager.findFiles(dataSource, "%")
-                for x in files:
-                    if x.getLocalPath() and '/data/data/' in x.getParentPath():
-                        local = Utils.replace_slash_platform(x.getLocalPath()) #normalize
-                        if Utils.get_platform().startswith("windows"):    
-                            base_path = local.split("\\data\\data\\")[0]
-                        else:
-                            base_path = local.split("/data/data/")[0]
-
-                        base = x
-                        break
-                
-                if base_path:
-                    number_of_reports+=1
-                    report_folder_path = os.path.join(tempDirectory,str(number_of_reports)) #report path
-                    #copy_tree(base_path, report_folder_path) #copy from dump to report path
-                    Utils.check_and_generate_folder(report_folder_path)
-
-                    analyzer = Analyzer(Utils.find_app_name(app_id), base_path, report_folder_path)
-                    analyzer.generate_report()
-                    
-                    report_location = os.path.join(report_folder_path, "report", "Report.json")
-                    item = {}
-                    item["report"] = report_location
-                    item["file"] = base
-                    item["app"] = Utils.find_app_name(app_id)
-                    reports.append(item)
-
-
-
+        # We are going to use import previous json file or other data
         if self.method == "method_importfile":
+            json_report = "Report.json"
 
+            reports_by_app = {}
+            
+            # Find all Report.json in the data source
             json_reports = self.fileManager.findFiles(dataSource, json_report)
-            # Processing datasource json reports
+            
+            # Processing all datasource json reports
             for report in json_reports:
-                number_of_reports+=1
-                report_folder_path = os.path.join(tempDirectory, str(number_of_reports), "report")
+
+                # Get app id of the json report
+                info = Utils.read_json(report.getLocalPath())
+                app_id = info["header"]["app_id"]
+                
+                # Since we can have multiple json files for multiple apps, we have to track how many reports exists for each app
+                if not reports_by_app.get(app_id):
+                    reports_by_app[app_id] = 1
+                else:
+                    reports_by_app[app_id] += 1
+
+                # Path for every report
+                report_folder_path = os.path.join(temp_directory, app_id, str(reports_by_app[app_id]))
                 Utils.check_and_generate_folder(report_folder_path)
 
+                # Copy json report to output folder
                 report_location = os.path.join(report_folder_path, "Report.json")
                 copyfile(report.getLocalPath(), report_location)
 
@@ -292,21 +147,128 @@ class ProjectIngestModule(DataSourceIngestModule):
                 item["report"] = report_location
                 item["file"] = report
                 item["app"] = Utils.find_app_name(app_id)
-                reports.append(item)
+                self.process_report(item, dataSource)
 
-        progressBar.progress("Processing Data for {}".format(dataSource.getName()), percent)
+        # Not using json report
+        else:
+            reports_by_app = {}
 
-        for report in reports:
-
-            if report["app"]:
-                m = __import__("modules.autopsy.{}".format(report["app"]), fromlist=[None])  
-                self.module_psy = m.ModulePsy(report["app"])
-                self.module_psy.initialize(self.context)
-                self.module_psy.process_report(dataSource.getName(), report["file"], number_of_reports, report["report"])
-
-        
+            #We will find all dumps on the datasource
+            internal = "%_internal.tar.gz"
+            external = "%_external.tar.gz"
             
+            dumps = []
+            dumps.extend(self.fileManager.findFiles(dataSource, internal))
+            dumps.extend(self.fileManager.findFiles(dataSource, external))
+            
+            #We found dumps, the datasource is not a mount path
+            if dumps:
+                #For each dump, we are going to check it
+                for base in dumps:
+                    #Get app id of the dump
+                    app_id = base.getName().replace('_internal.tar.gz', '').replace('_external.tar.gz','')
+
+                    #No reports for this app yet
+                    if not reports_by_app.get(app_id):
+                        reports_by_app[app_id] = []
+
+                    #We can have multiple dumps for the same app. this ensure we don't add the same folder twice
+                    base_path = os.path.dirname(base.getLocalPath())
+                    if base_path in reports_by_app[app_id]:
+                        continue
+                    
+                    #Adds the folder to the list of reports by app
+                    reports_by_app[app_id].append(base_path)
+
+                    #Multiple dumps per app, we are going to create the folder based on the number of the reports
+                    report_folder_path = os.path.join(temp_directory, app_id, str(len(reports_by_app[app_id])))
+                    Utils.check_and_generate_folder(report_folder_path)
+
+                    progressBar.progress("Analyzing Information for {} ({})".format(dataSource.getName(), app_id), percent)
+
+                    #We are going to analyze the dumps and generate the report
+                    analyzer = Analyzer(app_id, base_path, report_folder_path)
+                    analyzer.generate_report()
+
+                    #Generated json report location
+                    report_location = os.path.join(report_folder_path, "Report.json")
+
+                    #Add to reports list
+                    item = {}
+                    item["report"] = report_location
+                    item["file"] = base
+                    item["app"] = Utils.find_app_name(app_id)
+                    self.process_report(item, dataSource)
+            else:
+                base_path = None
+                base = None
+                # Little hack to know datasource real path
+                # We only know the real path on files, folders doesn't provide the real path
+                # So we are going to search every file
+                files = self.fileManager.findFiles(dataSource, "%")
+                for x in files:
+                    # Script needs files inside /data/data/
+                    # We find a file with this path, we got the base path
+                    if x.getLocalPath() and '/data/data/' in x.getParentPath():
+                        # Multiple SO normalization
+                        local = Utils.replace_slash_platform(x.getLocalPath())
+                        if Utils.get_platform().startswith("windows"):    
+                            base_path = local.split("\\data\\data\\")[0]
+                        else:
+                            base_path = local.split("/data/data/")[0]
+
+                        #Already have the base folder, stop the find
+                        base = x
+                        break
+                
+                # If have the base folder
+                if base_path:
+                    # For all supported apps
+                    for app_id in Utils.get_all_packages().values():
+                        # If app data exists in mount
+                        if os.path.exists(os.path.join(base_path, "data", "data", app_id)):
+                            # Create report folder
+                            report_number = 1
+                            report_folder_path = os.path.join(temp_directory, app_id, str(report_number)) #report path
+                            Utils.check_and_generate_folder(report_folder_path)
+
+                            progressBar.progress("Analyzing Information for {} ({})".format(dataSource.getName(), app_id), percent)
+
+                            # Folder to analyze
+                            analyzer = Analyzer(app_id, base_path, report_folder_path)
+                            analyzer.generate_report()
+                            
+                            # Report
+                            report_location = os.path.join(report_folder_path, "Report.json")
+                            item = {}
+                            item["report"] = report_location
+                            item["file"] = base
+                            item["app"] = Utils.find_app_name(app_id)
+                            self.process_report(item, dataSource)
+
         # After all reports, post a message to the ingest messages in box.
         return IngestModule.ProcessResult.OK
+
+    def process_report(self, report, dataSource):
+        # Initialize the autopsy module for the report
+        try:
+            m = __import__("modules.autopsy.{}".format(report["app"]), fromlist=[None]) 
+        # Oops, we don't have an autopsy module for this app
+        # Standalone app can have an module for an app without having an autopsy module for it
+        except:
+            logging.warning("Autopsy Module not found for {}".format(report["app"]))
+            return
+        
+        #Start autopsy module instance
+        self.module_psy = m.ModulePsy(report["app"])
+        
+        #Initialize possible blackboard menus
+        self.module_psy.initialize(self.context)
+        
+        #Process report and add information
+        #### FIX NUMBER OF REPORTS
+        self.module_psy.process_report(dataSource.getName(), report["file"], 0, report["report"])
+
+        
 
 

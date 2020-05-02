@@ -1,20 +1,4 @@
 {
-    "discord": "com.discord",
-    "facebook": "com.facebook.katana",
-    "instagram": "com.instagram.android",
-    "linkedin": "com.linkedin.android",
-    "messenger": "com.facebook.orca",
-    "pinterest": "com.pinterest",
-    "reddit": "com.reddit.frontpage",
-    "slack": "com.slack",
-    "snapchat": "com.snapchat.android",
-    "telegram": "org.telegram.messenger",
     "tiktok": "com.zhiliaoapp.musically",
-    "tinder": "com.tinder",
-    "tumblr": "com.tumblr",
-    "twitch": "tv.twitch.android.app",
-    "twitter": "com.twitter.android",
-    "viber": "com.viber.voip",
-    "whatsapp": "com.whatsapp",
-    "youtube": "com.google.android.youtube"
+    "tinder": "com.tinder"
 }

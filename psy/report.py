@@ -3,8 +3,6 @@ import os
 import json
 import logging
 
-from distutils.dir_util import copy_tree
-
 from package.utils import Utils
 from package.analyzer import Analyzer
 

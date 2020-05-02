@@ -2,10 +2,9 @@ import os
 import json
 import logging
 from package.utils import Utils
-from distutils.dir_util import copy_tree
 
 class Analyzer:
-    def __init__(self, app, folder, report_folder):
+    def __init__(self, app, folder, report_path):
         if '.' in app:
             self.app = Utils.find_app_name(app)
             self.app_id = app
@@ -16,22 +15,18 @@ class Analyzer:
         self.internal_path = None
         self.external_path = None
         self.folder = folder
-
-        Utils.check_and_generate_folder(report_folder)
         
-        self.report_path = os.path.join(report_folder, self.app_id)
+        self.report_path = report_path
         Utils.remove_folder(self.report_path)
-
-        Utils.check_and_generate_folder(self.report_path)
         
         self.initialize_dumps()
     
     def initialize_dumps(self):
-        for name in Utils.list_files(self.folder, ".tar.gz"):
+        for name in os.listdir(self.folder):
             if self.app_id + '_internal.tar.gz' in name:
-                self.internal_path = name
+                self.internal_path = os.path.join(self.folder, name)
             elif self.app_id +  '_external.tar.gz' in name:
-                self.external_path = name
+                self.external_path = os.path.join(self.folder, name)
 
     def generate_report(self):
         if not self.app_id:
@@ -65,11 +60,11 @@ class Analyzer:
 
             int_find = Utils.find_folder_has_folder(self.internal_path, self.folder)
             if int_find:
-                copy_tree(int_find, self.internal_cache_path)
+                Utils.copy_tree(int_find, self.internal_cache_path)
             
             ext_find = Utils.find_folder_has_folder(self.external_path, self.folder)
             if ext_find:
-                copy_tree(ext_find, self.external_cache_path)
+                Utils.copy_tree(ext_find, self.external_cache_path)
 
             if not int_find and not ext_find:
                 logging.info("Application data for {} not found".format(self.app))
@@ -86,7 +81,7 @@ class Analyzer:
     def generate_html_report(reports, report_path):
         logging.info("Generating HTML report")
 
-        copy_tree(os.path.join(Utils.get_base_path_folder(), "template"), report_path)
+        Utils.copy_tree(os.path.join(Utils.get_base_path_folder(), "template"), report_path)
 
         report_file_path = os.path.join(report_path, "index.html")
         
