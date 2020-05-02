@@ -75,7 +75,7 @@ class Analyzer:
         
         # Utils.remove_folder(os.path.join(self.report_path))
         
-        return {"Report_1": module.generate_report()}
+        return module.generate_report()
 
     @staticmethod
     def generate_html_report(reports, report_path):
@@ -83,7 +83,7 @@ class Analyzer:
 
         Utils.copy_tree(os.path.join(Utils.get_base_path_folder(), "template"), report_path)
 
-        report_file_path = os.path.join(report_path, "index.html")
+        report_file_path = os.path.join(report_path, "report.html")
         
         js_code = "var reportData = " + json.dumps(reports, indent = 2)
 

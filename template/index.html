@@ -10,42 +10,32 @@
     <!-- Bootstrap core CSS -->
     <link rel="stylesheet" href="css/bootstrap.min.css">
     <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/offcanvas.css">
     <meta name="theme-color" content="#563d7c">
 </head>
 
 <body>
-    <nav class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow">
-        <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">Generated Report</a>
-        <!-- <input class="form-control form-control-dark w-100" type="text" placeholder="Search" aria-label="Search"> -->
-        <ul class="navbar-nav px-3">
-            <li class="nav-item text-nowrap">
-                <span id="generated-date" class="text-white"></span>
-            </li>
-        </ul>
-    </nav>
-
-    <div class="container-fluid">
-        <div class="row">
-            <nav class="col-md-2 d-none d-md-block bg-light sidebar">
-                <div class="sidebar-sticky">
-                    <select id="reports-list" class="form-control">
-                    </select>
-
-                    <ul id="menu-list" class="nav flex-column">
-                    </ul>
-                    
-                </div>
-            </nav>
-
-            <main id="page-builder" role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
-            </main>
+    <main role="main" class="container">
+      <div class="d-flex align-items-center p-3 my-3 text-white-50 bg-purple rounded shadow-sm">
+        <span data-feather="file-text"></span>
+        <div class="lh-100">
+          <h6 class="mb-0 text-white lh-100">LabCIF - Android Forensics</h6>
+          <small>Lab of Cybersecurity and Digital Forensics at IPLeiria</small>
         </div>
-    </div>
-    <script src="Report.js"></script>
+      </div>
+    
+      <div class="my-3 p-3 bg-white rounded shadow-sm list-group">
+        <h6 class="border-bottom border-gray pb-2 mb-0">List of Reports</h6>
+        <div id="reports-list">
+            
+        </div>
+      </div>
+    </main>
+    <script src="ListOfReports.js"></script>
     <script src="js/jquery-3.4.1.min.js"></script>
     <script src="js/bootstrap.bundle.min.js"></script>
     <script src="js/feather.min.js"></script>
-    <script src="js/dashboard.js"></script>
+    <script src="js/index.js"></script>
 </body>
 
 </html>
