@@ -7,20 +7,25 @@ import logging
 from package.database import Database
 from package.utils import Utils
 from modules.report import ModuleParent
+from package.timeline import Timeline
 
 class ModuleReport(ModuleParent):
     def __init__(self, internal_path, external_path, report_path, app_name, app_id):
         ModuleParent.__init__(self, internal_path, external_path, report_path, app_name, app_id)
+        self.timeline = Timeline()
+
         logging.info("Module started")
         
     def generate_report(self):
         self.report["freespace"] = self.get_undark_db()
         self.report["sqlparse"] = self.get_sqlparse()
         self.report["user_photos"] = self.get_user_photos()
+        self.report["matches"] = self.get_user_matches()
         self.report["bio_changes"] = self.get_bio_changes()
         self.report["messages"] = self.get_user_messages()
         self.report["credit_cards"] = self.get_credit_cards()
         self.report["locations"] = self.get_locations()
+        self.report["timeline"] = self.timeline.get_sorted_timeline()
 
         logging.info("Report Generated")
 
@@ -49,6 +54,14 @@ class ModuleReport(ModuleParent):
             message["delivery_status"] = str(entry[6]).lower()
             messages_list.append(message)
 
+            timeline_event = {}
+            timeline_event["from"]= message["from"]
+            timeline_event["to"]= message["to"]
+            timeline_event["message"]= message["message"]
+            self.timeline.add(message["created_time"],"message", timeline_event)
+
+
+
         logging.info("{} messages found".format(len(messages_list)))
 
         return messages_list
@@ -72,7 +85,6 @@ class ModuleReport(ModuleParent):
 
 
 
-
     def get_bio_changes(self):
         
         logging.info("Get Biography Changes...")
@@ -86,6 +98,13 @@ class ModuleReport(ModuleParent):
             bio_change["old"] = entry[0]
             bio_change["new"] = entry[1]
             bio_change["createdtime"] = entry[3]
+
+            
+            timeline_event = {}
+            timeline_event["old"]= bio_change["old"]
+            timeline_event["new"]= bio_change["new"]
+            self.timeline.add(bio_change["createdtime"],"biography", timeline_event)
+
             biography_changes.append(bio_change)
         
         logging.info("{} biography change(s) found".format(len(biography_changes)))
@@ -93,12 +112,12 @@ class ModuleReport(ModuleParent):
 
     def get_user_matches(self):
         logging.info("Getting User Matches...")
-        matches = {}
+        matches = []
 
         db = os.path.join(self.internal_cache_path, "databases", "tinder-3.db")
 
         database = Database(db)
-        results = database.execute_query("select match_id, match_creation_date, match_last_activity_date, match_person_id, match_person_name, match_person_bio, match_person_birth_date,  case when match_is_blocked = 1 then 'Blocked' when match_is_blocked = 0 then 'Not Blocked ' else 'Invalid' end from match_view")
+        results = database.execute_query("select match_id, match_creation_date, match_last_activity_date, match_person_id, match_person_name, match_person_bio, match_person_birth_date, case when match_is_blocked = 1 then 'Blocked' when match_is_blocked = 0 then 'Not Blocked ' else 'Invalid' end from match_view;")
         for entry in results:
             match={}
             match["id"] = entry[0]
@@ -108,9 +127,15 @@ class ModuleReport(ModuleParent):
             match["person_name"] = entry[4]
             match["person_bio"] = entry[5]
             match["person_bithdate"] = entry[6]
-            match["person_bithdate"] = entry[7]
-            match["is_blocked"] = entry[8]
-            matches[match["id"]] = match
+            match["is_blocked"] = entry[7]
+            matches.append(match)
+
+            timeline_event = {}
+            timeline_event["person_id"]= match["person_id"]
+            timeline_event["person_name"]= match["person_name"]
+            timeline_event["is_blocked"]= match["is_blocked"]
+            self.timeline.add(match["creation_date"],"match", timeline_event)
+            
 
         logging.info("{} matches found".format(len(matches)))
         return matches
@@ -141,6 +166,11 @@ class ModuleReport(ModuleParent):
             card["origin"] = str(entry[5])
             card["use_count"] = entry[6]
             card["use_date"] = str(entry[7])
+
+            timeline_event = {}
+            timeline_event["name"]= card["name"]
+            self.timeline.add(card["use_date"],"credit_card", timeline_event)
+
             cards_list.append(card)
 
         logging.info("{} credit cards found".format(len(cards_list)))
@@ -171,6 +201,14 @@ class ModuleReport(ModuleParent):
             location["city"] = entry[8]
             location["last_seen_date"] = entry[9]
             locations_list.append(location)
+
+            timeline_event = {}
+            timeline_event["latitude"]= location["latitude"]
+            timeline_event["longitude"]= location["longitude"]
+            timeline_event["address"]= location["address"]
+            timeline_event["city"]= location["city"]
+            timeline_event["country_long"]= location["country_long"]
+            self.timeline.add(location["last_seen_date"],"location", timeline_event)
 
         logging.info("{} locations found".format(len(locations_list)))
 
