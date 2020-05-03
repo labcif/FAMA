@@ -15,13 +15,24 @@
 
 <body>
     <nav class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow">
-        <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">fazer back Generated Report</a>
-        <!-- <input class="form-control form-control-dark w-100" type="text" placeholder="Search" aria-label="Search"> -->
-        <ul class="navbar-nav px-3">
-            <li class="nav-item text-nowrap">
-                <span id="extra-buttons"></span>
-                <span id="generated-date" class="text-white"></span>
+        <a class="navbar-brand col-12 col-sm-12 col-md-2" href="javascript:window.history.back();">Report</a>
+        <ul class="navbar-nav px-0 col-12 col-sm-6 col-md-6 text-left ml-2" style="flex-direction: row">
+            <li class="nav-item mr-2">
+                <a class="nav-link" id="timeline-btn" href="javascript:void(null);"><span data-feather="clock"></span> Timeline</a>
             </li>
+            <li class="nav-item mx-2">
+                <a class="nav-link" id="map-btn" href="javascript:void(null);"><span data-feather="map"></span> Map</a>
+            </li>
+            <li class="nav-item mx-2">
+                <a class="nav-link" id="media-btn" href="javascript:void(null);"><span data-feather="film"></span> Media</a>
+            </li>
+            <li class="nav-item mx-2">
+                <a class="nav-link" id="pdf-btn" href="javascript:void(null);"><span data-feather="file-text"></span> PDF</a>
+            </li>
+        </ul>
+        <!-- <input class="form-control form-control-dark w-100" type="text" placeholder="Search" aria-label="Search"> -->
+        <ul class="navbar-nav col-sm-6 col-md-4 text-right d-none d-md-block">
+            <span id="generated-date" class="text-white mr-4"></span>
         </ul>
     </nav>
 
@@ -35,11 +46,28 @@
                 </div>
             </nav>
 
-            <main id="page-builder" role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+            <main id="page-builder" role="main" class="report-top col-md-10 ml-sm-auto px-4">
             </main>
         </div>
     </div>
+
+    <div id="loading-modal" class="modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Generating your report!</h5>
+                </div>
+                <div class="modal-body">
+                    <p>Please wait until it is ready.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Report Information-->
     <script src="assets/Report.js"></script>
+
+    <script src="assets/js/pdfmake.min.js"></script>
+    <script src="assets/js/vfs_fonts.js"></script>
     <script src="assets/js/jquery-3.4.1.min.js"></script>
     <script src="assets/js/bootstrap.bundle.min.js"></script>
     <script src="assets/js/feather.min.js"></script>

@@ -109,7 +109,9 @@ def start(args):
     
     #Generate html index
     if args.html and reports:
-        analyzer.generate_html_index(reports, args.output)
+        item = {}
+        item["reports"] = reports
+        analyzer.generate_html_index(item, args.output)
 
     logging.info("Done")
 
