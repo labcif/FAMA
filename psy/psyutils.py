@@ -7,7 +7,10 @@ from org.sleuthkit.autopsy.ingest import ModuleDataEvent
 from org.sleuthkit.autopsy.ingest import IngestServices
 from org.sleuthkit.datamodel import BlackboardAttribute
 from org.sleuthkit.autopsy.ingest import IngestMessage
-from org.sleuthkit.datamodel import CommunicationsManager 
+from org.sleuthkit.datamodel import CommunicationsManager
+from org.sleuthkit.autopsy.geolocation.datamodel import BookmarkWaypoint
+from org.sleuthkit.datamodel import BlackboardArtifact
+
 
 from psy.progress import ProgressUpdater
 
@@ -54,6 +57,19 @@ class PsyUtils:
     @staticmethod
     def add_relationship(node1, node2, art, relationship_type, timestamp):
         Case.getCurrentCase().getSleuthkitCase().getCommunicationsManager().addRelationships(node1, node2, art, relationship_type, timestamp)
+    
+    @staticmethod
+    def add_tracking_point(file, timestamp=0, latitude=0, longitude=0, altitude=0, source="source"):
+        
+        art = file.newArtifact(BlackboardArtifact.ARTIFACT_TYPE.TSK_GPS_TRACKPOINT)
+        art.addAttribute(BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_GEO_LATITUDE, source, float(latitude)))
+        art.addAttribute(BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_GEO_LONGITUDE, source, float(longitude)))
+        art.addAttribute(BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_GEO_ALTITUDE, source, float(altitude)))
+        art.addAttribute(BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_DATETIME, source, timestamp))
+        BookmarkWaypoint(art)
+        return art
+
+
                     
     @staticmethod
     def blackboard_attribute(attribute):

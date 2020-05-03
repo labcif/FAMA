@@ -6,6 +6,7 @@ from org.sleuthkit.autopsy.casemodule.services import Blackboard
 from org.sleuthkit.autopsy.ingest import IngestModule
 from org.sleuthkit.datamodel import Relationship
 from org.sleuthkit.datamodel import Account
+from org.sleuthkit.autopsy.geolocation.datamodel import BookmarkWaypoint
 
 from package.database import Database
 from package.utils import Utils
@@ -28,6 +29,7 @@ class ModulePsy(ModulePsyParent):
         self.process_messages(data.get("messages"), file)
         self.process_user_photos(data.get("user_photos"), file)
         self.process_bio_changes(data.get("bio_changes"), file)
+        self.process_user_matches(data.get("matches"), file)
         self.process_credit_cards(data.get("credit_cards"), file)
         self.process_locations(data.get("locations"), file)
         self.process_drp(data.get("sqlparse"), file)
@@ -42,11 +44,16 @@ class ModulePsy(ModulePsyParent):
         self.art_user_profile = self.utils.create_artifact_type(self.module_name, "TINDER_PROFILE", "Profile")
         self.art_messages = self.utils.create_artifact_type(self.module_name, "TINDER_MESSAGES","Messages")
         self.art_locations = self.utils.create_artifact_type(self.module_name, "TINDER_LOCATIONS","Locations")
+        self.art_matches = self.utils.create_artifact_type(self.module_name, "TINDER_MATCHES","Matches")
         self.art_credit_cards = self.utils.create_artifact_type(self.module_name, "TINDER_CREDIT_CARDS","Credit Cards")
         self.art_bio_changes = self.utils.create_artifact_type(self.module_name, "TINDER_BIO_CHANGES","Biography Changes")
         self.art_drp = self.utils.create_artifact_type(self.module_name, "TINDER_DRP", "Deleted rows (SQLite-Deleted-Records-Parser)")
         self.art_undark = self.utils.create_artifact_type(self.module_name, "TINDER_UNDARK", "Deleted rows")
         self.art_photos = self.utils.create_artifact_type(self.module_name, "TINDER_PHOTOS", "Photos")
+
+        
+
+        self.account_tinder = self.utils.add_account_type("Tinder", "Tinder")
         
 
 
@@ -101,6 +108,20 @@ class ModulePsy(ModulePsyParent):
         self.art_drp = self.utils.create_artifact_type(self.module_name, "TINDER_DRP", "Deleted rows (SQLite-Deleted-Records-Parser)")
         # PROFILE ATTRIBUTES
         # self.att_prf_id = self.utils.create_attribute_type('PROFILE_KEY', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "ID")
+
+        # MATCH ATTRIBUTES
+
+        self.att_match_id = self.utils.create_attribute_type('TINDER_MATCH_ID', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "ID")
+        self.att_match_creattion_date = self.utils.create_attribute_type('TINDER_MATCH_CREATION_DATE', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.DATETIME, "Creation Date")
+        self.att_match_last_activity = self.utils.create_attribute_type('TINDER_MATCH_LAST_ACTIVITY', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.DATETIME, "Last Activity")
+        self.att_match_person_id = self.utils.create_attribute_type('TINDER_MATCH_PERSON_ID', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Person ID")
+        self.att_match_person_name = self.utils.create_attribute_type('TINDER_MATCH_PERSON_NAME', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Person Name")
+        self.att_match_person_biography = self.utils.create_attribute_type('TINDER_MATCH_PERSON_BIO', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Person Biography")
+        self.att_match_person_birthday = self.utils.create_attribute_type('TINDER_MATCH_PERSON_BIRTHDAY', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.DATETIME, "Person Birthdate")
+        self.att_match_block = self.utils.create_attribute_type('TINDER_MATCH_BLOCK', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Block")
+
+        
+
         
         # DELETED ROWS (UNDARK) ATTRIBUTES
         self.att_undark_key = self.utils.create_attribute_type('UNDARK_KEY', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Database")
@@ -140,15 +161,15 @@ class ModulePsy(ModulePsyParent):
         # IN THIS EXAMPLE WE WILL USE AUTOPSY MESSAGE ARTIFACT
         # 
         # EXAMPLE:
-        account = self.utils.add_account_type("Tinder", "Tinder")
+        
         for message in messages:
             try:
                 art = file.newArtifact(BlackboardArtifact.ARTIFACT_TYPE.TSK_MESSAGE)
                 
         # THIS IS USEFUL FOR THE AUTOPSY COMMUNICATIONS TAB
         
-                contact_1 = self.utils.get_or_create_account(account, file, message.get("from"))
-                contact_2 = self.utils.get_or_create_account(account, file, message.get("to"))
+                contact_1 = self.utils.get_or_create_account(self.account_tinder, file, message.get("from"))
+                contact_2 = self.utils.get_or_create_account(self.account_tinder, file, message.get("to"))
         
                 art.addAttribute(BlackboardAttribute(self.att_msg_from, "source.db", message.get("from")))
                 art.addAttribute(BlackboardAttribute(self.att_msg_to, "source.db", message.get("to")))
@@ -166,7 +187,28 @@ class ModulePsy(ModulePsyParent):
             except Exception as e:
                 logging.warning("Error getting a message: " + str(e))
 
+    def process_user_matches(self, matches, file):
+        logging.info("Indexing user matches")
+        if not matches:
+            return
         
+        for match in matches:
+            try:
+                art = file.newArtifact(self.art_matches.getTypeID())
+                
+
+                art.addAttribute(BlackboardAttribute(self.att_match_id, "legacy_tinder-1.db", match.get("id")))
+                art.addAttribute(BlackboardAttribute(self.att_match_creattion_date, "legacy_tinder-1.db", match.get("creation_date")))
+                art.addAttribute(BlackboardAttribute(self.att_match_last_activity, "legacy_tinder-1.db", match.get("last_activity_date")))
+                art.addAttribute(BlackboardAttribute(self.att_match_person_id, "legacy_tinder-1.db", match.get("person_id")))
+                art.addAttribute(BlackboardAttribute(self.att_match_person_name, "legacy_tinder-1.db", match.get("person_name")))
+                art.addAttribute(BlackboardAttribute(self.att_match_person_biography, "legacy_tinder-1.db", match.get("person_bio")))
+                art.addAttribute(BlackboardAttribute(self.att_match_person_birthday, "legacy_tinder-1.db", match.get("person_bithdate")))
+                art.addAttribute(BlackboardAttribute(self.att_match_block, "legacy_tinder-1.db", match.get("is_blocked")))
+
+                self.utils.index_artifact(art, self.art_matches)
+            except Exception as e:
+                logging.warning("Error getting user macth: " + str(e))
 
 
     def process_locations(self, locations, file):
@@ -178,8 +220,8 @@ class ModulePsy(ModulePsyParent):
             try:
                 art = file.newArtifact(self.art_locations.getTypeID())
         
-                art.addAttribute(BlackboardAttribute(self.att_loc_latitude, "legacy_tinder-1.db", location.get("latitude")))
-                art.addAttribute(BlackboardAttribute(self.att_loc_longitude, "legacy_tinder-1.db", location.get("longitude")))
+                art.addAttribute(BlackboardAttribute(self.att_loc_latitude, "legacy_tinder-1.db", str(location.get("latitude"))))
+                art.addAttribute(BlackboardAttribute(self.att_loc_longitude, "legacy_tinder-1.db", str(location.get("longitude"))))
                 art.addAttribute(BlackboardAttribute(self.att_loc_province, "legacy_tinder-1.db", location.get("province")))
                 art.addAttribute(BlackboardAttribute(self.att_loc_country_short, "legacy_tinder-1.db", location.get("country_short")))
                 art.addAttribute(BlackboardAttribute(self.att_loc_country, "legacy_tinder-1.db", location.get("country_long")))
@@ -189,7 +231,9 @@ class ModulePsy(ModulePsyParent):
                 art.addAttribute(BlackboardAttribute(self.att_loc_city, "legacy_tinder-1.db", location.get("city")))
                 art.addAttribute(BlackboardAttribute(self.att_loc_last_seen, "legacy_tinder-1.db", location.get("last_seen_date")))
 
+                self.utils.add_tracking_point(file, location.get("last_seen_date"), location.get("latitude"), location.get("longitude"),0,"legacy_tinder-1.db")
                 self.utils.index_artifact(art, self.art_locations)
+
             except Exception as e:
                 logging.warning("Error getting location: " + str(e))
 
