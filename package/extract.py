@@ -37,7 +37,7 @@ class Extract:
         base64_location = Utils.get_base64_location()
 
         for serial_number in DeviceCommunication.list_devices():
-            path_dump_folder = os.path.join(self.path_dump_folder, serial_number)
+            path_dump_folder = os.path.join(self.path_dump_folder, serial_number).replace(":","_")
 
             path_dump_internal = os.path.join(path_dump_folder, self.internal_data_dump_name.format(app_package))
             path_dump_external = os.path.join(path_dump_folder, self.external_data_dump_name.format(app_package))
