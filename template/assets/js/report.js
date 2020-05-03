@@ -4,37 +4,32 @@ function capitalize(text){
   return text.charAt(0).toUpperCase() + text.substr(1).toLowerCase();
 }
 
-function initializeReports(){
-  Object.keys(reportData).forEach(function (item) {
-    $("#reports-list").append(new Option(item, item));
-  });
-}
-
-function getSelectedOption(select){
-  return $(select).find(":selected").text()
-}
-
-function getReportData(){
-  return reportData[getSelectedOption("#reports-list")];
-}
-
 function initializeMenus(){
   let list = "";
 
-  Object.keys(getReportData()).forEach(function (item) {
+  Object.keys(reportData).forEach(function (item) {
     if (item !== "header"){
-      list += `<li class="nav-item"><a id="menulink-${item}" class="nav-link menu-item" href="#"><span data-feather="file-text"></span>${capitalize(item)}</a></li>`;
+      list += `<li class="nav-item"><a id="menulink-${item}" class="nav-link menu-item" href="javascript:void(null);"><span data-feather="file-text"></span>${capitalize(item)}</a></li>`;
     }
   });
-  list += `<button class="btn btn-secondary mt-5" id="timeline-btn">Timeline chart</button>`
-  list += `<button class="btn btn-secondary mt-1" id="media-btn">Media</button>`
   $("#menu-list").html(list);
+  $(".menu-item").on("click", menuClick);
 }
 
 function generatedDate(){
   $("#generated-date").html("Generated at " + (new Date(Number(reportData["header"]["report_date"])).toISOString().slice(0, 19).replace(/-/g, "/").replace("T", " ")));
 }
 
+function extraButtons(){
+  let list = `
+  📋<a href="javascript:void(null);" id="timeline-btn">Timeline</a>
+  📽️<a href="javascript:void(null);" id="media-btn">Media</a>`
+  
+  $("#extra-buttons").html(list);
+  $("#timeline-btn").on("click", renderTimeline);
+  $("#media-btn").on("click", renderMedia);
+  feather.replace()
+}
 
 function menuClick(event){
   if (event.target){
@@ -44,9 +39,7 @@ function menuClick(event){
     idName = "menulink-" + event;
   }
 
-  console.log(idName);
-
-  Object.keys(getReportData()).forEach(function (item) {
+  Object.keys(reportData).forEach(function (item) {
     $("#menulink-" + item).removeClass("active");
   });
 
@@ -62,7 +55,7 @@ function menuClick(event){
 function renderTimeline(){
   console.log("entrou");
 
-  report = getReportData();
+  report = reportData;
   console.log(report);
   // let first_date = new Date(report["timeline"][0]["timestamp"]*1000).toLocaleDateString("pt-PT")
   // let last_date = new Date(report["timeline"][report["timeline"].length-1]["timestamp"]*1000).toLocaleDateString("pt-PT")
@@ -90,7 +83,7 @@ function renderTimeline(){
 
     content += ` <div class="tracking-item">
     <div class="tracking-icon status-intransit"> 
-    <object data="svg/${item["event"]}.svg" type="image/svg+xml" class="w-100"></object>
+    <object data="assets/svg/${item["event"]}.svg" type="image/svg+xml" class="w-100"></object>
     
     
     
@@ -145,7 +138,7 @@ $("#page-builder").html(content);
 
 
 function pageBuilder(title){
-  report = getReportData()
+  report = reportData
   if (!(title in report)){
     return;
   }
@@ -206,9 +199,7 @@ function pageBuilder(title){
 
 function startUp(){
   initializeMenus()
-  renderTimeline()
-  // renderMedia()
-  //generatedDate()
+  generatedDate()
 
   let defined = false
   Object.keys(reportData).forEach(function (item) {
@@ -223,13 +214,7 @@ function startUp(){
 
 (function () {
   'use strict'
-  initializeReports()
-
   startUp()
-
-  $(".menu-item").on("click", menuClick);
-  $(".timeline-btn").on("click", renderTimeline);
-  $("#reports-list").change(startUp);
-  
+  extraButtons()
 }())
 

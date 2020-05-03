@@ -16,8 +16,6 @@ class ReportOutput:
 
         self.fileManager = Case.getCurrentCase().getServices().getFileManager()
 
-        self.reports = {}
-
         progressBar.updateStatusLabel("Finding source data")
 
         self.tempDirectory = os.path.join(Case.getCurrentCase().getModulesOutputDirAbsPath(), "AndroidForensics")
@@ -27,18 +25,33 @@ class ReportOutput:
             progressBar.updateStatusLabel("Run Ingest Module first!")
             return
 
-        for app_directory in os.listdir(self.tempDirectory):
-            for app_report in os.listdir(os.path.join(self.tempDirectory, app_directory)):
-                report = os.path.join(self.tempDirectory, app_directory, app_report, "report", "Report.json")
-                logging.info(str(report))
-                if os.path.exists(report):
-                    self.reports["Report_{}".format(app_report)] = Utils.read_json(report)
-
         progressBar.updateStatusLabel("Creating report")
 
-        report_path = Analyzer.generate_html_report(self.reports, baseReportDir)
+        reports = []
 
-        Case.getCurrentCase().addReport(report_path, "Report", "Forensics Report")
+        for fileset in os.listdir(self.tempDirectory):
+            fileset_path = os.path.join(self.tempDirectory, fileset)
+            for app_id in os.listdir(fileset_path):
+                app_path = os.path.join(fileset_path, app_id)
+                for app_report in os.listdir(app_path):
+                    report = os.path.join(app_path, app_report, "Report.json")
+                    if os.path.exists(report):
+                        report_content = Utils.read_json(report)
+
+                        report_path = Analyzer.generate_html_report(report_content, os.path.join(app_path, app_report))
+                        
+                        Case.getCurrentCase().addReport(report_path, "Report", "Forensics Report")
+
+                        reports.append(Analyzer.generate_report_summary(report_content, app_report, fileset = fileset))
+
+        if len(reports) == 0:
+            progressBar.complete(ReportStatus.ERROR)
+            progressBar.updateStatusLabel("Nothing to report!")
+            return
+
+        report_file_path = Analyzer.generate_html_index(reports, baseReportDir)
+
+        Case.getCurrentCase().addReport(report_file_path, "Report", "Forensics Report")
 
         progressBar.updateStatusLabel("Done")
 

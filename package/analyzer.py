@@ -75,7 +75,7 @@ class Analyzer:
         
         # Utils.remove_folder(os.path.join(self.report_path))
         
-        return {"Report_1": module.generate_report()}
+        return module.generate_report()
 
     @staticmethod
     def generate_html_report(reports, report_path):
@@ -83,16 +83,57 @@ class Analyzer:
 
         Utils.copy_tree(os.path.join(Utils.get_base_path_folder(), "template"), report_path)
 
-        report_file_path = os.path.join(report_path, "index.html")
+        report_file_path = os.path.join(report_path, "report.html")
         
         js_code = "var reportData = " + json.dumps(reports, indent = 2)
 
-        handler = open(os.path.join(report_path, "Report.js"), "w")
+        assets_folder = os.path.join(report_path, "assets")
+        Utils.check_and_generate_folder(assets_folder)
+
+        handler = open(os.path.join(assets_folder, "Report.js"), "w")
         handler.write(js_code)
         handler.close()
 
         return report_file_path
+
+    @staticmethod
+    def generate_report_summary(report, app_report, fileset = None):
+        info_report = {}
+        info_report["report_name"] = report["header"]["report_name"]
+        info_report["report_date"] = report["header"]["report_date"]
+        info_report["app_name"] = report["header"]["app_name"]
+        info_report["app_id"] = report["header"]["app_id"]
+        info_report["artifacts"] = len(report.keys()) - 1 #ignore header
         
+        if fileset:
+            info_report["link"] = "../../ModuleOutput/AndroidForensics/{}/{}/{}/report.html".format(fileset, info_report["app_id"], app_report)
+        else:
+            info_report["link"] = "{}/{}/report.html".format(info_report["app_id"], app_report)
+
+        return info_report
+
+    @staticmethod
+    def generate_html_index(reports, report_path):
+        logging.info("Generating HTML index report")
+        
+        Utils.copy_tree(os.path.join(Utils.get_base_path_folder(), "template"), report_path)
+        try:
+            os.remove(os.path.join(report_path, "report.html")) #remove report.html from index
+        except:
+            pass
+
+        report_file_path = os.path.join(report_path, "index.html")
+
+        js_code = "var reportList = " + json.dumps(reports, indent = 2)
+
+        assets_folder = os.path.join(report_path, "assets")
+        Utils.check_and_generate_folder(assets_folder)
+
+        handler = open(os.path.join(assets_folder, "ListOfReports.js"), "w")
+        handler.write(js_code)
+        handler.close()
+
+        return report_file_path
 
         
 

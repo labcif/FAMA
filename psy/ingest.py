@@ -1,6 +1,7 @@
 import os
 import json
 import logging
+import time
 from shutil import copyfile
 
 from java.util import UUID
@@ -41,11 +42,11 @@ class ProjectIngestModule(DataSourceIngestModule):
         
         #Method selected in settings
         self.method = self.settings.getSetting('method')
-        logging.info("METHOD::::::{}".format(self.method)) #REMOVE
         
     def process(self, dataSource, progressBar):
         #Set progressbar to an scale of 100%
-        progressBar.switchToDeterminate(100)
+        #progressBar.switchToDeterminate(100)
+        progressBar.switchToIndeterminate()
 
         #Initialize list of possible data sources
         data_sources = []
@@ -55,12 +56,10 @@ class ProjectIngestModule(DataSourceIngestModule):
             #Get list of selected apps to extract
             self.apps = json.loads(self.settings.getSetting('apps'))
         
-            logging.info("APPSSS:::: "+ str(self.apps)) #REMOVE
-
             #Extract instance, the dump folder is going to be the same for all apps dumps
             extract = Extract()
 
-            progressBar.progress("Extracting from ADB", 0)
+            progressBar.progress("Extracting from ADB")
             logging.info("Starting ADB")
 
             #Auxiliar variable used to store all folders for each device
@@ -79,8 +78,8 @@ class ProjectIngestModule(DataSourceIngestModule):
             
             # Add one datasource for each device, with the list of the possible folders
             for serial, folders_list in folders.items():
-                datasource_name = dataSource.getName() + "_ADB_{}".format(serial)
-                self.utils.add_to_fileset(datasource_name, folders_list, device_id = UUID.fromString(dataSource.getDeviceId()))
+                datasource_name = dataSource.getName() + "_ADB_{}_{}".format(serial, int(time.time()))
+                self.utils.add_to_fileset(datasource_name, folders_list)
                 
                 # Add data source to case to be analised
                 for case_datasources in Case.getCurrentCase().getDataSources():
@@ -103,7 +102,7 @@ class ProjectIngestModule(DataSourceIngestModule):
 
             self.process_by_datasource(source, progressBar, percent)
 
-        progressBar.progress("Done", 100)
+        progressBar.progress("Done")
 
     def process_by_datasource(self, dataSource, progressBar, percent):
         #Since we are running ingest for the same datasource, we remove the output folder first but only for the datasource!
@@ -111,7 +110,7 @@ class ProjectIngestModule(DataSourceIngestModule):
         Utils.remove_folder(temp_directory)
         Utils.check_and_generate_folder(self.temp_module_path)
 
-        progressBar.progress("Analyzing Information for {}".format(dataSource.getName()), percent)
+        progressBar.progress("Analyzing Information for {}".format(dataSource.getName()))
 
         # We are going to use import previous json file or other data
         if self.method == "method_importfile":
@@ -184,7 +183,7 @@ class ProjectIngestModule(DataSourceIngestModule):
                     report_folder_path = os.path.join(temp_directory, app_id, str(len(reports_by_app[app_id])))
                     Utils.check_and_generate_folder(report_folder_path)
 
-                    progressBar.progress("Analyzing Information for {} ({})".format(dataSource.getName(), app_id), percent)
+                    progressBar.progress("Analyzing Information for {} ({})".format(dataSource.getName(), app_id))
 
                     #We are going to analyze the dumps and generate the report
                     analyzer = Analyzer(app_id, base_path, report_folder_path)
@@ -232,7 +231,7 @@ class ProjectIngestModule(DataSourceIngestModule):
                             report_folder_path = os.path.join(temp_directory, app_id, str(report_number)) #report path
                             Utils.check_and_generate_folder(report_folder_path)
 
-                            progressBar.progress("Analyzing Information for {} ({})".format(dataSource.getName(), app_id), percent)
+                            progressBar.progress("Analyzing Information for {} ({})".format(dataSource.getName(), app_id))
 
                             # Folder to analyze
                             analyzer = Analyzer(app_id, base_path, report_folder_path)

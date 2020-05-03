@@ -1,27 +1,17 @@
-from javax.swing import JCheckBox
-from javax.swing import BoxLayout
-from javax.swing import JButton
-from javax.swing import ButtonGroup
-from javax.swing import JComboBox
-from javax.swing import JRadioButton
-from javax.swing import JList
-from javax.swing import JLabel
-from javax.swing import JTextArea
-from javax.swing import JTextField
-from javax.swing import JLabel
-from java.awt import GridLayout
-from java.awt import GridBagLayout
-from java.awt import GridBagConstraints
+from java.awt import Font
 from java.awt import Component
 from javax.swing import JPanel
-from javax.swing import JScrollPane
-from javax.swing import JFileChooser
-from javax.swing.filechooser import FileNameExtensionFilter
+from javax.swing import JCheckBox
+from javax.swing import BoxLayout
+from javax.swing import ButtonGroup
+from javax.swing import JRadioButton
+from javax.swing import JLabel
 
 from org.sleuthkit.autopsy.ingest import IngestModuleIngestJobSettings
 from org.sleuthkit.autopsy.ingest import IngestModuleIngestJobSettingsPanel
 
 import json
+from collections import OrderedDict
 
 from package.utils import Utils
 
@@ -60,15 +50,16 @@ class ProjectIngestSettingsPanel(IngestModuleIngestJobSettingsPanel):
         self.setLayout(BoxLayout(self, BoxLayout.PAGE_AXIS))
         
         # title 
-        self.p_title = createPanel()
+        self.p_title = SettingsUtils.createPanel()
         self.lb_title = JLabel("Android Forensics")
+        self.lb_title.setFont(self.lb_title.getFont().deriveFont(Font.BOLD, 11))
         self.p_title.add(self.lb_title)
         self.add(self.p_title)
         # end of title
         
         
         # info menu
-        self.p_info = createPanel()
+        self.p_info = SettingsUtils.createPanel()
         self.lb_info = JLabel("")
         self.lb_info2 = JLabel("")
         self.p_info.add(self.lb_info)
@@ -81,11 +72,11 @@ class ProjectIngestSettingsPanel(IngestModuleIngestJobSettingsPanel):
 
         # method menu
 
-        self.p_method = createPanel()
+        self.p_method = SettingsUtils.createPanel()
         self.bg_method = ButtonGroup()
-        self.rb_selectedDatasource = createRadioButton("Analyse selected datasource", "method_datasource", self.onMethodChange)
-        self.rb_importReportFile = createRadioButton("Import previous generated report file","method_importfile" ,self.onMethodChange)
-        self.rb_liveExtraction = createRadioButton("Live extraction with ADB","method_adb", self.onMethodChange)
+        self.rb_selectedDatasource = SettingsUtils.createRadioButton("Analyse selected datasource", "method_datasource", self.onMethodChange)
+        self.rb_importReportFile = SettingsUtils.createRadioButton("Import previous generated report file","method_importfile" ,self.onMethodChange)
+        self.rb_liveExtraction = SettingsUtils.createRadioButton("Live extraction with ADB","method_adb", self.onMethodChange)
         self.rb_selectedDatasource.setSelected(True)
 
         self.bg_method.add(self.rb_selectedDatasource)
@@ -101,10 +92,13 @@ class ProjectIngestSettingsPanel(IngestModuleIngestJobSettingsPanel):
         # end of method menu
 
         #app checkboxes menu
-        self.p_apps = createPanel()
+        self.p_apps = SettingsUtils.createPanel()
         
-        for app, app_id in Utils.get_all_packages().items():
-            checkbox = addApplicationCheckbox(app, app_id, self.getSelectedApps)
+        sorted_items = OrderedDict(sorted(Utils.get_all_packages().items()))
+
+        for app, app_id in sorted_items.iteritems():
+            #(app, app_id)
+            checkbox = SettingsUtils.addApplicationCheckbox(app, app_id, self.getSelectedApps)
             self.add(checkbox)
             self.apps_checkboxes_list.append(checkbox)
             self.p_apps.add(checkbox)
@@ -156,27 +150,29 @@ class ProjectIngestSettingsPanel(IngestModuleIngestJobSettingsPanel):
         for cb_app in self.apps_checkboxes_list:
             cb_app.setVisible(visible)
 
-
-def createPanel():
-    panel = JPanel()
-    panel.setLayout(BoxLayout(panel, BoxLayout.PAGE_AXIS))
-    panel.setAlignmentX(Component.LEFT_ALIGNMENT)
-    return panel
-
-def addApplicationCheckbox(app, app_id, ap):
-    checkbox = JCheckBox("{} ({})".format(app.capitalize(), app_id), actionPerformed= ap)
-    checkbox.setActionCommand(app)
-    checkbox.setSelected(True)
-    checkbox.setVisible(False)
-    checkbox.setActionCommand(app_id)
-    
-    return checkbox
-
-def createRadioButton(name, ac, ap):
-    button = JRadioButton(name, actionPerformed= ap)
-    button.setActionCommand(ac)
-    return button   
-
 class ProjectReportSettingsPanel(JPanel):
     def __init__(self):
         pass
+
+class SettingsUtils:
+    @staticmethod
+    def createPanel():
+        panel = JPanel()
+        panel.setLayout(BoxLayout(panel, BoxLayout.PAGE_AXIS))
+        panel.setAlignmentX(Component.LEFT_ALIGNMENT)
+        return panel
+
+    @staticmethod
+    def addApplicationCheckbox(app, app_id, ap):
+        checkbox = JCheckBox("{} ({})".format(app.capitalize(), app_id), actionPerformed= ap)
+        checkbox.setActionCommand(app)
+        checkbox.setSelected(True)
+        checkbox.setVisible(False)
+        checkbox.setActionCommand(app_id)
+        return checkbox
+
+    @staticmethod
+    def createRadioButton(name, ac, ap):
+        button = JRadioButton(name, actionPerformed= ap)
+        button.setActionCommand(ac)
+        return button

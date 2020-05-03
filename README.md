@@ -13,6 +13,12 @@ Android extraction and analysis framework with integrated Autopsy Plugin. Dump e
 * Complete integrated Autopsy compatibility (ingest, report, communication and timeline support).
 * Export HTML report based on the current case.
 
+### Report Screenshots
+
+![Report Index](https://i.imgur.com/T3v3uH4.png)
+
+![Report Sample](https://i.imgur.com/uWpTKaF.png)
+
 ## Prerequisites
 
 * [Python](https://www.python.org/downloads/) (2.7+)
