@@ -66,14 +66,19 @@ body {
  * Content
  */
 
-[role="main"] {
-  padding-top: 48px; /* Space for fixed navbar */
+.report-top {
+  padding-top: 100px; /* Space for fixed navbar */
 }
 
 @media (min-width: 768px) {
-  [role="main"] {
+  .report-top {
     padding-top: 48px; /* Space for fixed navbar */
   }
+}
+
+
+.index-top {
+  padding-top: 25px;
 }
 
 /*

@@ -84,6 +84,11 @@ class Analyzer:
         Utils.copy_tree(os.path.join(Utils.get_base_path_folder(), "template"), report_path)
 
         report_file_path = os.path.join(report_path, "report.html")
+
+        try:
+            os.remove(os.path.join(report_path, "index.html")) #remove report.html from index
+        except:
+            pass
         
         js_code = "var reportData = " + json.dumps(reports, indent = 2)
 

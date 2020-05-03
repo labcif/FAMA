@@ -21,14 +21,7 @@ function generatedDate(){
 }
 
 function extraButtons(){
-  let list = `
-  📋<a href="javascript:void(null);" id="timeline-btn">Timeline</a>
-  📽️<a href="javascript:void(null);" id="media-btn">Media</a>`
   
-  $("#extra-buttons").html(list);
-  $("#timeline-btn").on("click", renderTimeline);
-  $("#media-btn").on("click", renderMedia);
-  feather.replace()
 }
 
 function menuClick(event){
@@ -49,8 +42,9 @@ function menuClick(event){
   pageBuilder(name);
 }
 
+function renderMap(){
 
-
+}
 
 function renderTimeline(){
   console.log("entrou");
@@ -185,7 +179,8 @@ function pageBuilder(title){
   else if (typeof report[title] === 'object'){
     content += `<div class="table-responsive"><table class="table table-striped table-sm table-bordered table-hover">`;
 
-
+    
+    
     Object.keys(report[title]).forEach(function (key) {
       content += `<tr><td>${key}</td><td>${report[title][key]}</td></tr>`;
     });
@@ -212,9 +207,148 @@ function startUp(){
   feather.replace()
 }
 
+function makeReport(){
+  $('#loading-modal').modal('show');
+  setTimeout(function (){
+    content = [
+      {
+        text: `LabCIF - Android Forensics Report`,
+        style: 'header'
+      },
+      {
+        text: `${capitalize(reportData.header.app_name)} - Report ${reportData.header.report_name}`,
+        style: 'subheader',
+        margin: [0, 0, 0, 20]
+      },
+    ]
+
+    if (reportData.header.case_name){
+      content.push({
+        text: `Case Name: ${reportData.header.case_name}`
+      });
+    }
+  
+    if (reportData.header.case_number){
+      content.push({
+        text: `Case Number: ${reportData.header.case_number}`
+      })
+    }
+  
+    if (reportData.header.examiner){
+      content.push({
+        text: `Examiner: ${reportData.header.examiner}`,
+        margin: [0, 0, 0, 20]
+      })
+    }
+  
+    Object.keys(reportData).forEach(function (key) {
+      if (key === "header"){
+        return
+      }
+  
+      content.push({
+        text: `Category: ${capitalize(key)}`,
+        style: 'subheader'
+      })
+  
+      rows = []
+      
+      if (Array.isArray(reportData[key]) && typeof reportData[key][0] === 'object'){
+        let titleDefined = false;
+        reportData[key].forEach(item => {
+          //define table header
+          if (!titleDefined){
+            let header = []
+            
+            Object.keys(item).forEach(function (head) {
+              header.push(head)
+            });
+  
+            titleDefined = true;
+            rows.push(header)
+          }
+    
+          let individual = []
+          Object.keys(item).forEach(function (body) {
+            individual.push(JSON.stringify(item[body]));
+          });
+  
+          rows.push(individual);
+        })
+        
+      }
+      //Array of strings
+      else if (Array.isArray(reportData[key]) && typeof reportData[key][0] === 'string'){
+        reportData[key].forEach(item => {
+          rows.push([item]);
+        });
+      }
+      //Object (key/value)
+      else if (typeof reportData[key] === 'object'){
+        Object.keys(reportData[key]).forEach(function (item) {
+          rows.push([item, JSON.stringify(reportData[key][item])]);
+        });
+      }
+  
+      
+      if (rows.length > 0){
+        content.push({
+          style: 'tableExample',
+          table: {
+            body: rows
+          }
+        })
+      }
+  
+      // text = [
+      //   'It is however possible to provide an array of texts ',
+      //   'to the paragraph (instead of a single string) and have ',
+      //   {text: 'a better ', fontSize: 15, bold: true},
+      //   'control over it. \nEach inline can be ',
+      //   {text: 'styled ', fontSize: 20},
+      //   {text: 'independently ', italics: true, fontSize: 40},
+      //   'then.\n\n'
+      // ]
+  
+      //content.push(text)
+    });
+  
+    var docDefinition = {
+      content: content,
+      styles: {
+        header: {
+          fontSize: 18,
+          bold: true
+        },
+        subheader: {
+          fontSize: 15,
+          bold: true
+        },
+        quote: {
+          italics: true
+        },
+        small: {
+          fontSize: 8
+        },
+        tableExample: {
+          margin: [0, 5, 0, 15],
+          width: 50
+        },
+      }
+    };
+    pdfMake.createPdf(docDefinition).download(`Report_${reportData.header.app_name}_${reportData.header.report_name}.pdf`);
+    $('#loading-modal').modal('hide');
+  }, 50);
+}
+
 (function () {
   'use strict'
   startUp()
-  extraButtons()
+
+  $("#timeline-btn").on("click", renderTimeline);
+  $("#map-btn").on("click", renderMap);
+  $("#media-btn").on("click", renderMedia);
+  $("#pdf-btn").on("click", makeReport);
+  feather.replace()
 }())
 

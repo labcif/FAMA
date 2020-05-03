@@ -89,6 +89,7 @@ This project is licensed under the terms of the GNU GPL v3 License.
 * [Bootstrap](https://getbootstrap.com/) - MIT License
 * [jQuery](https://jquery.com/) - MIT License
 * [feather](https://github.com/feathericons/feather) - MIT License
+* [pdfmake](https://github.com/bpampuch/pdfmake) - MIT License
 
 ## Notes
 
