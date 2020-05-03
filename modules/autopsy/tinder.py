@@ -23,8 +23,6 @@ class ModulePsy(ModulePsyParent):
         
         #TODO
         # HERE WE CAN CALL THE FUNCTIONS THAT WILL INDEX THE REPORT'S ARTIFACTS
-        # 
-        # EXAMPLE:
         data = Utils.read_json(path)
         self.process_messages(data.get("messages"), file)
         self.process_user_photos(data.get("user_photos"), file)
@@ -38,9 +36,7 @@ class ModulePsy(ModulePsyParent):
     def initialize(self, context):
         self.context = context
 
-        # TODO
         # HERE YOU CAN DEFINE THE ARTIFACTS TO DISPLAY ON THE BLACKBOARD
-        # EXAMPLE:
         self.art_user_profile = self.utils.create_artifact_type(self.module_name, "TINDER_PROFILE", "Profile")
         self.art_messages = self.utils.create_artifact_type(self.module_name, "TINDER_MESSAGES","Messages")
         self.art_locations = self.utils.create_artifact_type(self.module_name, "TINDER_LOCATIONS","Locations")
@@ -57,9 +53,6 @@ class ModulePsy(ModulePsyParent):
         
 
 
-        #TODO
-        # HERE YOU CAN DEFINE THE ATTRIBUTES FOR THE ARTIFACTS
-        # EXAMPLE:
         # MESSAGE ATTRIBUTES
         self.att_msg_to = self.utils.create_attribute_type('TINDER_MSG_TO', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "To")
         self.att_msg_from = self.utils.create_attribute_type('TINDER_MSG_FROM', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "From")
@@ -82,7 +75,6 @@ class ModulePsy(ModulePsyParent):
         self.att_loc_last_seen = self.utils.create_attribute_type('TINDER_LOC_LAST_SEEN', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.DATETIME, "Last Seen Date")
         
         # CREDIT CARDS ATTRIBUTES
-
         self.att_card_name = self.utils.create_attribute_type('TINDER_CARD_NAME', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Card Name")
         self.att_card_expiration_date = self.utils.create_attribute_type('TINDER_CARD_EXPIRATION', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Card Expiration")
         self.att_card_card_number_encrypted = self.utils.create_attribute_type('TINDER_CARD_NUMBER', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Encrypted Card Number ")
@@ -92,7 +84,6 @@ class ModulePsy(ModulePsyParent):
         self.att_card_use_date = self.utils.create_attribute_type('TINDER_CARD_USE_DATE', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Use Date")
         
         # BIOGRAPHY CHANGES ATTRIBUTES
-
         self.att_bio_old = self.utils.create_attribute_type('TINDER_BIO_OLD', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Old Biography")
         self.att_bio_new = self.utils.create_attribute_type('TINDER_BIO_NEW', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "New Biography")
         self.att_bio_created_time = self.utils.create_attribute_type('TINDER_BIO_CREATED_TIME', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.DATETIME, "Created Time")
@@ -106,11 +97,8 @@ class ModulePsy(ModulePsyParent):
         self.att_drp_unallocated = self.utils.create_attribute_type('TINDER_DRP_UNALLOCATED', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Unallocated")
         self.att_drp_data = self.utils.create_attribute_type('TINDER_DRP_DATA', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Data")
         self.art_drp = self.utils.create_artifact_type(self.module_name, "TINDER_DRP", "Deleted rows (SQLite-Deleted-Records-Parser)")
-        # PROFILE ATTRIBUTES
-        # self.att_prf_id = self.utils.create_attribute_type('PROFILE_KEY', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "ID")
 
         # MATCH ATTRIBUTES
-
         self.att_match_id = self.utils.create_attribute_type('TINDER_MATCH_ID', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "ID")
         self.att_match_creattion_date = self.utils.create_attribute_type('TINDER_MATCH_CREATION_DATE', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.DATETIME, "Creation Date")
         self.att_match_last_activity = self.utils.create_attribute_type('TINDER_MATCH_LAST_ACTIVITY', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.DATETIME, "Last Activity")
@@ -131,36 +119,11 @@ class ModulePsy(ModulePsyParent):
         self.att_ph_avatar = self.utils.create_attribute_type('TINDER_PROFILE_AVATAR', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Avatar")
 
 
-    # def process_user_profile(self, profile, file):
-    #     logging.info("Indexing user profile.")
-    #     if not profile:
-    #         return
-
-    #     #TODO
-    #     # HERE YOU CAN ADD THE PROFILE ATTRIBUTES FROM THE REPORT AND INDEX THE ARTIFACT TO THE BLACKBOARD
-
-    #     # EXAMPLE:
-    #     try:
-    #         art = file.newArtifact(self.art_user_profile.getTypeID())
-    #         attributes = []
-    #         attributes.append(BlackboardAttribute(self.att_prf_id, "source.xml", profile.get("id")))
-        
-    #         art.addAttributes(attributes)
-    #         self.utils.index_artifact(art, self.art_user_profile)        
-        
-    #     except Exception as e:
-    #         logging.warning("Error getting user profile: " + str(e))
-
     def process_messages(self, messages, file):
         logging.info("Indexing user messages")
         if not messages:
             return
 
-        #TODO
-        # HERE YOU CAN ADD MESSAGES ATTRIBUTES FROM THE REPORT AND INDEX THE ARTIFACT TO THE BLACKBOARD
-        # IN THIS EXAMPLE WE WILL USE AUTOPSY MESSAGE ARTIFACT
-        # 
-        # EXAMPLE:
         
         for message in messages:
             try:
@@ -171,13 +134,13 @@ class ModulePsy(ModulePsyParent):
                 contact_1 = self.utils.get_or_create_account(self.account_tinder, file, message.get("from"))
                 contact_2 = self.utils.get_or_create_account(self.account_tinder, file, message.get("to"))
         
-                art.addAttribute(BlackboardAttribute(self.att_msg_from, "source.db", message.get("from")))
-                art.addAttribute(BlackboardAttribute(self.att_msg_to, "source.db", message.get("to")))
-                art.addAttribute(BlackboardAttribute(self.att_msg_message, "source.db", message.get("message")))
-                art.addAttribute(BlackboardAttribute(self.att_msg_created_time, "source.db", message.get("created_time")))
-                art.addAttribute(BlackboardAttribute(self.att_msg_like, "source.db", message.get("is_liked")))
-                art.addAttribute(BlackboardAttribute(self.att_msg_seen, "source.db", message.get("is_seen")))
-                art.addAttribute(BlackboardAttribute(self.att_msg_delivery_status, "source.db", message.get("delivery_status")))
+                art.addAttribute(BlackboardAttribute(self.att_msg_from, "tinder-3.db", message.get("from")))
+                art.addAttribute(BlackboardAttribute(self.att_msg_to, "tinder-3.db", message.get("to")))
+                art.addAttribute(BlackboardAttribute(self.att_msg_message, "tinder-3.db", message.get("message")))
+                art.addAttribute(BlackboardAttribute(self.att_msg_created_time, "tinder-3.db", message.get("created_time")))
+                art.addAttribute(BlackboardAttribute(self.att_msg_like, "tinder-3.db", message.get("is_liked")))
+                art.addAttribute(BlackboardAttribute(self.att_msg_seen, "tinder-3.db", message.get("is_seen")))
+                art.addAttribute(BlackboardAttribute(self.att_msg_delivery_status, "tinder-3.db", message.get("delivery_status")))
         
         # THIS IS USEFUL FOR THE AUTOPSY COMMUNICATIONS TAB
         
@@ -197,14 +160,14 @@ class ModulePsy(ModulePsyParent):
                 art = file.newArtifact(self.art_matches.getTypeID())
                 
 
-                art.addAttribute(BlackboardAttribute(self.att_match_id, "legacy_tinder-1.db", match.get("id")))
-                art.addAttribute(BlackboardAttribute(self.att_match_creattion_date, "legacy_tinder-1.db", match.get("creation_date")))
-                art.addAttribute(BlackboardAttribute(self.att_match_last_activity, "legacy_tinder-1.db", match.get("last_activity_date")))
-                art.addAttribute(BlackboardAttribute(self.att_match_person_id, "legacy_tinder-1.db", match.get("person_id")))
-                art.addAttribute(BlackboardAttribute(self.att_match_person_name, "legacy_tinder-1.db", match.get("person_name")))
-                art.addAttribute(BlackboardAttribute(self.att_match_person_biography, "legacy_tinder-1.db", match.get("person_bio")))
-                art.addAttribute(BlackboardAttribute(self.att_match_person_birthday, "legacy_tinder-1.db", match.get("person_bithdate")))
-                art.addAttribute(BlackboardAttribute(self.att_match_block, "legacy_tinder-1.db", match.get("is_blocked")))
+                art.addAttribute(BlackboardAttribute(self.att_match_id, "tinder-3.db", match.get("id")))
+                art.addAttribute(BlackboardAttribute(self.att_match_creattion_date, "tinder-3.db", match.get("creation_date")))
+                art.addAttribute(BlackboardAttribute(self.att_match_last_activity, "tinder-3.db", match.get("last_activity_date")))
+                art.addAttribute(BlackboardAttribute(self.att_match_person_id, "tinder-3.db", match.get("person_id")))
+                art.addAttribute(BlackboardAttribute(self.att_match_person_name, "tinder-3.db", match.get("person_name")))
+                art.addAttribute(BlackboardAttribute(self.att_match_person_biography, "tinder-3.db", match.get("person_bio")))
+                art.addAttribute(BlackboardAttribute(self.att_match_person_birthday, "tinder-3.db", match.get("person_bithdate")))
+                art.addAttribute(BlackboardAttribute(self.att_match_block, "tinder-3.db", match.get("is_blocked")))
 
                 self.utils.index_artifact(art, self.art_matches)
             except Exception as e:
@@ -245,7 +208,7 @@ class ModulePsy(ModulePsyParent):
         for photo in photos:
             try:
                 art = file.newArtifact(self.art_photos.getTypeID())
-                art.addAttribute(BlackboardAttribute(self.att_ph_avatar, "legacy_tinder-1.db", str(photo)))
+                art.addAttribute(BlackboardAttribute(self.att_ph_avatar, "tinder-3.db", str(photo)))
 
                 self.utils.index_artifact(art, self.art_photos)
             except Exception as e:
@@ -279,8 +242,6 @@ class ModulePsy(ModulePsyParent):
             try:
                 art = file.newArtifact(self.art_credit_cards.getTypeID())
                 
-        # THIS IS USEFUL FOR THE AUTOPSY COMMUNICATIONS TAB
-        
                 art.addAttribute(BlackboardAttribute(self.att_msg_from, "Web Data", card.get("name")))
                 art.addAttribute(BlackboardAttribute(self.att_msg_to, "Web Data", card.get("expiration_date")))
                 art.addAttribute(BlackboardAttribute(self.att_msg_message, "Web Data", card.get("card_number_encrypted")))

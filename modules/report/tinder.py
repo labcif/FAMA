@@ -8,11 +8,14 @@ from package.database import Database
 from package.utils import Utils
 from modules.report import ModuleParent
 from package.timeline import Timeline
+from package.location import Location
 
 class ModuleReport(ModuleParent):
     def __init__(self, internal_path, external_path, report_path, app_name, app_id):
         ModuleParent.__init__(self, internal_path, external_path, report_path, app_name, app_id)
         self.timeline = Timeline()
+        self.locations = Location()
+
 
         logging.info("Module started")
         
@@ -26,6 +29,7 @@ class ModuleReport(ModuleParent):
         self.report["credit_cards"] = self.get_credit_cards()
         self.report["locations"] = self.get_locations()
         self.report["timeline"] = self.timeline.get_sorted_timeline()
+        self.report["tracking"] = self.locations.get_sorted_locations()
 
         logging.info("Report Generated")
 
@@ -190,8 +194,8 @@ class ModuleReport(ModuleParent):
         
         for entry in cards:
             location={}
-            location["latitude"] = str(entry[0])
-            location["longitude"] = str(entry[1])
+            location["latitude"] = entry[0]
+            location["longitude"] = entry[1]
             location["province"] = entry[2]
             location["country_short"] = entry[3]
             location["country_long"] = entry[4]
@@ -209,6 +213,8 @@ class ModuleReport(ModuleParent):
             timeline_event["city"]= location["city"]
             timeline_event["country_long"]= location["country_long"]
             self.timeline.add(location["last_seen_date"],"location", timeline_event)
+
+            self.locations.add(location["last_seen_date"], location["latitude"], location["longitude"])
 
         logging.info("{} locations found".format(len(locations_list)))
 
