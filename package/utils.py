@@ -99,8 +99,12 @@ class Utils:
     @staticmethod
     def safe_members(members): #used to clean : in folders
         for finfo in members:
-            if re.sub('[<>:|?*"]', "", finfo.name) == str(finfo.name):
+            if Utils.clean_invalid_filename(finfo.name) == str(finfo.name):
                 yield finfo
+
+    @staticmethod
+    def clean_invalid_filename(filename, character = ""):
+        return re.sub('[<>:|?*"]', character, filename)
 
     @staticmethod
     def extract_tar(file, path):
