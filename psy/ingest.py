@@ -45,8 +45,10 @@ class ProjectIngestModule(DataSourceIngestModule):
         
     def process(self, dataSource, progressBar):
         #Set progressbar to an scale of 100%
-        #progressBar.switchToDeterminate(100)
-        progressBar.switchToIndeterminate()
+        self.progressBar = progressBar
+        progressBar.switchToDeterminate(100)
+        
+        # progressBar.switchToIndeterminate()
 
         #Initialize list of possible data sources
         data_sources = []
@@ -55,17 +57,23 @@ class ProjectIngestModule(DataSourceIngestModule):
         if self.method == "method_adb":
             #Get list of selected apps to extract
             self.apps = json.loads(self.settings.getSetting('apps'))
+
+            jobs = len(self.apps)*3  #extract, analyser, index           
+            self.progressJob = ProgressJob(progressBar, jobs)
+            
+
         
             #Extract instance, the dump folder is going to be the same for all apps dumps
             extract = Extract()
 
-            progressBar.progress("Extracting from ADB")
+            self.progressJob.next_job("Extracting from ADB")
             logging.info("Starting ADB")
 
             #Auxiliar variable used to store all folders for each device
             folders = {}
 
             for app_id in self.apps:
+                
                 # For each extract of the app with device context
                 for serial, folder in extract.dump_from_adb(app_id).items():
                     # If the device not in the list
@@ -75,6 +83,8 @@ class ProjectIngestModule(DataSourceIngestModule):
                     # If the folder is not the list for the device, add it
                     if not folder in folders[serial]:
                         folders[serial].append(folder)
+                    
+                    self.progressJob.next_job("Extracting {}".format(app_id))
             
             # Add one datasource for each device, with the list of the possible folders
             for serial, folders_list in folders.items():
@@ -93,29 +103,42 @@ class ProjectIngestModule(DataSourceIngestModule):
         else:
             logging.info("Using Selected Datasource")
             data_sources.append(dataSource)
+
+            
+            if self.method == "method_importfile":
+                self.progressJob = ProgressJob(progressBar, len(data_sources)) #indexing ( x1)
+            else:
+                jobs = 0
+                for source in data_sources:
+                    jobs = jobs + len(self.fileManager.findFiles(source, "%_internal.tar.gz"))
+
+                self.progressJob = ProgressJob(progressBar, 2 * jobs) #indexing and analying
+            
         
         # For each data source, we will process it each one
         count = 0
         for source in data_sources:
             count += 1
-            percent = int(count / float(len(data_sources) + 1) * 100)
+            self.process_by_datasource(source)
 
-            self.process_by_datasource(source, progressBar, percent)
+        self.progressJob.next_job("Done")
+        # progressBar.progress("Done")
 
-        progressBar.progress("Done")
-
-    def process_by_datasource(self, dataSource, progressBar, percent):
+    def process_by_datasource(self, dataSource):
         #Since we are running ingest for the same datasource, we remove the output folder first but only for the datasource!
-        temp_directory = os.path.join(self.temp_module_path, dataSource.getName())
+        temp_directory = os.path.join(self.temp_module_path, dataSource.getName().replace(":","_"))
         Utils.remove_folder(temp_directory)
         Utils.check_and_generate_folder(self.temp_module_path)
 
-        progressBar.progress("Analyzing Information for {}".format(dataSource.getName()))
+        # progressBar.progress("Analyzing Information for {}".format(dataSource.getName()))
+        
 
         # We are going to use import previous json file or other data
         if self.method == "method_importfile":
             json_report = "Report.json"
 
+            
+            
             reports_by_app = {}
             
             # Find all Report.json in the data source
@@ -123,11 +146,12 @@ class ProjectIngestModule(DataSourceIngestModule):
             
             # Processing all datasource json reports
             for report in json_reports:
-
+                
+                
                 # Get app id of the json report
                 info = Utils.read_json(report.getLocalPath())
                 app_id = info["header"]["app_id"]
-                
+                self.progressJob.next_job("Processing report {} ".format(app_id))
                 # Since we can have multiple json files for multiple apps, we have to track how many reports exists for each app
                 if not reports_by_app.get(app_id):
                     reports_by_app[app_id] = 1
@@ -147,6 +171,8 @@ class ProjectIngestModule(DataSourceIngestModule):
                 item["file"] = report
                 item["app"] = Utils.find_app_name(app_id)
                 self.process_report(item, dataSource)
+                
+                
 
         # Not using json report
         else:
@@ -166,7 +192,7 @@ class ProjectIngestModule(DataSourceIngestModule):
                 for base in dumps:
                     #Get app id of the dump
                     app_id = base.getName().replace('_internal.tar.gz', '').replace('_external.tar.gz','')
-
+                    self.progressJob.next_job("Processing report {} ".format(app_id))
                     #No reports for this app yet
                     if not reports_by_app.get(app_id):
                         reports_by_app[app_id] = []
@@ -183,7 +209,7 @@ class ProjectIngestModule(DataSourceIngestModule):
                     report_folder_path = os.path.join(temp_directory, app_id, str(len(reports_by_app[app_id])))
                     Utils.check_and_generate_folder(report_folder_path)
 
-                    progressBar.progress("Analyzing Information for {} ({})".format(dataSource.getName(), app_id))
+                    # progressBar.progress("Analyzing Information for {} ({})".format(dataSource.getName(), app_id))
 
                     #We are going to analyze the dumps and generate the report
                     analyzer = Analyzer(app_id, base_path, report_folder_path)
@@ -198,6 +224,7 @@ class ProjectIngestModule(DataSourceIngestModule):
                     item["file"] = base
                     item["app"] = Utils.find_app_name(app_id)
                     self.process_report(item, dataSource)
+                    
             else:
                 base_path = None
                 base = None
@@ -231,7 +258,7 @@ class ProjectIngestModule(DataSourceIngestModule):
                             report_folder_path = os.path.join(temp_directory, app_id, str(report_number)) #report path
                             Utils.check_and_generate_folder(report_folder_path)
 
-                            progressBar.progress("Analyzing Information for {} ({})".format(dataSource.getName(), app_id))
+                            # progressBar.progress("Analyzing Information for {} ({})".format(dataSource.getName(), app_id))
 
                             # Folder to analyze
                             analyzer = Analyzer(app_id, base_path, report_folder_path)
@@ -244,6 +271,7 @@ class ProjectIngestModule(DataSourceIngestModule):
                             item["file"] = base
                             item["app"] = Utils.find_app_name(app_id)
                             self.process_report(item, dataSource)
+                            
 
         # After all reports, post a message to the ingest messages in box.
         return IngestModule.ProcessResult.OK
@@ -251,7 +279,8 @@ class ProjectIngestModule(DataSourceIngestModule):
     def process_report(self, report, dataSource):
         # Initialize the autopsy module for the report
         try:
-            m = __import__("modules.autopsy.{}".format(report["app"]), fromlist=[None]) 
+            m = __import__("modules.autopsy.{}".format(report["app"]), fromlist=[None])
+            self.progressJob.next_job("Processing report {} ".format(report["app"]))
         # Oops, we don't have an autopsy module for this app
         # Standalone app can have an module for an app without having an autopsy module for it
         except:
@@ -267,6 +296,29 @@ class ProjectIngestModule(DataSourceIngestModule):
         #Process report and add information
         #### FIX NUMBER OF REPORTS
         self.module_psy.process_report(dataSource.getName(), report["file"], 0, report["report"])
+        
+
+class ProgressJob():
+    
+    def __init__(self, progressbar, jobs, maxValue=100):
+        if jobs < 1: jobs = 1
+        if maxValue < 1: maxValue = 1
+        
+        self.maxValue = maxValue
+        self.atualPercent = 0
+        self.increment = int(100 / jobs)
+        self.progressBar = progressbar
+
+    def next_job(self, message):
+    
+        self.atualPercent += self.increment
+        
+        if self.atualPercent > self.maxValue:
+            self.atualPercent = self.maxValue - 1
+        
+        self.progressBar.progress(message, self.atualPercent)
+            
+
 
         
 
