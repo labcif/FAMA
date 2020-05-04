@@ -10,6 +10,7 @@
     <!-- Bootstrap core CSS -->
     <link rel="stylesheet" href="assets/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/css/dashboard.css">
+    <link rel="stylesheet" href="assets/map/leaflet.css" />
     <meta name="theme-color" content="#563d7c">
 </head>
 
@@ -63,9 +64,35 @@
             </div>
         </div>
     </div>
+
+    <div id="empty-map-modal" class="modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">No location points found!</h5>
+                </div>
+                <div class="modal-body">
+                    <p>Please, add location points to your report. </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="empty-media-modal" class="modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">No media found!</h5>
+                </div>
+                <div class="modal-body">
+                    <p>Please, add media files to your report. </p>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- Report Information-->
     <script src="assets/Report.js"></script>
-
+    <script src="assets/map/leaflet.js"></script>
     <script src="assets/js/pdfmake.min.js"></script>
     <script src="assets/js/vfs_fonts.js"></script>
     <script src="assets/js/jquery-3.4.1.min.js"></script>

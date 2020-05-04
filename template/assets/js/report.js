@@ -44,7 +44,65 @@ function menuClick(event){
 
 function renderMap(){
 
-}
+  
+
+  
+  var content=  `
+    <div style="height:auto;width:auto;" class="grid-container">
+      <div style="height:auto;width:auto;" class="grid-item" id="map">
+      <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+      
+  
+      </div>
+    <div>
+  `
+  
+  $("#page-builder").html(content);
+  
+  
+  var map = L.map('map').setView([51.505, -0.09], 13);
+  
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      // attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+  }).addTo(map);
+  
+  if(report["locations"] == undefined){
+    $('#empty-map-modal').modal('show');
+    return
+  }
+  
+  report["locations"].forEach(item => {
+    
+    timestamp = new Date(item["timestamp"] * 1000);
+    date = timestamp.toLocaleDateString("pt-PT");
+    time = timestamp.toLocaleTimeString("pt-PT");
+  
+    console.log(date)
+    console.log(time)
+    console.log(timestamp)
+    console.log(date)
+    console.log(time)
+    console.log(timestamp)
+    
+    popupContent = `
+    <strong>Date:</strong> ${date}<br>
+    <strong>Time:</strong> ${time}<br>
+    <strong>Latitude:</strong> ${item["latitude"]}<br>
+    <strong>Longitude:</strong> ${item["longitude"]}<br>
+    `
+  
+  
+    L.marker([item["latitude"], item["longitude"]]).addTo(map)
+  
+    .bindPopup(popupContent)
+    .openPopup();
+  
+  
+  });
+  
+  
+  
+  }
 
 function renderTimeline(){
   console.log("entrou");
@@ -110,25 +168,39 @@ function getHeader(title){
  
 
 function renderMedia(){
-//   content = `<div class="embed-responsive embed-responsive-21by9">
-//   <iframe class="embed-responsive-item" src="C:\\Users\\josef\\Desktop\\Autopsy_tests\\asdasd\\ModuleOutput\\AndroidForensics\\com.zhiliaoapp.musically\\2\\report\\Contents\\external\\cache\\welcome_screen_video4.mp4"></iframe>
-// </div>`;
-
-src = `C:\\Users\\josef\\Desktop\\Autopsy_tests\\test.mp4`
-
-content = `
-${getHeader("Media")}
-<div class="row">
-  <div class="col-lg-4 col-md-12 mb-4">
-    <div class="embed-responsive embed-responsive-4by3 z-depth-1-half">
-      <iframe class="embed-responsive-item" src="${src}" allowfullscreen></iframe>
-    </div>
-  </div>
-</div>`
-
-$("#page-builder").html(content);
-
-}
+  //   content = `<div class="embed-responsive embed-responsive-21by9">
+  //   <iframe class="embed-responsive-item" src="C:\\Users\\josef\\Desktop\\Autopsy_tests\\asdasd\\ModuleOutput\\AndroidForensics\\com.zhiliaoapp.musically\\2\\report\\Contents\\external\\cache\\welcome_screen_video4.mp4"></iframe>
+  // </div>`;
+  
+  $("#page-builder").html("");
+  
+  if(report["media"] == undefined){
+    $('#empty-media-modal').modal('show');
+    return
+  }
+  
+  src = `C:\\Users\\josef\\Desktop\\ee\\test.mp4`
+  src2 = `C:\\Users\\josef\\Desktop\\ee\\test.jpg`
+  content = `
+  ${getHeader("Media")}
+  <div class="row">
+  `
+  report["media"].forEach(item => {
+    content += `
+    <div class="col-lg-4 col-md-12 mb-4">
+      <div class="embed-responsive embed-responsive-4by3 z-depth-1-half">
+        <iframe src="${item["filename"]}" allowfullscreen></iframe>
+      </div>
+      <span>${item["filename"]}<span>
+    </div>`
+  
+  });
+  
+  content +=`</div>`
+  
+  $("#page-builder").html(content);
+  
+  }
 
 
 function pageBuilder(title){

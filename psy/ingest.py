@@ -314,7 +314,7 @@ class ProgressJob():
         self.atualPercent += self.increment
         
         if self.atualPercent > self.maxValue:
-            self.atualPercent = self.maxValue - 1
+            self.atualPercent = self.maxValue
         
         self.progressBar.progress(message, self.atualPercent)
             
