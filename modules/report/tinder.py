@@ -9,12 +9,14 @@ from package.utils import Utils
 from modules.report import ModuleParent
 from package.timeline import Timeline
 from package.location import Location
+from package.media import Media
 
 class ModuleReport(ModuleParent):
     def __init__(self, internal_path, external_path, report_path, app_name, app_id):
         ModuleParent.__init__(self, internal_path, external_path, report_path, app_name, app_id)
         self.timeline = Timeline()
         self.locations = Location()
+        self.media = Media()
 
 
         logging.info("Module started")
@@ -30,6 +32,7 @@ class ModuleReport(ModuleParent):
         self.report["locations"] = self.get_locations()
         self.report["timeline"] = self.timeline.get_sorted_timeline()
         self.report["tracking"] = self.locations.get_sorted_locations()
+        self.report["media"] = self.media.get_media()
 
         logging.info("Report Generated")
 
@@ -83,6 +86,7 @@ class ModuleReport(ModuleParent):
         user_photos =[]
         for photo in photos_list: 
             user_photos.append(photo[0])
+            self.media.add(photo[0], True)
 
         logging.info("{} photo(s) found".format(len(photos_list)))
         return user_photos
