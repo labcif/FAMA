@@ -271,7 +271,7 @@ class ModulePsy(ModulePsyParent):
 
         for u in users.values():
             try: 
-                art = file.newArtifact(BlackboardArtifact.ARTIFACT_TYPE.TSK_CONTACT)
+                art = file.newArtifact(self.art_profiles)
                 attributes = []
                 attributes.append(BlackboardAttribute(self.att_prf_uid, "db_im_xx", u.get("uid")))
                 attributes.append(BlackboardAttribute(self.att_prf_unique_id, "db_im_xx", u.get("uniqueid")))

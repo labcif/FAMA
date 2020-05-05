@@ -121,7 +121,7 @@ class ModuleReport(ModuleParent):
         db = os.path.join(self.internal_cache_path, "databases", "tinder-3.db")
 
         database = Database(db)
-        results = database.execute_query("select match_id, match_creation_date, match_last_activity_date, match_person_id, match_person_name, match_person_bio, match_person_birth_date, case when match_is_blocked = 1 then 'Blocked' when match_is_blocked = 0 then 'Not Blocked ' else 'Invalid' end from match_view;")
+        results = database.execute_query("select match_id, match_creation_date/1000 , match_last_activity_date, match_person_id, match_person_name, match_person_bio, match_person_birth_date/1000, case when match_is_blocked = 1 then 'Blocked' when match_is_blocked = 0 then 'Not Blocked ' else 'Invalid' end from match_view;")
         for entry in results:
             match={}
             match["id"] = entry[0]

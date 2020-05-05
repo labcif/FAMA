@@ -9,7 +9,7 @@ function initializeMenus(){
 
   Object.keys(reportData).forEach(function (item) {
     if (item !== "header"){
-      list += `<li class="nav-item"><a id="menulink-${item}" class="nav-link menu-item" href="javascript:void(null);"><span data-feather="file-text"></span>${capitalize(item)}</a></li>`;
+      list += `<li class="nav-item"><a id="menulink-${item}" class="nav-link menu-item" href="javascript:void(null);"><span data-feather="file-text"></span>${capitalize(item.replace("_", " "))}</a></li>`;
     }
   });
   $("#menu-list").html(list);
@@ -163,7 +163,7 @@ function renderTimeline(){
 }
 
 function getHeader(title){
-  return `<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom"><h1 class="h2">${capitalize(title)}</h1></div>`
+  return `<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom"><h1 class="h2">${capitalize(title.replace("_", " "))}</h1></div>`
 }
  
 
