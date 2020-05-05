@@ -49,8 +49,7 @@ function renderMap(){
   
   var content=  `
     <div style="height:auto;width:auto;" class="grid-container">
-      <div style="height:auto;width:auto;" class="grid-item" id="map">
-      <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+      <div style="height: calc(100vh - 48px);width:100%; display:block" class="grid-item" id="map">
       
   
       </div>
@@ -232,7 +231,7 @@ function pageBuilder(title){
 
       content += `<tr>`;
       Object.keys(item).forEach(function (body) {
-        content += `<td>${item[body]}</td>`;
+        content += `<td>${JSON.stringify(item[body])}</td>`;
       });
       content += `</tr>`;
     })
@@ -243,7 +242,7 @@ function pageBuilder(title){
   else if (Array.isArray(report[title]) && typeof report[title][0] === 'string'){
     content += `<ul class="list-group">`;
     report[title].forEach(item => {
-      content += `<li class="list-group-item">${item}</li>`;
+      content += `<li class="list-group-item">${JSON.stringify(item)}</li>`;
     });
     content += `</ul>`;
   }
@@ -254,7 +253,7 @@ function pageBuilder(title){
     
     
     Object.keys(report[title]).forEach(function (key) {
-      content += `<tr><td>${key}</td><td>${report[title][key]}</td></tr>`;
+      content += `<tr><td>${key}</td><td>${JSON.stringify(report[title][key])}</td></tr>`;
     });
 
     content += `</tbody></table></div>`;
