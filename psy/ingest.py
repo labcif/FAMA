@@ -233,6 +233,10 @@ class ProjectIngestModule(DataSourceIngestModule):
                 # So we are going to search every file
                 files = self.fileManager.findFiles(dataSource, "%")
                 for x in files:
+                    #We should add artifacts to a file, so we add it to the logicalfileset as reference
+                    if not base:
+                        base = x
+
                     # Script needs files inside /data/data/
                     # We find a file with this path, we got the base path
                     if x.getLocalPath() and '/data/data/' in x.getParentPath():
@@ -244,7 +248,6 @@ class ProjectIngestModule(DataSourceIngestModule):
                             base_path = local.split("/data/data/")[0]
 
                         #Already have the base folder, stop the find
-                        base = x
                         break
                 
                 # If have the base folder
