@@ -47,8 +47,6 @@ class ProjectIngestModule(DataSourceIngestModule):
         #Set progressbar to an scale of 100%
         self.progressBar = progressBar
         progressBar.switchToDeterminate(100)
-        
-        # progressBar.switchToIndeterminate()
 
         #Initialize list of possible data sources
         data_sources = []
@@ -60,8 +58,6 @@ class ProjectIngestModule(DataSourceIngestModule):
 
             jobs = len(self.apps)*3  #extract, analyser, index           
             self.progressJob = ProgressJob(progressBar, jobs)
-            
-
         
             #Extract instance, the dump folder is going to be the same for all apps dumps
             extract = Extract()
@@ -116,13 +112,10 @@ class ProjectIngestModule(DataSourceIngestModule):
             
         
         # For each data source, we will process it each one
-        count = 0
         for source in data_sources:
-            count += 1
             self.process_by_datasource(source)
 
         self.progressJob.next_job("Done")
-        # progressBar.progress("Done")
 
     def process_by_datasource(self, dataSource):
         #Since we are running ingest for the same datasource, we remove the output folder first but only for the datasource!
@@ -130,14 +123,11 @@ class ProjectIngestModule(DataSourceIngestModule):
         Utils.remove_folder(temp_directory)
         Utils.check_and_generate_folder(self.temp_module_path)
 
-        # progressBar.progress("Analyzing Information for {}".format(dataSource.getName()))
-        
+        self.progressJob.change_text("Analyzing Information for {}".format(dataSource.getName()))
 
         # We are going to use import previous json file or other data
         if self.method == "method_importfile":
             json_report = "Report.json"
-
-            
             
             reports_by_app = {}
             
@@ -146,7 +136,6 @@ class ProjectIngestModule(DataSourceIngestModule):
             
             # Processing all datasource json reports
             for report in json_reports:
-                
                 
                 # Get app id of the json report
                 info = Utils.read_json(report.getLocalPath())
@@ -172,8 +161,6 @@ class ProjectIngestModule(DataSourceIngestModule):
                 item["app"] = Utils.find_app_name(app_id)
                 self.process_report(item, dataSource)
                 
-                
-
         # Not using json report
         else:
             reports_by_app = {}
@@ -209,7 +196,7 @@ class ProjectIngestModule(DataSourceIngestModule):
                     report_folder_path = os.path.join(temp_directory, app_id, str(len(reports_by_app[app_id])))
                     Utils.check_and_generate_folder(report_folder_path)
 
-                    # progressBar.progress("Analyzing Information for {} ({})".format(dataSource.getName(), app_id))
+                    self.progressJob.change_text("Analyzing Information for {} ({})".format(dataSource.getName(), app_id))
 
                     #We are going to analyze the dumps and generate the report
                     analyzer = Analyzer(app_id, base_path, report_folder_path)
@@ -261,7 +248,7 @@ class ProjectIngestModule(DataSourceIngestModule):
                             report_folder_path = os.path.join(temp_directory, app_id, str(report_number)) #report path
                             Utils.check_and_generate_folder(report_folder_path)
 
-                            # progressBar.progress("Analyzing Information for {} ({})".format(dataSource.getName(), app_id))
+                            self.progressJob.change_text("Analyzing Information for {} ({})".format(dataSource.getName(), app_id))
 
                             # Folder to analyze
                             analyzer = Analyzer(app_id, base_path, report_folder_path)
@@ -301,25 +288,26 @@ class ProjectIngestModule(DataSourceIngestModule):
         self.module_psy.process_report(dataSource.getName(), report["file"], 0, report["report"])
         
 
-class ProgressJob():
-    
-    def __init__(self, progressbar, jobs, maxValue=100):
+class ProgressJob:
+    def __init__(self, progressBar, jobs, maxValue=100):
         if jobs < 1: jobs = 1
         if maxValue < 1: maxValue = 1
         
         self.maxValue = maxValue
         self.atualPercent = 0
-        self.increment = int(100 / jobs)
-        self.progressBar = progressbar
+        self.increment = int(100 / (jobs + 1))
+        self.progressBar = progressBar
 
     def next_job(self, message):
-    
         self.atualPercent += self.increment
         
         if self.atualPercent > self.maxValue:
             self.atualPercent = self.maxValue
         
         self.progressBar.progress(message, self.atualPercent)
+
+    def change_text(self, message):
+        self.progressBar.progress(message)
             
 
 
