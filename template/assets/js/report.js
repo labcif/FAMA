@@ -5,6 +5,23 @@ function capitalize(text) {
 }
 
 function initializeMenus() {
+  let info = `<div><strong>Report:</strong> ${reportData.header.report_name}</div>
+  <div><strong>App:</strong> ${capitalize(reportData.header.app_name)} (${reportData.header.app_id})</div>`
+
+  if (reportData.header.case_name){
+    info += `<div><strong>Case:</strong> ${reportData.header.case_name}</div>`
+  }
+
+  if (reportData.header.case_number){
+    info += `<div><strong>Nº:</strong> ${reportData.header.case_number}</div>`
+  }
+
+  if (reportData.header.examiner){
+    info += `<div><strong>Examiner:</strong> ${reportData.header.examiner}</div>`
+  }
+
+  $("#report-info").html(info);
+
   let list = "";
 
   Object.keys(reportData).forEach(function (item) {
@@ -193,7 +210,7 @@ function renderTimeline() {
       Doest support video
     </video>
       </div>
-      <span>${item}<span>
+      <span>${item}</span>
     </div>`
 
     });
