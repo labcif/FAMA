@@ -7,9 +7,9 @@ import logging
 from package.database import Database
 from package.utils import Utils
 from modules.report import ModuleParent
-from package.timeline import Timeline
-from package.location import Location
-from package.media import Media
+from package.models.timeline import Timeline
+from package.models.location import Location
+from package.models.media import Media
 
 class ModuleReport(ModuleParent):
     def __init__(self, internal_path, external_path, report_path, app_name, app_id):

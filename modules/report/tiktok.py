@@ -5,8 +5,8 @@ import logging
 
 from package.database import Database
 from package.utils import Utils
-from package.timeline import Timeline
-from package.media import Media
+from package.models.timeline import Timeline
+from package.models.media import Media
 from modules.report import ModuleParent
 
 class ModuleReport(ModuleParent):
