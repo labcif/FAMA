@@ -1,5 +1,6 @@
 import os
 from package.utils import Utils
+from package.models import Timeline, Location, Media
 
 class ModuleParent:
     def __init__(self, internal_path, external_path, report_path, app_name, app_id):
@@ -52,3 +53,21 @@ class ModuleParent:
 
     def generate_report(self):
         raise NotImplementedError
+    
+    def add_model(self, model, model_arg=False, my_model=""):
+
+        if isinstance(model, Timeline):
+            self.report["AF_timeline"] = model.get_sorted_timeline(model_arg)
+            return
+            
+        if isinstance(model, Media):
+            self.report["AF_media"] = model.get_media()
+            return
+        
+        if isinstance(model, Location):
+            self.report["AF_location"] = model.get_sorted_locations(model_arg)
+            return
+        
+        self.report[my_model] = model
+
+        

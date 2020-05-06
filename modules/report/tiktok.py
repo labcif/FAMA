@@ -5,9 +5,9 @@ import logging
 
 from package.database import Database
 from package.utils import Utils
-from package.models.timeline import Timeline
-from package.models.media import Media
+from package.models import Timeline, Location, Media
 from modules.report import ModuleParent
+
 
 class ModuleReport(ModuleParent):
     def __init__(self, internal_path, external_path, report_path, app_name, app_id):
@@ -27,8 +27,9 @@ class ModuleReport(ModuleParent):
         self.report["videos"] = self.get_videos()
         self.report["published_videos"] = self.get_videos_publish()
         self.report["log"] = self.get_last_session()
-        self.report["timeline"] = self.timeline.get_sorted_timeline()
-        self.report["media"] = self.media.get_media()
+        
+        self.add_model(self.timeline)
+        self.add_model(self.media)
 
         logging.info("Report Generated")
 
