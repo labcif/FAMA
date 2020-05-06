@@ -1,11 +1,17 @@
 from java.awt import Font
 from java.awt import Component
+from java.awt import Dimension
+from java.awt import BorderLayout
 from javax.swing import JPanel
 from javax.swing import JCheckBox
 from javax.swing import BoxLayout
 from javax.swing import ButtonGroup
 from javax.swing import JRadioButton
 from javax.swing import JLabel
+from javax.swing import JTextArea
+from javax.swing import JSeparator
+from javax.swing import JScrollPane
+
 
 from org.sleuthkit.autopsy.ingest import IngestModuleIngestJobSettings
 from org.sleuthkit.autopsy.ingest import IngestModuleIngestJobSettingsPanel
@@ -48,25 +54,36 @@ class ProjectIngestSettingsPanel(IngestModuleIngestJobSettingsPanel):
         self.apps_checkboxes_list = []
 
         self.setLayout(BoxLayout(self, BoxLayout.PAGE_AXIS))
+        self.setPreferredSize(Dimension(300,0))
         
         # title 
         self.p_title = SettingsUtils.createPanel()
+        
+        
         self.lb_title = JLabel("Android Forensics")
-        self.lb_title.setFont(self.lb_title.getFont().deriveFont(Font.BOLD, 11))
+        self.lb_title.setFont(self.lb_title.getFont().deriveFont(Font.BOLD, 15))
         self.p_title.add(self.lb_title)
         self.add(self.p_title)
+        
         # end of title
         
         
         # info menu
         self.p_info = SettingsUtils.createPanel()
-        self.lb_info = JLabel("")
-        self.lb_info2 = JLabel("")
-        self.p_info.add(self.lb_info)
-        self.p_info.add(self.lb_info2)
+        self.p_info.setPreferredSize(Dimension(300,20))
         
-       
-        self.add(self.p_info)
+        self.lb_info = SettingsUtils.createInfoLabel("")
+        self.lb_info2 = SettingsUtils.createInfoLabel("")
+        self.sp2 = SettingsUtils.createSeparators(1)
+
+
+        self.p_info.add(self.sp2, BorderLayout.SOUTH)
+        self.p_info.add(self.lb_info, BorderLayout.SOUTH)
+        self.p_info.add(self.lb_info2, BorderLayout.SOUTH)
+        
+        
+
+        
 
         # end of info menu
 
@@ -84,6 +101,7 @@ class ProjectIngestSettingsPanel(IngestModuleIngestJobSettingsPanel):
         self.bg_method.add(self.rb_liveExtraction)
 
         self.p_method.add(JLabel("Analysis method"))
+        self.p_method.add(self.sp)
         self.p_method.add(self.rb_selectedDatasource)
         self.p_method.add(self.rb_importReportFile)
         self.p_method.add(self.rb_liveExtraction)
@@ -92,7 +110,7 @@ class ProjectIngestSettingsPanel(IngestModuleIngestJobSettingsPanel):
         # end of method menu
 
         #app checkboxes menu
-        self.p_apps = SettingsUtils.createPanel()
+        self.p_apps = SettingsUtils.createPanel(True)
         
         sorted_items = OrderedDict(sorted(Utils.get_all_packages().items()))
 
@@ -102,8 +120,10 @@ class ProjectIngestSettingsPanel(IngestModuleIngestJobSettingsPanel):
             self.add(checkbox)
             self.apps_checkboxes_list.append(checkbox)
             self.p_apps.add(checkbox)
+        
 
         self.add(self.p_apps)
+        self.add(self.p_info)
         # end of checkboxes menu
 
     def customizeComponents(self):
@@ -156,10 +176,18 @@ class ProjectReportSettingsPanel(JPanel):
 
 class SettingsUtils:
     @staticmethod
-    def createPanel():
+    def createPanel(scroll =False):
+        
         panel = JPanel()
         panel.setLayout(BoxLayout(panel, BoxLayout.PAGE_AXIS))
         panel.setAlignmentX(Component.LEFT_ALIGNMENT)
+        
+        # if scroll:
+            # scrollpane = JScrollPane(panel)
+            # scrollpane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED)
+            # scrollpane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER)
+            # return JPanel().add(scrollpane)
+        
         return panel
 
     @staticmethod
@@ -176,3 +204,19 @@ class SettingsUtils:
         button = JRadioButton(name, actionPerformed= ap)
         button.setActionCommand(ac)
         return button
+    @staticmethod
+    def createInfoLabel(text):
+        textArea = JTextArea()
+        textArea.setLineWrap(True)
+        textArea.setWrapStyleWord(True)
+        textArea.setOpaque(False)
+        textArea.setEditable(False)
+        return textArea
+
+    @staticmethod
+    def createSeparators(count):
+        lines =""
+        for i in range(count):
+            lines+="<br>"
+
+        return SettingsUtils.createInfoLabel(lines)
