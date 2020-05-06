@@ -90,6 +90,13 @@ class Analyzer:
         except:
             pass
         
+        if not reports.get("header"):
+            reports["header"] = {}
+
+        reports["header"]["case_name"] = os.environ.get("case_name".upper())
+        reports["header"]["case_number"] = os.environ.get("case_number".upper())
+        reports["header"]["examiner"] = os.environ.get("examiner".upper())
+        
         js_code = "var reportData = " + json.dumps(reports, indent = 2)
 
         assets_folder = os.path.join(report_path, "assets")
@@ -128,6 +135,10 @@ class Analyzer:
             pass
 
         report_file_path = os.path.join(report_path, "index.html")
+
+        reports["case_name"] = os.environ.get("case_name".upper())
+        reports["case_number"] = os.environ.get("case_number".upper())
+        reports["examiner"] = os.environ.get("examiner".upper())
 
         js_code = "var reportList = " + json.dumps(reports, indent = 2)
 

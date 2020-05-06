@@ -266,6 +266,23 @@ class Utils:
         return final_path
 
     @staticmethod
+    def set_env():
+        env_path = os.path.join(Utils.get_base_path_folder(), '.env')
+        if not os.path.exists(env_path):
+            return None
+
+        handler = open(env_path, 'r')
+        contents = handler.read()
+        handler.close()
+
+        for line in contents.splitlines():
+            items = line.split('=')
+            if not len(items) > 1:
+                continue
+
+            os.environ[items[0].strip()] = '='.join(items[1:]).strip()
+
+    @staticmethod
     def copy_tree(src, dst, preserve_mode=1, preserve_times=1,
               preserve_symlinks=0, update=0, verbose=1, dry_run=0):
         #OVERRIDE FROM DSTUTILS METHOD

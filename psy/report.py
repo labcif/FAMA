@@ -27,10 +27,12 @@ class ReportOutput:
 
         progressBar.updateStatusLabel("Creating report")
 
+        
+        os.environ["CASE_NAME"] = Case.getCurrentCase().getName()
+        os.environ["CASE_NUMBER"] = Case.getCurrentCase().getNumber()
+        os.environ["EXAMINER"] = Case.getCurrentCase().getExaminer()
+
         reports = {}
-        reports["case_name"] = Case.getCurrentCase().getName()
-        reports["case_number"] = Case.getCurrentCase().getNumber()
-        reports["examiner"] = Case.getCurrentCase().getExaminer()
         reports["reports"] = []
 
         for fileset in os.listdir(self.tempDirectory):
@@ -41,9 +43,6 @@ class ReportOutput:
                     report = os.path.join(app_path, app_report, "Report.json")
                     if os.path.exists(report):
                         report_content = Utils.read_json(report)
-                        report_content["header"]["case_name"] = reports["case_name"]
-                        report_content["header"]["case_number"] = reports["case_number"]
-                        report_content["header"]["examiner"] = reports["examiner"]
 
                         report_path = Analyzer.generate_html_report(report_content, os.path.join(app_path, app_report))
                         

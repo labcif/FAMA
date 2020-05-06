@@ -12,6 +12,8 @@ from package.utils import Utils
 
 def start(args):
     Utils.setup_custom_logger()
+    Utils.set_env()
+    
     logging.info("Starting")
     
     extract = Extract()
@@ -37,7 +39,7 @@ def start(args):
 
     for app in args.app:
         folders = []
-
+        
         #This logic support both <appname> and <com.app.id>
         #app > appname
         #app_id > com.app.id
