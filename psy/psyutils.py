@@ -52,7 +52,11 @@ class PsyUtils:
     
     @staticmethod
     def index_artifact(artifact, artifact_type):
-        IngestServices.getInstance().fireModuleDataEvent(ModuleDataEvent("test",artifact_type, None))
+        try:
+            Case.getCurrentCase().getServices().getBlackboard().indexArtifact(artifact)
+        except:
+            logging.warning("Error indexing artifact type: " + artifact_type)
+        IngestServices.getInstance().fireModuleDataEvent(ModuleDataEvent("Forensics Analyzer",artifact_type, None))
 
     @staticmethod
     def add_relationship(node1, node2, art, relationship_type, timestamp):
