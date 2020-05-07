@@ -8,6 +8,16 @@ body {
   vertical-align: text-bottom;
 }
 
+.top-link-mobile:hover{
+  color: rgba(255,255,255,.75)
+}
+
+.top-link-mobile{
+  color: rgba(255,255,255,.5);
+}
+
+
+
 /*
  * Sidebar
  */
@@ -69,6 +79,24 @@ body {
 .report-top {
   padding-top: 100px; /* Space for fixed navbar */
 }
+
+.map-style {
+  width:100%;
+  display:block
+}
+
+@media (max-width: 768px){
+  .map-style{
+    height: calc(100vh - 101px)
+  }
+}
+
+@media (min-width: 768px){
+  .map-style{
+    height: calc(100vh - 48px)
+  }
+}
+
 
 @media (min-width: 768px) {
   .report-top {

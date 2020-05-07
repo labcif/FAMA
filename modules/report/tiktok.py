@@ -233,7 +233,7 @@ class ModuleReport(ModuleParent):
                 for entry in aweme_list:
                     video ={}
                     video["created_time"] = entry.get("create_time")
-                    video["video"] = str(entry.get("video").get("animated_cover").get("url_list")[0])
+                    video["video"] = str(entry.get("video"))#.get("animated_cover").get("url_list")[0])
                     
                     
                     timeline_event = {}
