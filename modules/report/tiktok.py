@@ -86,27 +86,9 @@ class ModuleReport(ModuleParent):
                 else:
                     message["sender"] = conversation_output["participant_2"]
                     message["receiver"] = conversation_output["participant_1"]
-                message_type = entry[4]
 
-                message_dump = json.loads(entry[1])
-                body=""
-
-                if  message_type == 7: #text message type
-                    message["type"] = "text"
-                    body = message_dump.get("text")
-
-                elif message_type == 8: #video message type
-                    message["type"] = "video"
-                    body= "https://www.tiktok.com/@tiktok/video/{}".format(message_dump.get("itemId"))
-                
-                elif message_type == 5:
-                    message["type"] = "gif"
-                    body=message_dump.get("url").get("url_list")[0]
-                else:
-                    message["type"] = "unknown"
-                    body= str(message_dump)
-                
-                message["message"] = body
+                message["type"] = self.get_message_type_by_id(entry[4])                
+                message["message"] = self.parse_body_message_by_id(entry[4], json.loads(entry[1]))
                 message["deleted"] = str(entry[5])
                 conversation_output["messages"].append(message)
 
@@ -214,7 +196,6 @@ class ModuleReport(ModuleParent):
             video = {}
             video["key"] = entry[0]
             dump = json.loads(entry[1])
-            
             for line in dump["responseHeaders"].splitlines():
                 if 'Last-Modified:' in line:
                     video["last_modified"] = Utils.date_parser(line.split(": ")[1], "%a, %d %b %Y %H:%M:%S %Z")
@@ -252,7 +233,7 @@ class ModuleReport(ModuleParent):
                 for entry in aweme_list:
                     video ={}
                     video["created_time"] = entry.get("create_time")
-                    video["video"] = str(entry.get("video"))#.get("animated_cover").get("url_list")[0]
+                    video["video"] = str(entry.get("video").get("animated_cover").get("url_list")[0])
                     
                     
                     timeline_event = {}
@@ -302,4 +283,30 @@ class ModuleReport(ModuleParent):
 
         logging.info("{} entrys found".format(len(results)))
         return session
+    
+    @staticmethod
+
+    def parse_body_message_by_id(message_type, message_dump):
+        body=""
+        if  message_type == 7:
+            body = message_dump.get("text")
+        elif message_type == 8:
+            body= "https://www.tiktok.com/@tiktok/video/{}".format(message_dump.get("itemId"))
+        elif message_type == 5:
+            body=message_dump.get("url").get("url_list")[0]
+        elif message_type == 15:
+            body=message_dump.get("joker_stickers")[0].get("static_url").get("url_list")[0]
+        else:
+            body= str(message_dump)
+        
+        return body
+
+
+    @staticmethod
+    def get_message_type_by_id(message_type_id):
+        if  message_type_id == 7: return "text"
+        if  message_type_id == 8: return "video"
+        if  message_type_id == 5: return "gif"
+        if  message_type_id == 15: return "gif"
+        return "unknown"
 
