@@ -101,7 +101,6 @@ class ProjectIngestSettingsPanel(IngestModuleIngestJobSettingsPanel):
         self.bg_method.add(self.rb_liveExtraction)
 
         self.p_method.add(JLabel("Analysis method"))
-        self.p_method.add(self.sp)
         self.p_method.add(self.rb_selectedDatasource)
         self.p_method.add(self.rb_importReportFile)
         self.p_method.add(self.rb_liveExtraction)

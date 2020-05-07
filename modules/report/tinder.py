@@ -63,7 +63,7 @@ class ModuleReport(ModuleParent):
             timeline_event["from"]= message["from"]
             timeline_event["to"]= message["to"]
             timeline_event["message"]= message["message"]
-            self.timeline.add(message["created_time"],"message", timeline_event)
+            self.timeline.add(message["created_time"],"AF_message", timeline_event)
 
 
 
@@ -109,7 +109,7 @@ class ModuleReport(ModuleParent):
             timeline_event = {}
             timeline_event["old"]= bio_change["old"]
             timeline_event["new"]= bio_change["new"]
-            self.timeline.add(bio_change["createdtime"],"biography", timeline_event)
+            self.timeline.add(bio_change["createdtime"],"AF_user", timeline_event)
 
             biography_changes.append(bio_change)
         
@@ -140,7 +140,7 @@ class ModuleReport(ModuleParent):
             timeline_event["person_id"]= match["person_id"]
             timeline_event["person_name"]= match["person_name"]
             timeline_event["is_blocked"]= match["is_blocked"]
-            self.timeline.add(match["creation_date"],"match", timeline_event)
+            self.timeline.add(match["creation_date"],"AF_relation", timeline_event)
             
 
         logging.info("{} matches found".format(len(matches)))
@@ -175,7 +175,7 @@ class ModuleReport(ModuleParent):
 
             timeline_event = {}
             timeline_event["name"]= card["name"]
-            self.timeline.add(card["use_date"],"credit_card", timeline_event)
+            self.timeline.add(card["use_date"],"AF_creditcard", timeline_event)
 
             cards_list.append(card)
 
@@ -214,7 +214,7 @@ class ModuleReport(ModuleParent):
             timeline_event["address"]= location["address"]
             timeline_event["city"]= location["city"]
             timeline_event["country_long"]= location["country_long"]
-            self.timeline.add(location["last_seen_date"],"location", timeline_event)
+            self.timeline.add(location["last_seen_date"],"AF_location", timeline_event)
 
             self.locations.add(location["last_seen_date"], location["latitude"], location["longitude"])
 

@@ -25,7 +25,7 @@ function initializeMenus() {
   let list = "";
 
   Object.keys(reportData).forEach(function (item) {
-    if (item !== "header") {
+    if (item !== "header" && item.substring(0, 3) !=="AF_") {
       list += `<li class="nav-item"><a id="menulink-${item}" class="nav-link menu-item" href="javascript:void(null);"><span data-feather="file-text"></span>${capitalize(item.replace("_", " "))}</a></li>`;
     }
   });
@@ -34,7 +34,12 @@ function initializeMenus() {
 }
 
 function generatedDate() {
-  $("#generated-date").html("Generated at " + (new Date(Number(reportData["header"]["report_date"])).toISOString().slice(0, 19).replace(/-/g, "/").replace("T", " ")));
+    let timestamp = new Date(reportData["header"]["report_date"]);
+    let date = timestamp.toLocaleDateString("pt-PT");
+    let time = timestamp.toLocaleTimeString("pt-PT");
+
+
+  $("#generated-date").html("Generated at " + date + " " + time);
 }
 
 function extraButtons() {
@@ -75,17 +80,15 @@ function renderMap() {
 
   $("#page-builder").html(content);
 
-
-  var map = L.map('map').setView([51.505, -0.09], 13);
-
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    // attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-  }).addTo(map);
-
   if (report["AF_location"] == undefined) {
     $('#empty-map-modal').modal('show');
     return
   }
+  var map = L.map('map').setView([report["AF_location"][0]["latitude"], report["AF_location"][0][["longitude"]]], 13);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    // attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+  }).addTo(map);
 
   report["AF_location"].forEach(item => {
 
@@ -126,9 +129,11 @@ function renderTimeline() {
   report["AF_timeline"].forEach(item => {
     let date = "";
     let time = "";
+    let textclass = ""
     if (item["timestamp"] == 0) {
-      date = `<span class="badge badge-pill badge-danger text-white ml-3">Invalid date</span>`
-      time = ``
+      date = `Invalid date`
+      time = `Invalid time`
+      textclass= "text-danger"
     } else {
       timestamp = new Date(item["timestamp"] * 1000);
       date = timestamp.toLocaleDateString("pt-PT");
@@ -140,7 +145,7 @@ function renderTimeline() {
         <object data="assets/svg/${item["event"]}.svg" type="image/svg+xml" class="w-100"}"></object>
         
         </div>
-        <div class="tracking-date">${date}<span>${time}</span></div>
+        <div class="tracking-date ${textclass}">${date}<span class="${textclass}">${time}</span></div>
         <div class="tracking-content">`
 
     id += 1
@@ -149,7 +154,7 @@ function renderTimeline() {
       try {
         if (item["value"][body].length > 100) {
           content += `<span><strong class="d-inline">${body} : </strong><div id='${"timeline-" + id}' class='collapse'> ${item["value"][body]}</div>
-              <span class=" d-inline btn btn-link " data-toggle="collapse" data-target="#${"timeline-" + id}">Expand/Collapse</span></span>`;
+              <span class="d-inline btn btn-link text-primary" data-toggle="collapse" data-target="#${"timeline-" + id}">Expand/Collapse</span></span>`;
         } else {
           content += `<span><strong class="d-inline">${body} : </strong><div class="d-inline" id='${"timeline-" + id}'> ${item["value"][body]}</div></span>`;
         }
@@ -207,6 +212,7 @@ function renderMedia() {
         <source src="${item}" type="video/mp4">
       Doest support video
     </video>
+    <img src="${item}" alt="">
       </div>
       <span>${item}</span>
     </div>`
