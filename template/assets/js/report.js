@@ -54,9 +54,7 @@ function menuClick(event) {
     idName = "menulink-" + event;
   }
 
-  Object.keys(reportData).forEach(function (item) {
-    $("#menulink-" + item).removeClass("active");
-  });
+  removeFocus()
 
   $("#" + idName).addClass("active");
 
@@ -65,9 +63,10 @@ function menuClick(event) {
 }
 
 function renderMap() {
-
-
-
+  if (report["AF_location"] == undefined) {
+    $('#empty-map-modal').modal('show');
+    return
+  }
 
   var content = `
     <div style="height:auto;width:auto;" class="grid-container">
@@ -77,13 +76,9 @@ function renderMap() {
       </div>
     <div>
   `
-
+  removeFocus()
   $("#page-builder").html(content);
 
-  if (report["AF_location"] == undefined) {
-    $('#empty-map-modal').modal('show');
-    return
-  }
   var map = L.map('map').setView([report["AF_location"][0]["latitude"], report["AF_location"][0][["longitude"]]], 13);
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -117,16 +112,20 @@ function renderMap() {
 }
 
 function renderTimeline() {
-  report = reportData;
+  if (report["AF_timeline"] == undefined) {
+    $('#empty-timeline-modal').modal('show');
+    return
+  }
+
+  removeFocus()
 
   content = getHeader("timeline")
 
   content += `<div class="row"><div class="tracking-list">`
 
-
   var id = 1
 
-  report["AF_timeline"].forEach(item => {
+  reportData["AF_timeline"].forEach(item => {
     let date = "";
     let time = "";
     let textclass = ""
@@ -177,18 +176,28 @@ function getHeader(title) {
   return `<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom"><h1 class="h2">${capitalize(title.replace("_", " "))}</h1></div>`
 }
 
+function removeFocus(){
+  Object.keys(reportData).forEach(function (item) {
+    $("#menulink-" + item).removeClass("active");
+  });
+}
+
 
 function renderMedia() {
   //   content = `<div class="embed-responsive embed-responsive-21by9">
   //   <iframe class="embed-responsive-item" src="C:\\Users\\josef\\Desktop\\Autopsy_tests\\asdasd\\ModuleOutput\\AndroidForensics\\com.zhiliaoapp.musically\\2\\report\\Contents\\external\\cache\\welcome_screen_video4.mp4"></iframe>
   // </div>`;
 
-  $("#page-builder").html("");
 
   if (report["AF_media"] == undefined) {
     $('#empty-media-modal').modal('show');
     return
   }
+
+  removeFocus()
+
+  $("#page-builder").html("");
+
 
   // src = `C:\\Users\\josef\\Desktop\\ee\\test.mp4`
   // src2 = `C:\\Users\\josef\\Desktop\\ee\\test.jpg`
