@@ -214,14 +214,25 @@ function renderMedia() {
     //   <span>${item}<span>
     // </div>`
 
+    // content += `
+    // <div class="col-lg-4 col-md-12 mb-4">
+    //   <div class="embed-responsive embed-responsive-4by3 z-depth-1-half">
+    //   <video width="320" height="240" controls>
+    //     <source src="${item}" type="video/mp4">
+    //   Doest support video
+    // </video>
+    // <img src="${item}" alt="">
+    //   </div>
+    //   <span>${item}</span>
+    // </div>`
+
     content += `
     <div class="col-lg-4 col-md-12 mb-4">
-      <div class="embed-responsive embed-responsive-4by3 z-depth-1-half">
-      <video width="320" height="240" controls>
-        <source src="${item}" type="video/mp4">
-      Doest support video
-    </video>
-    <img src="${item}" alt="">
+      <div class="">
+      
+    
+        <embed src="${item}" autostart="0"/></embed>
+      
       </div>
       <span>${item}</span>
     </div>`

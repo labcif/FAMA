@@ -116,7 +116,7 @@ class ModulePsy(ModulePsyParent):
         # self.art_messages = self.utils.create_artifact_type(self.module_name, "TSK_MESSAGE","Messages", self.case)
         self.art_messages = self.utils.create_artifact_type(self.module_name, "TIKTOK_MESSAGES","Messages")
         self.art_user_profile = self.utils.create_artifact_type(self.module_name, "TIKTOK_PROFILE", "Profile")
-        self.art_profiles = self.utils.create_artifact_type(self.module_name, "TIKTOK_PROFILES_", "Profiles")
+        self.art_profiles = self.utils.create_artifact_type(self.module_name, "TIKTOK_PROFILES", "Profiles")
         self.art_searches = self.utils.create_artifact_type(self.module_name, "TIKTOK_SEARCHES","Search")
         self.art_videos = self.utils.create_artifact_type(self.module_name, "TIKTOK_VIDEOS", "Videos")
         self.art_publish_videos = self.utils.create_artifact_type(self.module_name, "TIKTOK_PUBLISHED_VIDEOS", "Published Videos")
@@ -271,7 +271,7 @@ class ModulePsy(ModulePsyParent):
 
         for u in users.values():
             try: 
-                art = file.newArtifact(self.art_profiles)
+                art = file.newArtifact(self.art_profiles.getTypeID())
                 attributes = []
                 attributes.append(BlackboardAttribute(self.att_prf_uid, "db_im_xx", u.get("uid")))
                 attributes.append(BlackboardAttribute(self.att_prf_unique_id, "db_im_xx", u.get("uniqueid")))
