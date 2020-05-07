@@ -90,6 +90,7 @@ This project is licensed under the terms of the GNU GPL v3 License.
 * [jQuery](https://jquery.com/) - MIT License
 * [feather](https://github.com/feathericons/feather) - MIT License
 * [pdfmake](https://github.com/bpampuch/pdfmake) - MIT License
+* [Freepic Icons](https://www.flaticon.com/packs/user-interface-111)
 
 ## Notes
 

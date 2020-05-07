@@ -1,4 +1,4 @@
-/* globals Chart:false, feather:false */
+/* globals rt:false, feather:false */
 
 function capitalize(text) {
   return text.charAt(0).toUpperCase() + text.substr(1).toLowerCase();
@@ -30,6 +30,16 @@ function initializeMenus() {
     }
   });
   $("#menu-list").html(list);
+
+  list = "";
+
+  Object.keys(reportData).forEach(function (item) {
+    if (item !== "header" && item.substring(0, 3) !=="AF_") {
+      list += `<li class="nav-item"><a id="menulink-${item}-listmobile" class="navbar-light nav-link menu-item top-link-mobile" style="padding: 0.5rem 0.8rem" href="javascript:void(null);"><span data-feather="file-text" class="mr-1"></span>${capitalize(item.replace("_", " "))}</a></li>`;
+    }
+  });
+
+  $("#menu-list-mobile").html(list);
   $(".menu-item").on("click", menuClick);
 }
 
@@ -42,18 +52,22 @@ function generatedDate() {
   $("#generated-date").html("Generated at " + date + " " + time);
 }
 
-function extraButtons() {
-
+function onChangeMenu(){
+  $("#page-builder").addClass("px-4");
+  $('.navbar-collapse').collapse('hide');
 }
 
 function menuClick(event) {
+  onChangeMenu()
+
   if (event.target) {
-    idName = event.target.id;
+    idName = event.target.id.replace('-listmobile', '');
   }
   else {
-    idName = "menulink-" + event;
+    idName = "menulink-" + event.replace('-listmobile', '');
   }
 
+  console.log(idName)
   removeFocus()
 
   $("#" + idName).addClass("active");
@@ -63,29 +77,32 @@ function menuClick(event) {
 }
 
 function renderMap() {
-  if (report["AF_location"] == undefined) {
+  if (reportData["AF_location"] == undefined) {
     $('#empty-map-modal').modal('show');
     return
   }
 
+  onChangeMenu()
+  $("#page-builder").removeClass("px-4");
+
   var content = `
-    <div style="height:auto;width:auto;" class="grid-container">
-      <div style="height: calc(100vh - 48px);width:100%; display:block" class="grid-item" id="map">
-      
-  
+    <div class="grid-container">
+      <div class="grid-item map-style" id="map">
       </div>
     <div>
   `
   removeFocus()
   $("#page-builder").html(content);
 
-  var map = L.map('map').setView([report["AF_location"][0]["latitude"], report["AF_location"][0][["longitude"]]], 13);
+  var map = L.map('map');
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     // attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
   }).addTo(map);
 
-  report["AF_location"].forEach(item => {
+  let markers = []
+
+  reportData["AF_location"].forEach(item => {
 
     timestamp = new Date(item["timestamp"] * 1000);
     let date = timestamp.toLocaleDateString("pt-PT");
@@ -98,7 +115,7 @@ function renderMap() {
     <strong>Longitude:</strong> ${item["longitude"]}<br>
     `
 
-
+    markers.push([item.latitude, item.longitude])
     L.marker([item["latitude"], item["longitude"]]).addTo(map)
 
       .bindPopup(popupContent)
@@ -107,21 +124,20 @@ function renderMap() {
 
   });
 
-
-
+  map.fitBounds(markers);
+  map.setZoom(13);
 }
 
 function renderTimeline() {
-  if (report["AF_timeline"] == undefined) {
-    $('#empty-timeline-modal').modal('show');
+  if (reportData["AF_media"] == undefined) {
+    $('#empty-media-modal').modal('show');
     return
   }
-
+  onChangeMenu()
   removeFocus()
 
   content = getHeader("timeline")
-
-  content += `<div class="row"><div class="tracking-list">`
+  content += `<div class="tracking-list inline-block">`
 
   var id = 1
 
@@ -167,7 +183,7 @@ function renderTimeline() {
 
   });
 
-  content += `</div></div></div></div>`
+  content += `</div></div></div>`
   $("#page-builder").html(content);
 
 }
@@ -184,15 +200,17 @@ function removeFocus(){
 
 
 function renderMedia() {
+
   //   content = `<div class="embed-responsive embed-responsive-21by9">
   //   <iframe class="embed-responsive-item" src="C:\\Users\\josef\\Desktop\\Autopsy_tests\\asdasd\\ModuleOutput\\AndroidForensics\\com.zhiliaoapp.musically\\2\\report\\Contents\\external\\cache\\welcome_screen_video4.mp4"></iframe>
   // </div>`;
 
 
-  if (report["AF_media"] == undefined) {
+  if (reportData["AF_media"] == undefined) {
     $('#empty-media-modal').modal('show');
     return
   }
+  onChangeMenu()
 
   removeFocus()
 
@@ -205,7 +223,7 @@ function renderMedia() {
   ${getHeader("Media")}
   <div class="row">
   `
-  report["AF_media"].forEach(item => {
+  reportData["AF_media"].forEach(item => {
     // content += `
     // <div class="col-lg-4 col-md-12 mb-4">
     //   <div class="embed-responsive embed-responsive-4by3 z-depth-1-half">
@@ -247,8 +265,7 @@ function renderMedia() {
 
 
 function pageBuilder(title) {
-  report = reportData
-  if (!(title in report)) {
+  if (!(title in reportData)) {
     return;
   }
 
@@ -257,11 +274,11 @@ function pageBuilder(title) {
   content += getHeader(title)
 
   //Array of objects
-  if (Array.isArray(report[title]) && typeof report[title][0] === 'object') {
+  if (Array.isArray(reportData[title]) && typeof reportData[title][0] === 'object') {
     let titleDefined = false;
     content += `<div class="table-responsive"><table class="table table-striped table-sm table-bordered table-hover">`;
 
-    report[title].forEach(item => {
+    reportData[title].forEach(item => {
       //define table header
       if (!titleDefined) {
         let theads = ""
@@ -283,21 +300,21 @@ function pageBuilder(title) {
     content += `</tbody></table></div>`;
   }
   //Array of strings
-  else if (Array.isArray(report[title]) && typeof report[title][0] === 'string') {
+  else if (Array.isArray(reportData[title]) && typeof reportData[title][0] === 'string') {
     content += `<ul class="list-group">`;
-    report[title].forEach(item => {
+    reportData[title].forEach(item => {
       content += `<li class="list-group-item">${JSON.stringify(item)}</li>`;
     });
     content += `</ul>`;
   }
   //Object (key/value)
-  else if (typeof report[title] === 'object') {
+  else if (typeof reportData[title] === 'object') {
     content += `<div class="table-responsive"><table class="table table-striped table-sm table-bordered table-hover">`;
 
 
 
-    Object.keys(report[title]).forEach(function (key) {
-      content += `<tr><td>${key}</td><td>${JSON.stringify(report[title][key])}</td></tr>`;
+    Object.keys(reportData[title]).forEach(function (key) {
+      content += `<tr><td>${key}</td><td>${JSON.stringify(reportData[title][key])}</td></tr>`;
     });
 
     content += `</tbody></table></div>`;
@@ -323,6 +340,8 @@ function startUp() {
 }
 
 function makeReport() {
+  onChangeMenu()
+
   $('#loading-modal').modal('show');
   setTimeout(function () {
     content = [
