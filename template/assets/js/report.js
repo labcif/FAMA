@@ -52,10 +52,6 @@ function generatedDate() {
   $("#generated-date").html("Generated at " + date + " " + time);
 }
 
-function extraButtons() {
-
-}
-
 function onChangeMenu(){
   $("#page-builder").addClass("px-4");
   $('.navbar-collapse').collapse('hide');
@@ -81,13 +77,13 @@ function menuClick(event) {
 }
 
 function renderMap() {
-  onChangeMenu()
-  $("#page-builder").removeClass("px-4");
-
   if (reportData["AF_location"] == undefined) {
     $('#empty-map-modal').modal('show');
     return
   }
+
+  onChangeMenu()
+  $("#page-builder").removeClass("px-4");
 
   var content = `
     <div class="grid-container">
@@ -133,17 +129,15 @@ function renderMap() {
 }
 
 function renderTimeline() {
-  onChangeMenu()
-
   if (reportData["AF_media"] == undefined) {
     $('#empty-media-modal').modal('show');
     return
   }
-
+  onChangeMenu()
   removeFocus()
 
   content = getHeader("timeline")
-  content += `<div class="row"><div class="tracking-list">`
+  content += `<div class="tracking-list inline-block">`
 
   var id = 1
 
@@ -189,7 +183,7 @@ function renderTimeline() {
 
   });
 
-  content += `</div></div></div></div>`
+  content += `</div></div></div>`
   $("#page-builder").html(content);
 
 }
@@ -206,7 +200,6 @@ function removeFocus(){
 
 
 function renderMedia() {
-  onChangeMenu()
 
   //   content = `<div class="embed-responsive embed-responsive-21by9">
   //   <iframe class="embed-responsive-item" src="C:\\Users\\josef\\Desktop\\Autopsy_tests\\asdasd\\ModuleOutput\\AndroidForensics\\com.zhiliaoapp.musically\\2\\report\\Contents\\external\\cache\\welcome_screen_video4.mp4"></iframe>
@@ -217,6 +210,7 @@ function renderMedia() {
     $('#empty-media-modal').modal('show');
     return
   }
+  onChangeMenu()
 
   removeFocus()
 

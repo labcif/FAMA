@@ -16,6 +16,15 @@ body {
   color: rgba(255,255,255,.5);
 }
 
+.logo-link:hover{
+  color: rgba(255,255,255,.6);
+  text-decoration: none;
+}
+
+.logo-link{
+  color: rgba(255, 255, 255, 0.9);
+}
+
 
 
 /*
