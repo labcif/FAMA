@@ -67,7 +67,6 @@ function menuClick(event) {
     idName = "menulink-" + event.replace('-listmobile', '');
   }
 
-  console.log(idName)
   removeFocus()
 
   $("#" + idName).addClass("active");

@@ -31,7 +31,7 @@ class ModulePsy(ModulePsyParent):
         self.process_searches(data.get("searches"), file)
         self.process_undark(data.get("freespace"), file)
         self.process_drp(data.get("sqlparse"), file)
-        #self.process_videos(data.get("videos"), report_number, file, os.path.dirname(path), datasource_name)
+        self.process_videos(data.get("videos"), report_number, file, os.path.dirname(path), datasource_name)
         self.process_logs(data.get("log"), file)
         self.process_published_videos(data.get("published_videos"), file)
 
@@ -312,7 +312,7 @@ class ModulePsy(ModulePsyParent):
         for v in files:
             os.rename(os.path.join(path, v), os.path.join(path, v) + ".mp4")
 
-        self.utils.add_to_fileset("{}_Videos".format(datasource_name), [path])
+        #self.utils.add_to_fileset("{}_Videos".format(datasource_name), [path])
 
     def process_published_videos(self, videos,file):
         logging.info("Indexing published videos.")
