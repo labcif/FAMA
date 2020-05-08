@@ -167,14 +167,14 @@ function renderTimeline() {
       id += 1
       try {
         if (item["value"][body].length > 100) {
-          content += `<span><strong class="d-inline">${body} : </strong><div id='${"timeline-" + id}' class='collapse'> ${item["value"][body]}</div>
+          content += `<span><strong class="d-inline">${capitalize(body.replace("_"," "))} : </strong><div id='${"timeline-" + id}' class='collapse'> ${item["value"][body]}</div>
               <span class="d-inline btn btn-link text-primary" data-toggle="collapse" data-target="#${"timeline-" + id}">Expand/Collapse</span></span>`;
         } else {
-          content += `<span><strong class="d-inline">${body} : </strong><div class="d-inline" id='${"timeline-" + id}'> ${item["value"][body]}</div></span>`;
+          content += `<span><strong class="d-inline">${capitalize(body.replace("_"," "))} : </strong><div class="d-inline" id='${"timeline-" + id}'> ${item["value"][body]}</div></span>`;
         }
       
       } catch (error) {
-        content += `<span><strong class="d-inline">${body} : </strong><div class="d-inline" id='${"timeline-" + id}'> ${item["value"][body]}</div></span>`;
+        content += `<span><strong class="d-inline">${capitalize(body.replace("_"," "))} : </strong><div class="d-inline" id='${"timeline-" + id}'> ${item["value"][body]}</div></span>`;
       }
 
     });
