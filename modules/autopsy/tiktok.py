@@ -92,7 +92,12 @@ class ModulePsy(ModulePsyParent):
         #published videos
 
         self.att_publish_vid_created_time = self.utils.create_attribute_type('TIKTOK_PUBLISHED_VIDEOS_CREATED_TIME', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.DATETIME, "Created TIme")
-        self.att_publish_vid_url = self.utils.create_attribute_type('TIKTOK_PUBLISHED_VIDEOS_URL', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Url")
+        self.att_publish_vid_url = self.utils.create_attribute_type('TIKTOK_PUBLISHED_VIDEOS_URL', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Video URL")
+        self.att_publish_vid_api = self.utils.create_attribute_type('TIKTOK_PUBLISHED_VIDEOS_API', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "API URL")
+        self.att_publish_vid_share_url = self.utils.create_attribute_type('TIKTOK_PUBLISHED_VIDEOS_SHARE', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "share URL")
+        self.att_publish_vid_music = self.utils.create_attribute_type('TIKTOK_PUBLISHED_VIDEOS_MUSIC', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "music URL")
+        self.att_publish_vid_duration = self.utils.create_attribute_type('TIKTOK_PUBLISHED_VIDEOS_DURATION', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.LONG, "Duration")
+        self.att_publish_vid_cover = self.utils.create_attribute_type('TIKTOK_PUBLISHED_VIDEOS_COVER', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Cover URL")
 
 
 
@@ -322,7 +327,13 @@ class ModulePsy(ModulePsyParent):
                 attributes = []
                 attributes.append(BlackboardAttribute(self.att_publish_vid_url, "aweme_publish", v.get("video")))
                 attributes.append(BlackboardAttribute(self.att_publish_vid_created_time, "aweme_publish", v.get("created_time")))
+                attributes.append(BlackboardAttribute(self.att_publish_vid_api, "aweme_publish", v.get("api_address")))
+                attributes.append(BlackboardAttribute(self.att_publish_vid_share_url, "aweme_publish", v.get("share_url")))
+                attributes.append(BlackboardAttribute(self.att_publish_vid_music, "aweme_publish", v.get("music")))
+                attributes.append(BlackboardAttribute(self.att_publish_vid_duration, "aweme_publish", v.get("duration")))
+                attributes.append(BlackboardAttribute(self.att_publish_vid_cover, "aweme_publish", v.get("cover")))
                 art.addAttributes(attributes)
+
                 self.utils.index_artifact(art, self.art_publish_videos)        
             except Exception as e:
                 logging.warning("Error getting a video: " + str(e))

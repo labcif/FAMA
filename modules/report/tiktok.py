@@ -242,9 +242,19 @@ class ModuleReport(ModuleParent):
                     #     else:
                     #         video["video"] = entry.get("video")
                     try:
-                        video["video"] = str(entry.get("video").get("animated_cover").get("url_list")[0])
+                        video["video"] =""
+                        if entry.get("video").get("animated_cover"):
+                            video["video"] =entry.get("video").get("animated_cover").get("url_list")[0]
+
+
+                        video["api_address"] = entry.get("video").get("play_addr").get("url_list")[-1]
+                        video["share_url"] = entry.get("share_url")
+                        video["music"] = entry.get("music").get("play_url").get("url_list")[0]
+                        video["duration"] = entry.get("video").get("duration")
+                        video["cover"] = str(entry.get("video").get("cover").get("url_list")[0])
                     except:
-                        video["video"] =str(entry)
+                        # video["video"] =str(entry)
+                        pass
 
                     
                     timeline_event = {}
