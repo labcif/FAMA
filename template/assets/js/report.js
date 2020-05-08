@@ -139,11 +139,13 @@ function renderTimeline() {
   content += `<div class="tracking-list inline-block">`
 
   var id = 1
-
+  var date = "";
+  var time = "";
+  var textclass = ""
   reportData["AF_timeline"].forEach(item => {
-    let date = "";
-    let time = "";
-    let textclass = ""
+    date = "";
+    time = "";
+    textclass = ""
     if (item["timestamp"] == 0) {
       date = `Invalid date`
       time = `Invalid time`

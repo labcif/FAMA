@@ -19,7 +19,7 @@ class Location:
         except KeyError:
             return 0
 
-    def get_sorted_locations(self, reverse=False):
+    def get_sorted_locations(self, reverse=True):
         self.locations.sort(key=self.get_value, reverse=reverse)
         return self.locations
 
@@ -55,7 +55,7 @@ class Timeline:
         except KeyError:
             return 0
 
-    def get_sorted_timeline(self, reverse=False):
+    def get_sorted_timeline(self, reverse=True):
         self.timeline.sort(key=self.get_value, reverse=reverse)
         return self.timeline
 
