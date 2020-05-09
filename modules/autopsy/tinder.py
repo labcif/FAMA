@@ -43,8 +43,7 @@ class ModulePsy(ModulePsyParent):
         self.art_matches = self.utils.create_artifact_type(self.module_name, "TINDER_MATCHES","Matches")
         self.art_credit_cards = self.utils.create_artifact_type(self.module_name, "TINDER_CREDIT_CARDS","Credit Cards")
         self.art_bio_changes = self.utils.create_artifact_type(self.module_name, "TINDER_BIO_CHANGES","Biography Changes")
-        self.art_drp = self.utils.create_artifact_type(self.module_name, "TINDER_DRP", "Deleted rows (SQLite-Deleted-Records-Parser)")
-        self.art_undark = self.utils.create_artifact_type(self.module_name, "TINDER_UNDARK", "Deleted rows")
+        self.art_deleted_rows = self.utils.create_artifact_type(self.module_name, "TINDER_DELETED_ROWS", "Deleted rows")
         self.art_photos = self.utils.create_artifact_type(self.module_name, "TINDER_PHOTOS", "Photos")
 
         
@@ -89,14 +88,7 @@ class ModulePsy(ModulePsyParent):
         self.att_bio_created_time = self.utils.create_attribute_type('TINDER_BIO_CREATED_TIME', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.DATETIME, "Created Time")
         
 
-        #DRP
-        self.att_drp_key = self.utils.create_attribute_type('TINDER_DRP_KEY', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Database")
-        self.att_drp_type = self.utils.create_attribute_type('TINDER_DRP_TYPE', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Type")
-        self.att_drp_offset = self.utils.create_attribute_type('TINDER_DRP_OFFSET', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Offset")
-        self.att_drp_length = self.utils.create_attribute_type('TINDER_DRP_LENGTH', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Length")
-        self.att_drp_unallocated = self.utils.create_attribute_type('TINDER_DRP_UNALLOCATED', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Unallocated")
-        self.att_drp_data = self.utils.create_attribute_type('TINDER_DRP_DATA', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Data")
-        self.art_drp = self.utils.create_artifact_type(self.module_name, "TINDER_DRP", "Deleted rows (SQLite-Deleted-Records-Parser)")
+        
 
         # MATCH ATTRIBUTES
         self.att_match_id = self.utils.create_attribute_type('TINDER_MATCH_ID', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "ID")
@@ -108,12 +100,17 @@ class ModulePsy(ModulePsyParent):
         self.att_match_person_birthday = self.utils.create_attribute_type('TINDER_MATCH_PERSON_BIRTHDAY', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.DATETIME, "Person Birthdate")
         self.att_match_block = self.utils.create_attribute_type('TINDER_MATCH_BLOCK', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Block")
 
-        
+        #DELETED ROWS
+        self.att_dr_key = self.utils.create_attribute_type('TINDER_DELETED_ROWS_KEY', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Database")
+        self.att_dr_method = self.utils.create_attribute_type('TINDER_DELETED_ROWS_METHOD', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Method")
+        self.att_dr_type = self.utils.create_attribute_type('TINDER_DELETED_ROWS_TYPE', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Type")
+        self.att_dr_offset = self.utils.create_attribute_type('TINDER_DELETED_ROWS_OFFSET', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Offset")
+        self.att_dr_length = self.utils.create_attribute_type('TINDER_DELETED_ROWS_LENGTH', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Length")
+        self.att_dr_unallocated = self.utils.create_attribute_type('TTINDER_DELETED_ROWS_UNALLOCATED', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Unallocated")
+        self.att_dr_data = self.utils.create_attribute_type('TINDER_DELETED_ROWS_DATA', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Data")
 
         
-        # DELETED ROWS (UNDARK) ATTRIBUTES
-        self.att_undark_key = self.utils.create_attribute_type('UNDARK_KEY', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Database")
-        self.att_undark_output = self.utils.create_attribute_type('UNDARK_OUTPUT', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Output")
+        
 
         # PHOTOS
         self.att_ph_avatar = self.utils.create_attribute_type('TINDER_PROFILE_AVATAR', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Avatar")
@@ -258,19 +255,19 @@ class ModulePsy(ModulePsyParent):
         logging.info("Indexing undark output.")
         if not undarks:
             return
-        
         for database, deleted_rows in undarks.items():
             for row in deleted_rows:
                 try: 
-                    art = file.newArtifact(self.art_undark.getTypeID())
+                    art = file.newArtifact(self.art_deleted_rows.getTypeID())
                     attributes = []
-                    attributes.append(BlackboardAttribute(self.att_undark_key, database, database))
-                    attributes.append(BlackboardAttribute(self.att_undark_output, database, row))
+                    attributes.append(BlackboardAttribute(self.att_dr_key, database, database))
+                    attributes.append(BlackboardAttribute(self.att_dr_method, database, "Undark"))
+                    attributes.append(BlackboardAttribute(self.att_dr_data, database, row))
                     art.addAttributes(attributes)
-                    self.utils.index_artifact(art, self.art_undark)        
+                    self.utils.index_artifact(art, self.art_deleted_rows)        
                 except Exception as e:
                     logging.warning("Error indexing undark output: " + str(e))
-    
+
 
     def process_drp(self, drps, file):
         logging.info("Indexing drp output.")
@@ -279,17 +276,18 @@ class ModulePsy(ModulePsyParent):
         for database, deleted_rows in drps.items():
             for row in deleted_rows:
                 try: 
-                    art = file.newArtifact(self.art_drp.getTypeID())
+                    art = file.newArtifact(self.art_deleted_rows.getTypeID())
                     attributes = []
-                    attributes.append(BlackboardAttribute(self.att_drp_key, database, database))
-                    attributes.append(BlackboardAttribute(self.att_drp_type, database, row.get("type")))
-                    attributes.append(BlackboardAttribute(self.att_drp_offset, database, row.get("offset")))
-                    attributes.append(BlackboardAttribute(self.att_drp_length, database, row.get("length")))
-                    attributes.append(BlackboardAttribute(self.att_drp_unallocated, database, row.get("unallocated")))
-                    attributes.append(BlackboardAttribute(self.att_drp_data, database, row.get("data")))
+                    attributes.append(BlackboardAttribute(self.att_dr_key, database, database))
+                    attributes.append(BlackboardAttribute(self.att_dr_method, database, "SQLite-Deleted-Records-Parser"))
+                    attributes.append(BlackboardAttribute(self.att_dr_type, database, row.get("type")))
+                    attributes.append(BlackboardAttribute(self.att_dr_offset, database, row.get("offset")))
+                    attributes.append(BlackboardAttribute(self.att_dr_length, database, row.get("length")))
+                    attributes.append(BlackboardAttribute(self.att_dr_unallocated, database, row.get("unallocated")))
+                    attributes.append(BlackboardAttribute(self.att_dr_data, database, row.get("data")))
 
                     art.addAttributes(attributes)
-                    self.utils.index_artifact(art, self.art_drp) 
+                    self.utils.index_artifact(art, self.art_deleted_rows) 
                 except Exception as e:
                     logging.warning("Error indexing drp output: " + str(e))
     
