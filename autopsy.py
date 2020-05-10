@@ -91,13 +91,11 @@ class ProjectDSProcessor(DataSourceProcessor):
         return self.configPanel
 
     def isPanelValid(self):
-        return True
-        #return configPanel.validatePanel();
+        return self.configPanel.validatePanel()
 
     def run(self, progressMonitor, callback):
-        logging.info("run")
-        #self.jp.storeSettings()
         pass
+        #self.jp.storeSettings()
         #run(UUID.randomUUID().toString(), configPanel.getImageFilePath(), configPanel.getProfile(), configPanel.getPluginsToRun(), configPanel.getTimeZone(), progressMonitor, callback);
 
     def cancel(self):
