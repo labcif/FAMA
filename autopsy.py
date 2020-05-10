@@ -1,18 +1,19 @@
 import os
 import sys
+import logging
 
 sys.path.append(os.path.dirname(__file__)) #include this path to module autopsy
 
 from org.sleuthkit.autopsy.ingest import GenericIngestModuleJobSettings
 from org.sleuthkit.autopsy.report import GeneralReportModuleAdapter
 from org.sleuthkit.autopsy.ingest import IngestModuleFactoryAdapter
+from org.sleuthkit.autopsy.corecomponentinterfaces import DataSourceProcessor  
+from org.sleuthkit.autopsy.casemodule import Case
 
 from psy.ingest import ProjectIngestModule
 from psy.report import ReportOutput
-from psy.settings import ProjectIngestSettingsPanel
-from psy.settings import ProjectReportSettingsPanel
-
-
+from psy.settings import ProjectIngestSettingsPanel, ProjectReportSettingsPanel, DataSourcesPanelSettings
+    
 class ProjectIngestModuleFactory(IngestModuleFactoryAdapter):
     moduleName = "LabCif - Android Forensics"
 
@@ -72,3 +73,42 @@ class ProjectIngestModuleReport(GeneralReportModuleAdapter):
 
     def getRelativeFilePath(self):
         return "index.html"
+
+class ProjectDSProcessor(DataSourceProcessor):
+    configPanel = None
+
+    def __init__(self):
+        self.configPanel = DataSourcesPanelSettings()
+    
+    @staticmethod
+    def getType():
+        return "Live extraction with ADB (Android)"
+
+    def getDataSourceType(self):
+        return "Live extraction with ADB (Android)"
+
+    def getPanel(self):
+        return self.configPanel
+
+    def isPanelValid(self):
+        return True
+        #return configPanel.validatePanel();
+
+    def run(self, progressMonitor, callback):
+        logging.info("run")
+        #self.jp.storeSettings()
+        pass
+        #run(UUID.randomUUID().toString(), configPanel.getImageFilePath(), configPanel.getProfile(), configPanel.getPluginsToRun(), configPanel.getTimeZone(), progressMonitor, callback);
+
+    def cancel(self):
+        logging.info("cancel")
+        pass
+        #if (addImageTask != null) {
+        #    addImageTask.cancelTask();
+        #}
+
+    def reset(self):
+        #self.configPanel.reset()
+        logging.info("reset")
+        #configPanel.reset()
+        pass

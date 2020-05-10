@@ -21,23 +21,6 @@ from collections import OrderedDict
 
 from package.utils import Utils
 
-#https://github.com/HienTH/autopsy/blob/master/pythonExamples/fileIngestModuleWithGui.py    
-class ProjectIngestSettingsPanelSettings(IngestModuleIngestJobSettings):
-    serialVersionUID = 1L
-
-    def __init__(self):
-        self.flag = False
-
-    def getVersionNumber(self):
-        return serialVersionUID
-
-    # TODO: Define getters and settings for data you want to store from UI
-    def getFlag(self):
-        return self.flag
-
-    def setFlag(self, flag):
-        self.flag = flag
-
 class ProjectIngestSettingsPanel(IngestModuleIngestJobSettingsPanel):
     def __init__(self, settings):
         self.local_settings = settings
@@ -172,6 +155,45 @@ class ProjectIngestSettingsPanel(IngestModuleIngestJobSettingsPanel):
 class ProjectReportSettingsPanel(JPanel):
     def __init__(self):
         pass
+
+class DataSourcesPanelSettings(JPanel):
+    serialVersionUID = 1L
+
+    def getSettings(self):
+        logging.info("getsettings")
+        return self.local_settings
+
+    def getVersionNumber(self):
+        logging.info("getversionnumber")
+        return serialVersionUID
+
+    @staticmethod
+    def createInstance(test):
+        logging.info("createinstance")
+        return DataSourcesPanelSettings(test)
+
+    def readSettings(self):
+        logging.info("readsettings")
+        pass
+
+    def select(self):
+        logging.info("select")
+        pass
+
+    def insertUpdate(e):
+        pass
+
+    def removeUpdate(e):
+        pass
+
+    def changedUpdate(e):
+        pass
+
+
+
+
+
+
 
 class SettingsUtils:
     @staticmethod
