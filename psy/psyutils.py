@@ -1,6 +1,13 @@
 import logging
 
 from java.util import UUID
+from java.awt import Component
+from javax.swing import JPanel
+from javax.swing import JCheckBox
+from javax.swing import JRadioButton
+from javax.swing import JTextArea
+from javax.swing import BoxLayout
+
 from org.sleuthkit.autopsy.casemodule import Case
 from org.sleuthkit.autopsy.casemodule.services import Blackboard
 from org.sleuthkit.autopsy.ingest import ModuleDataEvent
@@ -10,7 +17,6 @@ from org.sleuthkit.autopsy.ingest import IngestMessage
 from org.sleuthkit.datamodel import CommunicationsManager
 from org.sleuthkit.autopsy.geolocation.datamodel import BookmarkWaypoint
 from org.sleuthkit.datamodel import BlackboardArtifact
-
 
 from psy.progress import ProgressUpdater
 
@@ -94,3 +100,49 @@ class PsyUtils:
     def add_account_type(accountTypeName, displayName):
         communication_manager = Case.getCurrentCase().getSleuthkitCase().getCommunicationsManager()
         return CommunicationsManager.addAccountType(communication_manager,accountTypeName, displayName)
+
+class SettingsUtils:
+    @staticmethod
+    def createPanel(scroll = False):
+        panel = JPanel()
+        panel.setLayout(BoxLayout(panel, BoxLayout.PAGE_AXIS))
+        panel.setAlignmentX(Component.LEFT_ALIGNMENT)
+        
+        # if scroll:
+            # scrollpane = JScrollPane(panel)
+            # scrollpane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED)
+            # scrollpane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER)
+            # return JPanel().add(scrollpane)
+        
+        return panel
+
+    @staticmethod
+    def addApplicationCheckbox(app, app_id, ap, visible = False):
+        checkbox = JCheckBox("{} ({})".format(app.capitalize(), app_id), actionPerformed= ap)
+        checkbox.setActionCommand(app)
+        checkbox.setSelected(True)
+        checkbox.setVisible(visible)
+        checkbox.setActionCommand(app_id)
+        return checkbox
+
+    @staticmethod
+    def createRadioButton(name, ac, ap):
+        button = JRadioButton(name, actionPerformed= ap)
+        button.setActionCommand(ac)
+        return button
+    @staticmethod
+    def createInfoLabel(text):
+        textArea = JTextArea()
+        textArea.setLineWrap(True)
+        textArea.setWrapStyleWord(True)
+        textArea.setOpaque(False)
+        textArea.setEditable(False)
+        return textArea
+
+    @staticmethod
+    def createSeparators(count):
+        lines =""
+        for i in range(count):
+            lines+="<br>"
+
+        return SettingsUtils.createInfoLabel(lines)

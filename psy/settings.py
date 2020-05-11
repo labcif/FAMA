@@ -1,42 +1,19 @@
+import json
+
 from java.awt import Font
-from java.awt import Component
 from java.awt import Dimension
 from java.awt import BorderLayout
 from javax.swing import JPanel
-from javax.swing import JCheckBox
 from javax.swing import BoxLayout
 from javax.swing import ButtonGroup
-from javax.swing import JRadioButton
 from javax.swing import JLabel
-from javax.swing import JTextArea
-from javax.swing import JSeparator
-from javax.swing import JScrollPane
 
-
-from org.sleuthkit.autopsy.ingest import IngestModuleIngestJobSettings
 from org.sleuthkit.autopsy.ingest import IngestModuleIngestJobSettingsPanel
 
-import json
 from collections import OrderedDict
 
 from package.utils import Utils
-
-#https://github.com/HienTH/autopsy/blob/master/pythonExamples/fileIngestModuleWithGui.py    
-class ProjectIngestSettingsPanelSettings(IngestModuleIngestJobSettings):
-    serialVersionUID = 1L
-
-    def __init__(self):
-        self.flag = False
-
-    def getVersionNumber(self):
-        return serialVersionUID
-
-    # TODO: Define getters and settings for data you want to store from UI
-    def getFlag(self):
-        return self.flag
-
-    def setFlag(self, flag):
-        self.flag = flag
+from psy.psyutils import SettingsUtils
 
 class ProjectIngestSettingsPanel(IngestModuleIngestJobSettingsPanel):
     def __init__(self, settings):
@@ -172,50 +149,3 @@ class ProjectIngestSettingsPanel(IngestModuleIngestJobSettingsPanel):
 class ProjectReportSettingsPanel(JPanel):
     def __init__(self):
         pass
-
-class SettingsUtils:
-    @staticmethod
-    def createPanel(scroll =False):
-        
-        panel = JPanel()
-        panel.setLayout(BoxLayout(panel, BoxLayout.PAGE_AXIS))
-        panel.setAlignmentX(Component.LEFT_ALIGNMENT)
-        
-        # if scroll:
-            # scrollpane = JScrollPane(panel)
-            # scrollpane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED)
-            # scrollpane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER)
-            # return JPanel().add(scrollpane)
-        
-        return panel
-
-    @staticmethod
-    def addApplicationCheckbox(app, app_id, ap):
-        checkbox = JCheckBox("{} ({})".format(app.capitalize(), app_id), actionPerformed= ap)
-        checkbox.setActionCommand(app)
-        checkbox.setSelected(True)
-        checkbox.setVisible(False)
-        checkbox.setActionCommand(app_id)
-        return checkbox
-
-    @staticmethod
-    def createRadioButton(name, ac, ap):
-        button = JRadioButton(name, actionPerformed= ap)
-        button.setActionCommand(ac)
-        return button
-    @staticmethod
-    def createInfoLabel(text):
-        textArea = JTextArea()
-        textArea.setLineWrap(True)
-        textArea.setWrapStyleWord(True)
-        textArea.setOpaque(False)
-        textArea.setEditable(False)
-        return textArea
-
-    @staticmethod
-    def createSeparators(count):
-        lines =""
-        for i in range(count):
-            lines+="<br>"
-
-        return SettingsUtils.createInfoLabel(lines)

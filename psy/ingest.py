@@ -21,7 +21,10 @@ class ProjectIngestModule(DataSourceIngestModule):
         
         #Context of the ingest
         self.context = None
-        
+
+        #Set logging path to autopsy log
+        Utils.setup_custom_logger(os.path.join(Case.getCurrentCase().getLogDirectoryPath(), "autopsy.log.0"))
+  
         #Module Settings choosed in ingest settings
         self.settings = settings
 
