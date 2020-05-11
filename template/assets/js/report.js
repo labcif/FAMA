@@ -25,7 +25,7 @@ function initializeMenus() {
   let list = "";
 
   Object.keys(reportData).forEach(function (item) {
-    if (item !== "header" && item.substring(0, 3) !=="AF_") {
+    if (item !== "header" && item.substring(0, 3) !== "AF_") {
       list += `<li class="nav-item"><a id="menulink-${item}" class="nav-link menu-item" href="javascript:void(null);"><span data-feather="file-text"></span>${capitalize(item.replace("_", " "))}</a></li>`;
     }
   });
@@ -34,7 +34,7 @@ function initializeMenus() {
   list = "";
 
   Object.keys(reportData).forEach(function (item) {
-    if (item !== "header" && item.substring(0, 3) !=="AF_") {
+    if (item !== "header" && item.substring(0, 3) !== "AF_") {
       list += `<li class="nav-item"><a id="menulink-${item}-listmobile" class="navbar-light nav-link menu-item top-link-mobile" style="padding: 0.5rem 0.8rem" href="javascript:void(null);"><span data-feather="file-text" class="mr-1"></span>${capitalize(item.replace("_", " "))}</a></li>`;
     }
   });
@@ -44,15 +44,15 @@ function initializeMenus() {
 }
 
 function generatedDate() {
-    let timestamp = new Date(reportData["header"]["report_date"]);
-    let date = timestamp.toLocaleDateString("pt-PT");
-    let time = timestamp.toLocaleTimeString("pt-PT");
+  let timestamp = new Date(reportData["header"]["report_date"]);
+  let date = timestamp.toLocaleDateString("pt-PT");
+  let time = timestamp.toLocaleTimeString("pt-PT");
 
 
   $("#generated-date").html("Generated at " + date + " " + time);
 }
 
-function onChangeMenu(){
+function onChangeMenu() {
   $("#page-builder").addClass("px-4");
   $('.navbar-collapse').collapse('hide');
 }
@@ -149,7 +149,7 @@ function renderTimeline() {
     if (item["timestamp"] == 0) {
       date = `Invalid date`
       time = `Invalid time`
-      textclass= "text-danger"
+      textclass = "text-danger"
     } else {
       timestamp = new Date(item["timestamp"] * 1000);
       date = timestamp.toLocaleDateString("pt-PT");
@@ -169,14 +169,14 @@ function renderTimeline() {
       id += 1
       try {
         if (item["value"][body].length > 100) {
-          content += `<span><strong class="d-inline">${capitalize(body.replace("_"," "))} : </strong><div id='${"timeline-" + id}' class='collapse'> ${item["value"][body]}</div>
+          content += `<span><strong class="d-inline">${capitalize(body.replace("_", " "))} : </strong><div id='${"timeline-" + id}' class='collapse'> ${item["value"][body]}</div>
               <span class="d-inline btn btn-link text-primary" data-toggle="collapse" data-target="#${"timeline-" + id}">Expand/Collapse</span></span>`;
         } else {
-          content += `<span><strong class="d-inline">${capitalize(body.replace("_"," "))} : </strong><div class="d-inline" id='${"timeline-" + id}'> ${item["value"][body]}</div></span>`;
+          content += `<span><strong class="d-inline">${capitalize(body.replace("_", " "))} : </strong><div class="d-inline" id='${"timeline-" + id}'> ${item["value"][body]}</div></span>`;
         }
-      
+
       } catch (error) {
-        content += `<span><strong class="d-inline">${capitalize(body.replace("_"," "))} : </strong><div class="d-inline" id='${"timeline-" + id}'> ${item["value"][body]}</div></span>`;
+        content += `<span><strong class="d-inline">${capitalize(body.replace("_", " "))} : </strong><div class="d-inline" id='${"timeline-" + id}'> ${item["value"][body]}</div></span>`;
       }
 
     });
@@ -193,7 +193,7 @@ function getHeader(title) {
   return `<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom"><h1 class="h2">${capitalize(title.replace("_", " "))}</h1></div>`
 }
 
-function removeFocus(){
+function removeFocus() {
   Object.keys(reportData).forEach(function (item) {
     $("#menulink-" + item).removeClass("active");
   });
@@ -245,16 +245,38 @@ function renderMedia() {
     //   <span>${item}</span>
     // </div>`
 
-    content += `
-    <div class="col-lg-4 col-md-12 mb-4">
-      <div class="">
-      
+    content+=`<div class="col">`
+
+
+    if (item["type"] == "video") {
+      content += `<video width="320" height="240" controls><source src="${item["path"]}" type="${item["mime"]}"></video>`
+      content += `<figcaption><img src="assets/svg/video.svg" alt="${item["mime"]}" class="minilogo"></img>`
+    } else if (item["type"] == "image") {
+      content += `<div class="row"><img  width="320" height="240" src="${item["path"]}" class="img-thumbnail"></img></div>`
+      content += `<figcaption><img src="assets/svg/image.svg" alt="${item["mime"]}" class="minilogo"></img>`
+    } else if (item["type"] == "http") {
+      content += `<div class="row"><button type="button" class="btn btn-outline-primary" onclick="window.open('${item["path"]}','_blank')">Open external media</button>`
+      content += `<figcaption><img src="assets/svg/http.svg" class="minilogo" alt="${item["mime"]}"></img></div>`
+    } else if (item["type"] == "audio") {
+      content += `<audio controls><source src="${item["path"]}" type="${item["mime"]}"></audio>`
+      content += `<figcaption><img src="assets/svg/audio.svg" alt="${item["mime"]}" class="minilogo"></img>`
+    }
+    if (item["is_h265"]) {
+      content += '<img src="assets/svg/h265.svg" class="minilogo"></img>'
+    }
+
+
     
-        <embed src="${item}" autostart="0"/></embed>
-      
-      </div>
-      <span>${item}</span>
-    </div>`
+    content+=`<span class="d-inline btn btn-link text-primary">Open with external player</span></figcaption></div>`
+
+
+    // content += `
+    // <div class="col-lg-4 col-md-12 mb-4">
+    //   <div class="">
+    //     <embed src="${item["path"]}" autostart="0"/></embed>
+    //   </div>
+    //   <span>Path:${item["path"]}</span>
+    // </div>`
 
   });
 

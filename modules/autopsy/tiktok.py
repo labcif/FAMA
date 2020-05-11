@@ -72,17 +72,16 @@ class ModulePsy(ModulePsyParent):
         #seaches
         self.att_searches = self.utils.create_attribute_type('TIKTOK_SEARCH', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Search")
 
-        #undark
-        self.att_undark_key = self.utils.create_attribute_type('TIKTOK_UNDARK_KEY', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Database")
-        self.att_undark_output = self.utils.create_attribute_type('TIKTOK_UNDARK_OUTPUT', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Output")
 
-        #drp
-        self.att_drp_key = self.utils.create_attribute_type('TIKTOK_DRP_KEY', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Database")
-        self.att_drp_type = self.utils.create_attribute_type('TIKTOK_DRP_TYPE', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Type")
-        self.att_drp_offset = self.utils.create_attribute_type('TIKTOK_DRP_OFFSET', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Offset")
-        self.att_drp_length = self.utils.create_attribute_type('TIKTOK_DRP_LENGTH', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Length")
-        self.att_drp_unallocated = self.utils.create_attribute_type('TIKTOK_DRP_UNALLOCATED', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Unallocated")
-        self.att_drp_data = self.utils.create_attribute_type('TIKTOK_DRP_DATA', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Data")
+        #deleted rows
+        self.att_dr_key = self.utils.create_attribute_type('TIKTOK_DELETED_ROWS_KEY', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Database")
+        self.att_dr_method = self.utils.create_attribute_type('TIKTOK_DELETED_ROWS_METHOD', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Method")
+        self.att_dr_type = self.utils.create_attribute_type('TIKTOK_DELETED_ROWS_TYPE', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Type")
+        self.att_dr_offset = self.utils.create_attribute_type('TIKTOK_DELETED_ROWS_OFFSET', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Offset")
+        self.att_dr_length = self.utils.create_attribute_type('TIKTOK_DELETED_ROWS_LENGTH', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Length")
+        self.att_dr_unallocated = self.utils.create_attribute_type('TIKTOK_DELETED_ROWS_UNALLOCATED', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Unallocated")
+        self.att_dr_data = self.utils.create_attribute_type('TIKTOK_DELETED_ROWS_DATA', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Data")
+
 
         #videos
 
@@ -125,8 +124,7 @@ class ModulePsy(ModulePsyParent):
         self.art_searches = self.utils.create_artifact_type(self.module_name, "TIKTOK_SEARCHES","Search")
         self.art_videos = self.utils.create_artifact_type(self.module_name, "TIKTOK_VIDEOS", "Videos")
         self.art_publish_videos = self.utils.create_artifact_type(self.module_name, "TIKTOK_PUBLISHED_VIDEOS", "Published Videos")
-        self.art_undark = self.utils.create_artifact_type(self.module_name, "TIKTOK_UNDARK", "Deleted rows (Undark)")
-        self.art_drp = self.utils.create_artifact_type(self.module_name, "TIKTOK_DRP", "Deleted rows (SQLite-Deleted-Records-Parser)")
+        self.art_deleted_rows = self.utils.create_artifact_type(self.module_name, "TIKTOK_DELETED_ROWS", "Deleted rows")
         self.art_logs = self.utils.create_artifact_type(self.module_name, "TIKTOK_LOGS", "Logs")
         
 
@@ -238,12 +236,13 @@ class ModulePsy(ModulePsyParent):
         for database, deleted_rows in undarks.items():
             for row in deleted_rows:
                 try: 
-                    art = file.newArtifact(self.art_undark.getTypeID())
+                    art = file.newArtifact(self.art_deleted_rows.getTypeID())
                     attributes = []
-                    attributes.append(BlackboardAttribute(self.att_undark_key, database, database))
-                    attributes.append(BlackboardAttribute(self.att_undark_output, database, row))
+                    attributes.append(BlackboardAttribute(self.att_dr_key, database, database))
+                    attributes.append(BlackboardAttribute(self.att_dr_method, database, "Undark"))
+                    attributes.append(BlackboardAttribute(self.att_dr_data, database, row))
                     art.addAttributes(attributes)
-                    self.utils.index_artifact(art, self.art_undark)        
+                    self.utils.index_artifact(art, self.art_deleted_rows)        
                 except Exception as e:
                     logging.warning("Error indexing undark output: " + str(e))
 
@@ -254,17 +253,18 @@ class ModulePsy(ModulePsyParent):
         for database, deleted_rows in drps.items():
             for row in deleted_rows:
                 try: 
-                    art = file.newArtifact(self.art_drp.getTypeID())
+                    art = file.newArtifact(self.art_deleted_rows.getTypeID())
                     attributes = []
-                    attributes.append(BlackboardAttribute(self.att_drp_key, database, database))
-                    attributes.append(BlackboardAttribute(self.att_drp_type, database, row.get("type")))
-                    attributes.append(BlackboardAttribute(self.att_drp_offset, database, row.get("offset")))
-                    attributes.append(BlackboardAttribute(self.att_drp_length, database, row.get("length")))
-                    attributes.append(BlackboardAttribute(self.att_drp_unallocated, database, row.get("unallocated")))
-                    attributes.append(BlackboardAttribute(self.att_drp_data, database, row.get("data")))
+                    attributes.append(BlackboardAttribute(self.att_dr_key, database, database))
+                    attributes.append(BlackboardAttribute(self.att_dr_method, database, "SQLite-Deleted-Records-Parser"))
+                    attributes.append(BlackboardAttribute(self.att_dr_type, database, row.get("type")))
+                    attributes.append(BlackboardAttribute(self.att_dr_offset, database, row.get("offset")))
+                    attributes.append(BlackboardAttribute(self.att_dr_length, database, row.get("length")))
+                    attributes.append(BlackboardAttribute(self.att_dr_unallocated, database, row.get("unallocated")))
+                    attributes.append(BlackboardAttribute(self.att_dr_data, database, row.get("data")))
 
                     art.addAttributes(attributes)
-                    self.utils.index_artifact(art, self.art_drp) 
+                    self.utils.index_artifact(art, self.art_deleted_rows) 
                 except Exception as e:
                     logging.warning("Error indexing drp output: " + str(e))
 
