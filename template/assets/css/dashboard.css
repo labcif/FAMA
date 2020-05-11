@@ -25,7 +25,11 @@ body {
   color: rgba(255, 255, 255, 0.9);
 }
 
+.minilogo{
+	width: 20px;
+	height: 20px;
 
+}
 
 /*
  * Sidebar
