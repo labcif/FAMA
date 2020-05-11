@@ -26,6 +26,7 @@ class ModuleReport(ModuleParent):
         self.report["searches"] = self.get_user_searches()
         self.report["videos"] = self.get_videos()
         self.report["published_videos"] = self.get_videos_publish()
+        self.report["cache_images"] = self.get_fresco_cache()
         self.report["log"] = self.get_last_session()
         
         self.add_model(self.timeline)
@@ -206,7 +207,7 @@ class ModuleReport(ModuleParent):
 
                     self.timeline.add(video["last_modified"],"AF_video", timeline_event)
                     break
-            self.media.add(os.path.join("internal", "cache", "cache", video["key"] ))
+            self.media.add(os.path.join(self.internal_cache_path, "cache", "cache", video["key"] ))
             videos.append(video)
         
         logging.info("{} video(s) found".format(len(videos)))
@@ -265,6 +266,19 @@ class ModuleReport(ModuleParent):
     
         logging.info("{} video(s) found".format(len(videos)))
         return videos
+
+    def get_fresco_cache(self):
+        logging.info("Getting cache...")
+        cache_path = os.path.join(self.external_cache_path, "cache", "picture","fresco_cache", "v2.ols100.1") 
+        numerate_dirs = os.listdir(cache_path)
+        fresco_images =[]
+
+        for directory in numerate_dirs:
+            for cache_file in os.listdir(os.path.join(cache_path, directory)):
+                fresco_images.append(cache_file)
+                self.media.add(os.path.join(cache_path, directory, cache_file), False, False)
+        
+        return fresco_images
 
 
     

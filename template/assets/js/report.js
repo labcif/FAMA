@@ -224,6 +224,8 @@ function renderMedia() {
   ${getHeader("Media")}
   <div class="row">
   `
+
+  var media_id = 0
   reportData["AF_media"].forEach(item => {
     // content += `
     // <div class="col-lg-4 col-md-12 mb-4">
@@ -244,30 +246,33 @@ function renderMedia() {
     //   </div>
     //   <span>${item}</span>
     // </div>`
-
-    content+=`<div class="col">`
-
+    media_id += 1;
+    content += `<div class="col">`;
 
     if (item["type"] == "video") {
-      content += `<video width="320" height="240" controls><source src="${item["path"]}" type="${item["mime"]}"></video>`
-      content += `<figcaption><img src="assets/svg/video.svg" alt="${item["mime"]}" class="minilogo"></img>`
+      content += `<video width="320" height="240" controls><source src="${item["path"]}" type="${item["mime"]}"></video>`;
+      content += `<figcaption class="mt-2 mb-5"><img src="assets/svg/video.svg" alt="${item["mime"]}" class="minilogo"></img>`;
     } else if (item["type"] == "image") {
-      content += `<div class="row"><img  width="320" height="240" src="${item["path"]}" class="img-thumbnail"></img></div>`
-      content += `<figcaption><img src="assets/svg/image.svg" alt="${item["mime"]}" class="minilogo"></img>`
+      content += `<img width="320" height="240" src="${item["path"]}"></img>`;
+      content += `<figcaption class="mt-2 mb-5"><img src="assets/svg/image.svg" alt="${item["mime"]}" class="minilogo"></img>`;
     } else if (item["type"] == "http") {
-      content += `<div class="row"><button type="button" class="btn btn-outline-primary" onclick="window.open('${item["path"]}','_blank')">Open external media</button>`
-      content += `<figcaption><img src="assets/svg/http.svg" class="minilogo" alt="${item["mime"]}"></img></div>`
+      content += `<div class="row"><button type="button" class="btn btn-outline-primary" onclick="window.open('${item["path"]}','_blank')">Open external media</button>`;
+      content += `<figcaption><img src="assets/svg/http.svg" class="minilogo" alt="${item["mime"]}"></img></div>`;
     } else if (item["type"] == "audio") {
-      content += `<audio controls><source src="${item["path"]}" type="${item["mime"]}"></audio>`
-      content += `<figcaption><img src="assets/svg/audio.svg" alt="${item["mime"]}" class="minilogo"></img>`
+      content += `<audio controls><source src="${item["path"]}" type="${item["mime"]}"></audio>`;
+      content += `<figcaption><img src="assets/svg/audio.svg" alt="${item["mime"]}" class="minilogo"></img>`;
     }
     if (item["is_h265"]) {
-      content += '<img src="assets/svg/h265.svg" class="minilogo"></img>'
+      content += '<img src="assets/svg/h265.svg" class="minilogo"></img>';
     }
 
+    content += `
+              <div id='${"media-" + media_id}' class='collapse'> ${item["path"]}</div>
+              <span class="d-inline btn btn-link text-primary" data-toggle="collapse" data-target="#${"media-" + media_id}">Show Path</span>
+              <span class="d-inline btn btn-link text-primary">External viewer</span>`;
 
-    
-    content+=`<span class="d-inline btn btn-link text-primary">Open with external player</span></figcaption></div>`
+
+    content += `</figcaption></div>`
 
 
     // content += `
@@ -280,11 +285,14 @@ function renderMedia() {
 
   });
 
-  content += `</div>`
+  content += `</div>`;
 
   $("#page-builder").html(content);
 
 }
+
+
+
 
 
 function pageBuilder(title) {

@@ -49,19 +49,19 @@ class Media:
             media["is_h265"]= is_h265
             # TODO TO REMOVE--
             try:
-                # file_type = filetype.guess(path)#TODO FIX PATH 
+                file_type = filetype.guess(path) #TODO FIX PATH 
 
-                media["type"]= "image"
-                media["mime"]= "image/jpeg"
-                # if file_type:
-                #     # media["type"]= self.get_category(file_type.mime) 
-                #     # media["mime"]= file_type.mime
+                media["type"]= ""
+                media["mime"]= ""
+                if file_type:
+                    # media["type"]= self.get_category(file_type.mime) 
+                    # media["mime"]= file_type.mime
 
-                #     media["type"]= self.get_category(file_type.mime)
-                #     media["mime"]= file_type.mime
-                # else:
-                    # media["type"]= "unknown"
-                    # media["mime"]= "unknown"
+                    media["type"]= self.get_category(file_type.mime)
+                    media["mime"]= file_type.mime
+                else:
+                    media["type"]= "unknown"
+                    media["mime"]= "unknown"
             except:
                 pass
         else:
