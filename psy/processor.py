@@ -3,6 +3,9 @@ from java.awt import BorderLayout
 from javax.swing import JPanel
 from javax.swing import BoxLayout
 from javax.swing import JLabel
+from java.beans import PropertyChangeSupport
+
+from org.sleuthkit.autopsy.corecomponentinterfaces import DataSourceProcessor  
 
 from psy.psyutils import SettingsUtils
 
@@ -14,18 +17,24 @@ class DataSourcesPanelSettings(JPanel):
     serialVersionUID = 1L
 
     def __init__(self):
+        self.selected_apps = []
+        self.pcs = PropertyChangeSupport(self)
+
         self.initComponents()
         self.customizeComponents()
-        self.selected_apps = []
 
     def getVersionNumber(self):
         return serialVersionUID
+
+    def addPropertyChangeListener(self, pcl):
+        super(DataSourcesPanelSettings, self).addPropertyChangeListener(pcl)
+        self.pcs.addPropertyChangeListener(pcl)
 
     def readSettings(self):
         pass
 
     def validatePanel(self):
-        return len(self.selected_apps) != 0
+        return len(self.selected_apps) != 0 #incomplete!
 
     def initComponents(self):
         self.apps_checkboxes_list = []
@@ -73,5 +82,8 @@ class DataSourcesPanelSettings(JPanel):
         for cb_app in self.apps_checkboxes_list:
             if cb_app.isSelected():
                 self.selected_apps.append(cb_app.getActionCommand())
+
+        #Fire UI change, this is necessary to know if it's allowed to click next
+        self.pcs.firePropertyChange(DataSourceProcessor.DSP_PANEL_EVENT.UPDATE_UI.toString(), False, True);        
 
         #self.local_settings.setSetting("apps", json.dumps(selected_apps))
