@@ -1,25 +1,19 @@
+import json
+
 from java.awt import Font
-from java.awt import Component
 from java.awt import Dimension
 from java.awt import BorderLayout
 from javax.swing import JPanel
-from javax.swing import JCheckBox
 from javax.swing import BoxLayout
 from javax.swing import ButtonGroup
-from javax.swing import JRadioButton
 from javax.swing import JLabel
-from javax.swing import JTextArea
-from javax.swing import JSeparator
-from javax.swing import JScrollPane
 
-
-from org.sleuthkit.autopsy.ingest import IngestModuleIngestJobSettings
 from org.sleuthkit.autopsy.ingest import IngestModuleIngestJobSettingsPanel
 
-import json
 from collections import OrderedDict
 
 from package.utils import Utils
+from psy.psyutils import SettingsUtils
 
 class ProjectIngestSettingsPanel(IngestModuleIngestJobSettingsPanel):
     def __init__(self, settings):
@@ -155,116 +149,3 @@ class ProjectIngestSettingsPanel(IngestModuleIngestJobSettingsPanel):
 class ProjectReportSettingsPanel(JPanel):
     def __init__(self):
         pass
-
-class DataSourcesPanelSettings(JPanel):
-    serialVersionUID = 1L
-
-    def __init__(self):
-        self.initComponents()
-        self.customizeComponents()
-        self.selected_apps = []
-
-    def getVersionNumber(self):
-        return serialVersionUID
-
-    def readSettings(self):
-        pass
-
-    def validatePanel(self):
-        return len(self.selected_apps) != 0
-
-    def initComponents(self):
-        self.apps_checkboxes_list = []
-
-        self.setLayout(BoxLayout(self, BoxLayout.PAGE_AXIS))
-        self.setPreferredSize(Dimension(543, 172)) #Max 544x173 https://www.sleuthkit.org/autopsy/docs/api-docs/3.1/interfaceorg_1_1sleuthkit_1_1autopsy_1_1corecomponentinterfaces_1_1_data_source_processor.html#a068919818c017ee953180cc79cc68c80
-        
-        # info menu
-        self.p_info = SettingsUtils.createPanel()
-        self.p_info.setPreferredSize(Dimension(300,20))
-        
-        self.lb_info = SettingsUtils.createInfoLabel("This method is used when the application data has already been collected.")
-        self.lb_info2 = SettingsUtils.createInfoLabel("It will analyze the data source previously added to the data source and index the forensic artifacts.")
-        self.sp2 = SettingsUtils.createSeparators(1)
-
-        self.p_method = SettingsUtils.createPanel()
-        self.p_info.add(self.sp2, BorderLayout.SOUTH)
-        self.p_info.add(self.lb_info, BorderLayout.SOUTH)
-        self.p_info.add(self.lb_info2, BorderLayout.SOUTH)
-        
-        self.p_method.add(JLabel("Extract user data from:"))
-
-        self.p_apps = SettingsUtils.createPanel(True)
-        
-        sorted_items = OrderedDict(sorted(Utils.get_all_packages().items()))
-
-        for app, app_id in sorted_items.iteritems():
-            #(app, app_id)
-            checkbox = SettingsUtils.addApplicationCheckbox(app, app_id, self.getSelectedApps, visible = True)
-            self.add(checkbox)
-            self.apps_checkboxes_list.append(checkbox)
-            self.p_apps.add(checkbox)
-        
-        self.add(self.p_method)
-        self.add(self.p_apps)
-        self.add(self.p_info)
-        # end of checkboxes menu
-
-    def customizeComponents(self):
-        self.getSelectedApps("") #initialize selected apps
-    
-    def getSelectedApps(self, event):
-        self.selected_apps = []
-        
-        for cb_app in self.apps_checkboxes_list:
-            if cb_app.isSelected():
-                self.selected_apps.append(cb_app.getActionCommand())
-
-        #self.local_settings.setSetting("apps", json.dumps(selected_apps))
-
-class SettingsUtils:
-    @staticmethod
-    def createPanel(scroll =False):
-        
-        panel = JPanel()
-        panel.setLayout(BoxLayout(panel, BoxLayout.PAGE_AXIS))
-        panel.setAlignmentX(Component.LEFT_ALIGNMENT)
-        
-        # if scroll:
-            # scrollpane = JScrollPane(panel)
-            # scrollpane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED)
-            # scrollpane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER)
-            # return JPanel().add(scrollpane)
-        
-        return panel
-
-    @staticmethod
-    def addApplicationCheckbox(app, app_id, ap, visible = False):
-        checkbox = JCheckBox("{} ({})".format(app.capitalize(), app_id), actionPerformed= ap)
-        checkbox.setActionCommand(app)
-        checkbox.setSelected(True)
-        checkbox.setVisible(visible)
-        checkbox.setActionCommand(app_id)
-        return checkbox
-
-    @staticmethod
-    def createRadioButton(name, ac, ap):
-        button = JRadioButton(name, actionPerformed= ap)
-        button.setActionCommand(ac)
-        return button
-    @staticmethod
-    def createInfoLabel(text):
-        textArea = JTextArea()
-        textArea.setLineWrap(True)
-        textArea.setWrapStyleWord(True)
-        textArea.setOpaque(False)
-        textArea.setEditable(False)
-        return textArea
-
-    @staticmethod
-    def createSeparators(count):
-        lines =""
-        for i in range(count):
-            lines+="<br>"
-
-        return SettingsUtils.createInfoLabel(lines)

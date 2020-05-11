@@ -12,8 +12,10 @@ from org.sleuthkit.autopsy.casemodule import Case
 
 from psy.ingest import ProjectIngestModule
 from psy.report import ReportOutput
-from psy.settings import ProjectIngestSettingsPanel, ProjectReportSettingsPanel, DataSourcesPanelSettings
+from psy.processor import DataSourcesPanelSettings
+from psy.settings import ProjectIngestSettingsPanel, ProjectReportSettingsPanel
     
+#3 Modules - Ingest, Report, DatasourceProcessor
 class ProjectIngestModuleFactory(IngestModuleFactoryAdapter):
     moduleName = "LabCif - Android Forensics"
 
