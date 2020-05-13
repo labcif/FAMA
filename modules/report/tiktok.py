@@ -118,17 +118,19 @@ class ModuleReport(ModuleParent):
                 atributes =["account_region", "follower_count","following_count", "gender", "google_account", "is_blocked", "is_minor", "nickname", "register_time", "sec_uid", "short_id", "uid", "unique_id"]
 
                 for index in atributes:
-                    user_profile[index] = dump[index]
+                    user_profile[index] = dump.get(index)
                 break
             
-        user_profile["url"] = "https://www.tiktok.com/@{}".format(user_profile["unique_id"])
+        if user_profile.get("unique_id"):
+            user_profile["url"] = "https://www.tiktok.com/@{}".format(user_profile["unique_id"])
         
         
-        timeline_event = {}
-        timeline_event["uniqueid"] = user_profile["unique_id"] 
-        timeline_event["url"]= user_profile["url"]
+        if user_profile.get("uniqueid") and user_profile.get("url"):
+            timeline_event = {}
+            timeline_event["uniqueid"] = user_profile["unique_id"] 
+            timeline_event["url"]= user_profile["url"]
 
-        self.timeline.add(user_profile["register_time"],"AF_user", timeline_event)
+            self.timeline.add(user_profile["register_time"],"AF_user", timeline_event)
         
         return user_profile
     
@@ -224,6 +226,9 @@ class ModuleReport(ModuleParent):
         logging.info("Getting published videos")
         videos = []
         base_path = os.path.join(self.internal_cache_path, "cache", "aweme_publish")
+        if not os.path.exists(base_path):
+            return videos
+
         aweme_publish_files = os.listdir(base_path)
 
         for aweme_file in aweme_publish_files:
@@ -241,24 +246,34 @@ class ModuleReport(ModuleParent):
                     #             video["video"] = entry.get("video").get("animated_cover")
                     #     else:
                     #         video["video"] = entry.get("video")
-                    try:
-                        video["video"] =""
+
+                    video["video"] = ""
+                    video["duration"] = ""
+                    video["cover"] = ""
+                    video["api_address"] = ""
+
+                    if entry.get("video"):
                         if entry.get("video").get("animated_cover"):
                             video["video"] =entry.get("video").get("animated_cover").get("url_list")[0]
+                        else:
+                            video["video"] =str(entry)
 
-
-                        video["api_address"] = entry.get("video").get("play_addr").get("url_list")[-1]
-                        video["share_url"] = entry.get("share_url")
-                        video["music"] = entry.get("music").get("play_url").get("url_list")[0]
                         video["duration"] = entry.get("video").get("duration")
-                        video["cover"] = str(entry.get("video").get("cover").get("url_list")[0])
-                    except:
-                        # video["video"] =str(entry)
-                        pass
+                        
+                        try:
+                            video["cover"] = str(entry.get("video").get("cover").get("url_list")[0])
+                        except:
+                            pass
+                        try:
+                            video["api_address"] = entry.get("video").get("play_addr").get("url_list")[-1]
+                        except:
+                            pass
 
+                    video["share_url"] = entry.get("share_url")
+                    video["music"] = entry.get("music").get("play_url").get("url_list")[0]
                     
                     timeline_event = {}
-                    timeline_event["url"]= video["video"]
+                    timeline_event["url"] = video["video"]
                     
                     self.timeline.add(video["created_time"],"AF_publish", timeline_event)
                     videos.append(video)
