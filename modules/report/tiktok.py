@@ -28,6 +28,7 @@ class ModuleReport(ModuleParent):
         self.report["published_videos"] = self.get_videos_publish()
         self.report["cache_images"] = self.get_fresco_cache()
         self.report["log"] = self.get_last_session()
+        self.report["open_events"] = self.get_open_events()
         
         self.add_model(self.timeline)
         self.add_model(self.media)
@@ -105,6 +106,27 @@ class ModuleReport(ModuleParent):
         logging.info("{} messages found".format(len(conversation_output.get("messages"))))
 
         return conversations_list
+
+
+    def get_open_events(self):
+        logging.info("Get application open events...")
+        
+        open_events=[]
+        db = os.path.join(self.internal_cache_path, "databases", "TIKTOK.db")
+        database = Database(db)
+        results = database.execute_query("select open_time/1000 from app_open;")
+
+        for event in results:
+            open_events.append(event[0])
+            timeline_event = {}
+            timeline_event["event"]= "Open Application"
+            self.timeline.add(event[0],"AF_system", timeline_event)
+        
+        return open_events
+
+
+
+
 
     def get_user_profile(self):
         
@@ -276,7 +298,7 @@ class ModuleReport(ModuleParent):
         for directory in numerate_dirs:
             for cache_file in os.listdir(os.path.join(cache_path, directory)):
                 fresco_images.append(cache_file)
-                self.media.add(os.path.join(cache_path, directory, cache_file), False, False)
+                self.media.add(os.path.join(cache_path, directory, cache_file), False)
         
         return fresco_images
 
@@ -331,6 +353,12 @@ class ModuleReport(ModuleParent):
             body=message_dump.get("url").get("url_list")[0]
         elif message_type == 15:
             body=message_dump.get("joker_stickers")[0].get("static_url").get("url_list")[0]
+        elif message_type == 25:
+            body = "https://www.tiktok.com/@{}".format(message_dump.get("desc")) # or body = "https://m.tiktok.com/h5/share/usr/{}.html".format(message_dump.get("uid"))
+        elif message_type == 19:
+            body = message_dump.get("push_detail")
+        elif message_type == 22:
+            body = "https://www.tiktok.com/music/tiktok-{}".format(message_dump.get("music_id"))
         else:
             body= str(message_dump)
         
@@ -343,5 +371,10 @@ class ModuleReport(ModuleParent):
         if  message_type_id == 8: return "video"
         if  message_type_id == 5: return "gif"
         if  message_type_id == 15: return "gif"
+        if  message_type_id == 22: return "audio"
+        if  message_type_id == 25: return "profile"
+        if  message_type_id == 19: return "hashtag"
         return "unknown"
+
+
 

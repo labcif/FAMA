@@ -220,7 +220,7 @@ function renderMedia() {
 
   // src = `C:\\Users\\josef\\Desktop\\ee\\test.mp4`
   // src2 = `C:\\Users\\josef\\Desktop\\ee\\test.jpg`
-  content = `
+  var content = `
   ${getHeader("Media")}
   <div class="row">
   `
@@ -248,6 +248,7 @@ function renderMedia() {
     // </div>`
     media_id += 1;
     content += `<div class="col">`;
+    console.log(item)
 
     if (item["type"] == "video") {
       content += `<video width="320" height="240" controls><source src="${item["path"]}" type="${item["mime"]}"></video>`;
@@ -256,12 +257,11 @@ function renderMedia() {
       content += `<img width="320" height="240" src="${item["path"]}"></img>`;
       content += `<figcaption class="mt-2 mb-5"><img src="assets/svg/image.svg" alt="${item["mime"]}" class="minilogo"></img>`;
     } else if (item["type"] == "http") {
-      content += `<div class="row"><button type="button" class="btn btn-outline-primary" onclick="window.open('${item["path"]}','_blank')">Open external media</button>`;
-      content += `<figcaption><img src="assets/svg/http.svg" class="minilogo" alt="${item["mime"]}"></img></div>`;
+      content += `<button type="button" class="btn btn-outline-primary" onclick="window.open('${item["path"]}','_blank')">Open external media</button>`;
+      content += `<figcaption><img src="assets/svg/http.svg" class="minilogo" alt="${item["mime"]}"></img>`;
     } else if (item["type"] == "audio") {
       content += `<audio controls><source src="${item["path"]}" type="${item["mime"]}"></audio>`;
-      content += `<figcaption><img src="assets/svg/audio.svg" alt="${item["mime"]}" class="minilogo"></img>`;
-    }
+      content += `<figcaption><img src="assets/svg/audio.svg" alt="${item["mime"]}" class="minilogo"></img>`;}
     if (item["is_h265"]) {
       content += '<img src="assets/svg/h265.svg" class="minilogo"></img>';
     }

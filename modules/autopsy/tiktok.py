@@ -34,6 +34,8 @@ class ModulePsy(ModulePsyParent):
         self.process_videos(data.get("videos"), report_number, file, os.path.dirname(path), datasource_name)
         self.process_logs(data.get("log"), file)
         self.process_published_videos(data.get("published_videos"), file)
+        self.process_open_events(data.get("open_events"), file)
+        self.process_media(data.get("AF_media"), file)
 
     def initialize(self, context):
         self.context = context
@@ -88,6 +90,15 @@ class ModulePsy(ModulePsyParent):
         self.att_vid_key = self.utils.create_attribute_type('TIKTOK_VIDEO_KEY', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Key")
         self.att_vid_last_modified = self.utils.create_attribute_type('TIKTOK_VIDEO_LAST_MODIFIED', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.DATETIME, "Last Modified")
 
+        #media
+
+        # self.att_media_path
+        self.att_media_type = self.utils.create_attribute_type('TIKTOK_MEDIA_TYPE', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Media Type")
+
+        
+
+
+
         #published videos
 
         self.att_publish_vid_created_time = self.utils.create_attribute_type('TIKTOK_PUBLISHED_VIDEOS_CREATED_TIME', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.DATETIME, "Created TIme")
@@ -126,11 +137,46 @@ class ModulePsy(ModulePsyParent):
         self.art_publish_videos = self.utils.create_artifact_type(self.module_name, "TIKTOK_PUBLISHED_VIDEOS", "Published Videos")
         self.art_deleted_rows = self.utils.create_artifact_type(self.module_name, "TIKTOK_DELETED_ROWS", "Deleted rows")
         self.art_logs = self.utils.create_artifact_type(self.module_name, "TIKTOK_LOGS", "Logs")
+        self.art_media = self.utils.create_artifact_type(self.module_name, "TIKTOK_MEDIA", "Media")
+        self.art_open_app = self.utils.create_artifact_type(self.module_name, "TIKTOK_OPEN_PP", "Open Application")
         
 
-        
+    def process_media(self, media, file):
+
+        logging.info("Indexing media files")
+
+        if not media:
+            return
+
+        for m in media:
+            try: 
+                art = file.newArtifact(self.art_media.getTypeID())
+                attributes = []
+                attributes.append(BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_PATH, m.get("path"), m.get("path")))
+                attributes.append(BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_FILE_TYPE_SIG, m.get("path"), m.get("mime")))
+                attributes.append(BlackboardAttribute(self.att_media_type, m.get("path"), m.get("type")))
+                art.addAttributes(attributes)
+                self.utils.index_artifact(art, self.art_media)        
+            except Exception as e:
+                logging.warning("Error getting user: " + str(e))
+
+
+    def process_open_events(self, open_events, file):
+        logging.info("Indexing appication open events.")
+
+        if not open_events:
+            return
+
+        for e in open_events:
+            try: 
+                art = file.newArtifact(self.art_open_app.getTypeID())
+                art.addAttribute(BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_DATETIME, "TIKTOK.db", e))
+                self.utils.index_artifact(art, self.art_open_app)        
+            except Exception as e:
+                logging.warning("Error getting a application event entry: " + str(e))
+
+
     def process_user_profile(self, profile, file):
-        
         logging.info("Indexing user profile.")
         
         if not profile:
