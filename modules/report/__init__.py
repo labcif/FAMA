@@ -1,4 +1,5 @@
 import os
+import logging
 from package.utils import Utils
 from package.models import Timeline, Location, Media
 
@@ -69,5 +70,12 @@ class ModuleParent:
             return
         
         self.report[my_model] = model
+
+    def get_info(self, func):
+        try:
+            return func()
+        except:
+            logging.error("Error on method {}".format(func.__name__))
+            return None
 
         

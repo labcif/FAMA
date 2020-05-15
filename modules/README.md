@@ -57,9 +57,9 @@ class ModuleReport(ModuleParent):
         #REMEMBER THAT THE FINAL RESULT MUST BE AN OBJECT THAT WILL BE CONVERTED TO JSON
         
         #EXAMPLE:
-        # self.report["freespace"] = self.get_undark_db()
-        # self.report["profile"] = self.get_user_profile()
-        # self.report["messages"] = self.get_user_messages()
+        # self.report["freespace"] = self.get_info(self.get_undark_db)
+        # self.report["profile"] = self.get_info(self.get_user_profile)
+        # self.report["messages"] = self.get_info(self.get_user_messages)
         
         # UNDARK SHOULD BE FIRST TO ENSURE WE CAN RECOVER OLD DATA
 
