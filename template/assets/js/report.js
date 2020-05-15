@@ -262,8 +262,8 @@ function renderMedia() {
     } else if (item["type"] == "audio") {
       content += `<audio controls><source src="${item["path"]}" type="${item["mime"]}"></audio>`;
       content += `<figcaption><img src="assets/svg/audio.svg" alt="${item["mime"]}" class="minilogo"></img>`;}
-    if (item["is_h265"]) {
-      content += '<img src="assets/svg/h265.svg" class="minilogo"></img>';
+    else{
+        content+= `<embed src="${item["path"]}" width="320" height="240" scroll="no" autostart="0"/></embed>`;
     }
 
     content += `

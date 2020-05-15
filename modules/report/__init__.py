@@ -77,5 +77,3 @@ class ModuleParent:
         except:
             logging.error("Error on method {}".format(func.__name__))
             return None
-
-        
