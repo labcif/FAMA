@@ -78,16 +78,17 @@ class ProjectIngestModuleReport(GeneralReportModuleAdapter):
 
 class ProjectDSProcessor(DataSourceProcessor):
     configPanel = None
+    moduleName = "Live extraction with ADB (Android)"
 
     def __init__(self):
         self.configPanel = DataSourcesPanelSettings()
     
     @staticmethod
     def getType():
-        return "Live extraction with ADB (Android)"
+        return ProjectDSProcessor.moduleName
 
     def getDataSourceType(self):
-        return "Live extraction with ADB (Android)"
+        return self.moduleName
 
     def getPanel(self):
         return self.configPanel
@@ -96,19 +97,10 @@ class ProjectDSProcessor(DataSourceProcessor):
         return self.configPanel.validatePanel()
 
     def run(self, progressMonitor, callback):
-        pass
-        #self.jp.storeSettings()
-        #run(UUID.randomUUID().toString(), configPanel.getImageFilePath(), configPanel.getProfile(), configPanel.getPluginsToRun(), configPanel.getTimeZone(), progressMonitor, callback);
+        self.configPanel.run(progressMonitor, callback)
 
     def cancel(self):
-        logging.info("cancel")
-        pass
-        #if (addImageTask != null) {
-        #    addImageTask.cancelTask();
-        #}
+        logging.info("cancel") #implement? #cancel thread
 
     def reset(self):
-        #self.configPanel.reset()
-        logging.info("reset")
-        #configPanel.reset()
         pass

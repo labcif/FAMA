@@ -29,12 +29,12 @@ class Extract:
         self.path_dump_folder = os.path.join(self.dumps_path, Utils.get_current_time())
         
 
-    def dump_from_adb(self, app_package):
+    def dump_from_adb(self, app_package, devices = DeviceCommunication.list_devices()):
         folders = {}
 
         Utils.check_and_generate_folder(self.path_dump_folder)
 
-        for serial_number in DeviceCommunication.list_devices():
+        for serial_number in devices:
             path_dump_folder = os.path.join(self.path_dump_folder, Utils.clean_invalid_filename(serial_number, character="_"))
             Utils.check_and_generate_folder(path_dump_folder)
 

@@ -11,8 +11,10 @@ from org.sleuthkit.autopsy.casemodule import Case
 
 from package.analyzer import Analyzer
 from package.extract import Extract
+from package.device import DeviceCommunication
 from package.utils import Utils
 from psy.psyutils import PsyUtils
+from psy.extractor import Extractor
 
 class ProjectIngestModule(DataSourceIngestModule):
     def __init__(self, settings):
@@ -54,7 +56,7 @@ class ProjectIngestModule(DataSourceIngestModule):
         #Initialize list of possible data sources
         data_sources = []
         
-        #Extract method for adb selected
+        #Extract method for adb selected #THIS IS ONLY USED IN <= AUTOPSY 4.15
         if self.method == "method_adb":
             #Get list of selected apps to extract
             self.apps = json.loads(self.settings.getSetting('apps'))
@@ -62,32 +64,15 @@ class ProjectIngestModule(DataSourceIngestModule):
             jobs = len(self.apps)*3  #extract, analyser, index           
             self.progressJob = ProgressJob(progressBar, jobs)
         
-            #Extract instance, the dump folder is going to be the same for all apps dumps
-            extract = Extract()
-
             self.progressJob.next_job("Extracting from ADB")
             logging.info("Starting ADB")
 
-            #Auxiliar variable used to store all folders for each device
-            folders = {}
+            #Variable used to store all folders for each device
+            folders = Extractor(self.apps, DeviceCommunication.list_devices(), progressBar, dsprocessor = False).dump_apps()
 
-            for app_id in self.apps:
-                
-                # For each extract of the app with device context
-                for serial, folder in extract.dump_from_adb(app_id).items():
-                    # If the device not in the list
-                    if not folders.get(serial):
-                        folders[serial] = []
-
-                    # If the folder is not the list for the device, add it
-                    if not folder in folders[serial]:
-                        folders[serial].append(folder)
-                    
-                    self.progressJob.next_job("Extracting {}".format(app_id))
-            
             # Add one datasource for each device, with the list of the possible folders
             for serial, folders_list in folders.items():
-                datasource_name = dataSource.getName() + "_ADB_{}_{}".format(serial, int(time.time()))
+                datasource_name = "ADB_{}_{}".format(serial, int(time.time()))
                 self.utils.add_to_fileset(datasource_name, folders_list)
                 
                 # Add data source to case to be analised

@@ -13,7 +13,7 @@ from org.sleuthkit.autopsy.ingest import IngestModuleIngestJobSettingsPanel
 from collections import OrderedDict
 
 from package.utils import Utils
-from psy.psyutils import SettingsUtils
+from psy.psyutils import PsyUtils, SettingsUtils
 
 class ProjectIngestSettingsPanel(IngestModuleIngestJobSettingsPanel):
     def __init__(self, settings):
@@ -80,7 +80,12 @@ class ProjectIngestSettingsPanel(IngestModuleIngestJobSettingsPanel):
         self.p_method.add(JLabel("Analysis method"))
         self.p_method.add(self.rb_selectedDatasource)
         self.p_method.add(self.rb_importReportFile)
-        self.p_method.add(self.rb_liveExtraction)
+
+        autopsy_version = PsyUtils.get_autopsy_version()
+
+        if ((autopsy_version["major"] == 4 and autopsy_version["minor"] <= 15) or autopsy_version["major"] < 4):
+            self.p_method.add(self.rb_liveExtraction)
+            
         self.add(self.p_method)
 
         # end of method menu

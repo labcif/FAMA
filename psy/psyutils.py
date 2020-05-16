@@ -7,6 +7,7 @@ from javax.swing import JCheckBox
 from javax.swing import JRadioButton
 from javax.swing import JTextArea
 from javax.swing import BoxLayout
+from javax.swing.border import EmptyBorder
 
 from org.sleuthkit.autopsy.casemodule import Case
 from org.sleuthkit.autopsy.casemodule.services import Blackboard
@@ -17,6 +18,7 @@ from org.sleuthkit.autopsy.ingest import IngestMessage
 from org.sleuthkit.datamodel import CommunicationsManager
 from org.sleuthkit.autopsy.geolocation.datamodel import BookmarkWaypoint
 from org.sleuthkit.datamodel import BlackboardArtifact
+from org.sleuthkit.autopsy.coreutils import Version
 
 from psy.progress import ProgressUpdater
 
@@ -26,18 +28,20 @@ class PsyUtils:
         IngestServices.getInstance().postMessage(IngestMessage.createMessage(IngestMessage.MessageType.DATA, "Forensics Analyzer", msg))
 
     @staticmethod
-    def add_to_fileset(name, folder, device_id = UUID.randomUUID()):
+    def add_to_fileset(name, folder, device_id = UUID.randomUUID(), progress_updater = ProgressUpdater(), notify = True):
         fileManager = Case.getCurrentCase().getServices().getFileManager()
         skcase_data = Case.getCurrentCase()
         #skcase_data.notifyAddingDataSource(device_id)
-        progress_updater = ProgressUpdater() 
+        #progress_updater = ProgressUpdater() 
         
-        fileManager.addLocalFilesDataSource(device_id.toString(), name, "", folder, progress_updater)
+        data_source = fileManager.addLocalFilesDataSource(device_id.toString(), name, "", folder, progress_updater)
         
-        files_added = progress_updater.getFiles()
-        
-        for file_added in files_added:
-            skcase_data.notifyDataSourceAdded(file_added, device_id)
+        if notify:
+            files_added = progress_updater.getFiles()
+            for file_added in files_added:
+                skcase_data.notifyDataSourceAdded(file_added, device_id)
+
+        return data_source
 
     @staticmethod
     def create_attribute_type(att_name, type, att_desc):
@@ -101,12 +105,34 @@ class PsyUtils:
         communication_manager = Case.getCurrentCase().getSleuthkitCase().getCommunicationsManager()
         return CommunicationsManager.addAccountType(communication_manager,accountTypeName, displayName)
 
+    @staticmethod
+    def get_autopsy_version():
+        item = {"major": 0, "minor": 0, "patch": 0}
+
+        version = Version.getVersion().split('.')
+        
+        try:
+            if len(version) >= 1:
+                item["major"] = int(version[0])
+            
+            if len(version) >= 2:
+                item["minor"] = int(version[1])
+
+            if len(version) >= 3:
+                item["patch"] = int(version[2])
+        except:
+            pass
+        
+        return item
+
+
 class SettingsUtils:
     @staticmethod
-    def createPanel(scroll = False):
+    def createPanel(scroll = False, ptop = 0, pleft = 0, pbottom = 0, pright = 0):
         panel = JPanel()
         panel.setLayout(BoxLayout(panel, BoxLayout.PAGE_AXIS))
         panel.setAlignmentX(Component.LEFT_ALIGNMENT)
+        panel.setBorder(EmptyBorder(ptop, pleft, pbottom, pright))
         
         # if scroll:
             # scrollpane = JScrollPane(panel)
@@ -123,6 +149,14 @@ class SettingsUtils:
         checkbox.setSelected(True)
         checkbox.setVisible(visible)
         checkbox.setActionCommand(app_id)
+        return checkbox
+
+    @staticmethod
+    def addDeviceCheckbox(device, ap, visible = False):
+        checkbox = JCheckBox(device, actionPerformed= ap)
+        checkbox.setActionCommand(device)
+        checkbox.setSelected(True)
+        checkbox.setVisible(visible)
         return checkbox
 
     @staticmethod
