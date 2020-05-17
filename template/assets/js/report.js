@@ -251,25 +251,25 @@ function renderMedia() {
     //   <span>${item}</span>
     // </div>`
     media_id += 1;
-    content += `<div class="col mt-4 text-center" style="width:240px !important">`;
+    content += `<div class="col mt-4 text-center lazy" style="width:240px !important">`;
 
     if (item["type"] == "video") {
-      content += `<video class="mb-3" width="240" controls><source src="${item["path"]}" type="${item["mime"]}"></video>`;
-      content += `<button class="btn btn-sm"><img src="assets/svg/video.svg" alt="${item["mime"]}" class="minilogo"></img></button>`;
+      content += `<video class="mb-3" width="240" height="380" controls><source src="${item["path"]}" type="${item["mime"]}"></video>`;
+      content += `<button class="btn btn-sm"><img src="assets/svg/video.svg" alt="${item["mime"]}" class="minilogo"/> Video</button>`;
     } 
     else if (item["type"] == "image") {
-      content += `<img width="240" class="img-responsive mb-3" src="${item["path"]}"></img>`;
-      content += `<button class="btn btn-sm"><img src="assets/svg/image.svg" alt="${item["mime"]}" class="minilogo"></img> Image</button>`;
+      content += `<img width="240" class="img-responsive mb-3 lazy" data-src="${item["path"]}"/>`;
+      content += `<button class="btn btn-sm"><img src="assets/svg/image.svg" alt="${item["mime"]}" class="minilogo"/> Image</button>`;
     }
     else if (item["type"] == "audio") {
       content += `<audio class="mb-3" controls><source src="${item["path"]}" type="${item["mime"]}"></audio>`;
-      content += `<button class="btn btn-sm"><img src="assets/svg/audio.svg" alt="${item["mime"]}" class="minilogo"></img></button>`;
+      content += `<button class="btn btn-sm"><img src="assets/svg/audio.svg" alt="${item["mime"]}" class="minilogo"/> Audio</button>`;
     }
 
     content += `<button type="button" class="btn btn-primary btn-sm button-copy" data-toggle="tooltip" data-placement="bottom" title="${item["path"]}">Copy Path</button>`;
 
     if (item["type"] === "video"){
-      content += `<button type="button" class="btn btn-primary btn-sm" data-toggle="tooltip" data-placement="bottom" title="${item["path"]}">External Viewer</button>`
+      content += `<button type="button" class="btn btn-primary btn-sm ml-2" data-toggle="tooltip" data-placement="bottom" title="${item["path"]}">External Viewer</button>`
     }
 
 
@@ -291,6 +291,9 @@ function renderMedia() {
   $("#page-builder").html(content);
   $(".button-copy").on("click", copyText);
 
+  $(function($) {
+    $("img.lazy").Lazy();
+  });
 }
 
 
@@ -520,10 +523,12 @@ function makeReport() {
 (function () {
   'use strict'
   startUp()
-
+  
   //Tooltip hack
   $(document).ready(function() {
       $("body").tooltip({ selector: '[data-toggle=tooltip]' });
+      
+
   });
 
   $("#timeline-btn").on("click", renderTimeline);

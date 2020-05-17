@@ -84,14 +84,15 @@ This project is licensed under the terms of the GNU GPL v3 License.
 
 * [ADB](https://developer.android.com/studio/releases/platform-tools) - Android Software Development Kit License Agreement
 * [Base64](http://rtner.de/software/base64.html) - GNU GPL v2 License
-* [Undark](https://github.com/witwall/undark) - BSD License 2.0
-* [SQLite-Deleted-Records-Parser](https://github.com/mdegrazia/SQLite-Deleted-Records-Parser) - GNU GPL v3 License
 * [Bootstrap](https://getbootstrap.com/) - MIT License
-* [jQuery](https://jquery.com/) - MIT License
 * [feather](https://github.com/feathericons/feather) - MIT License
-* [pdfmake](https://github.com/bpampuch/pdfmake) - MIT License
-* [leaflet](https://github.com/Leaflet/Leaflet) - BSD 2-Clause "Simplified" License
 * [Freepic Icons](https://www.flaticon.com/packs/user-interface-111)
+* [jQuery](https://jquery.com/) - MIT License
+* [jQuery.lazy](https://github.com/eisbehr-/jquery.lazy) - MIT License
+* [leaflet](https://github.com/Leaflet/Leaflet) - BSD 2-Clause "Simplified" License
+* [pdfmake](https://github.com/bpampuch/pdfmake) - MIT License
+* [SQLite-Deleted-Records-Parser](https://github.com/mdegrazia/SQLite-Deleted-Records-Parser) - GNU GPL v3 License
+* [Undark](https://github.com/witwall/undark) - BSD License 2.0
 
 ## Notes
 
