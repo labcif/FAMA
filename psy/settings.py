@@ -68,7 +68,7 @@ class ProjectIngestSettingsPanel(IngestModuleIngestJobSettingsPanel):
 
         self.p_method = SettingsUtils.createPanel()
         self.bg_method = ButtonGroup()
-        self.rb_selectedDatasource = SettingsUtils.createRadioButton("Analyse selected datasource", "method_datasource", self.onMethodChange)
+        self.rb_selectedDatasource = SettingsUtils.createRadioButton("Analyze selected datasource", "method_datasource", self.onMethodChange)
         self.rb_importReportFile = SettingsUtils.createRadioButton("Import previous generated report file","method_importfile" ,self.onMethodChange)
         self.rb_liveExtraction = SettingsUtils.createRadioButton("Live extraction with ADB","method_adb", self.onMethodChange)
         self.rb_selectedDatasource.setSelected(True)
@@ -116,8 +116,8 @@ class ProjectIngestSettingsPanel(IngestModuleIngestJobSettingsPanel):
         self.local_settings.setSetting("method", self.method)
 
         if self.method == "method_datasource":
-            self.lb_info.setText("This method is used when there is no data source but you have the device.")
-            self.lb_info2.setText("It will extract the content of the selected applications from the device, analyze and index the forensic artifacts.")
+            self.lb_info.setText("This method is used when the application data has already been collected.")
+            self.lb_info2.setText("It will analyze the data source previously added to the data source and index the forensic artifacts.")
             self.toggleCheckboxes(False)
             
         elif self.method == "method_importfile":
@@ -126,8 +126,8 @@ class ProjectIngestSettingsPanel(IngestModuleIngestJobSettingsPanel):
             self.toggleCheckboxes(False)
     
         elif self.method == "method_adb":
-            self.lb_info.setText("This method is used when the application data has already been collected.")
-            self.lb_info2.setText("It will analyze the data source previously added to the data source and index the forensic artifacts.")
+            self.lb_info.setText("This method is used when there is no data source but you have the device.")
+            self.lb_info2.setText("It will extract the content of the selected applications from the device, analyze and index the forensic artifacts.")
             self.toggleCheckboxes(True)
 
         # self.local_settings.setSetting("apps", self.getSelectedApps())

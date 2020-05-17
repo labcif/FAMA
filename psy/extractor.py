@@ -1,4 +1,7 @@
+import os
+
 from package.extract import Extract
+from package.utils import Utils
 
 class Extractor:
     def __init__(self, apps, devices, progress, dsprocessor = True):
@@ -29,5 +32,36 @@ class Extractor:
                     folders[serial].append(folder)
 
                 #self.progressJob.next_job("Extracting {}".format(app_id))
+
+
+        for serial, folderslist in folders.items():
+            extracted_list = []
+
+            for folder in folderslist:
+                extracted_list.append(self.extract_dumps(serial, folder))
+
+            folders[serial] = extracted_list
+
         return folders
-        
+
+    def extract_dumps(self, serial, folder):
+        files = os.listdir(folder)
+
+        self.internal_path = os.path.join(folder, "data", "data")
+        self.external_path = os.path.join(folder, "data", "media", "0", "Android", "data")
+
+        Utils.check_and_generate_folder(self.internal_path)
+        Utils.check_and_generate_folder(self.external_path)
+
+        if self.dsprocessor:
+            self.progress.setProgressText('  Handling extracted data from {}.\n  Please wait.'.format(serial))
+        else:
+            self.progress.progress('Handling extracted data from {}'.format(serial))
+
+        for filename in files:
+            if '_internal.tar.gz' in filename:
+                Utils.extract_tar(os.path.join(folder, filename), os.path.join(self.internal_path, filename.replace('_internal.tar.gz', '')))
+            elif '_external.tar.gz' in filename:
+                Utils.extract_tar(os.path.join(folder, filename), os.path.join(self.external_path, filename.replace('_external.tar.gz', '')))
+
+        return os.path.join(folder, "data")

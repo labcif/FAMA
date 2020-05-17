@@ -3,6 +3,7 @@ import logging
 import time
 from collections import OrderedDict
 
+from java.awt import Font
 from java.awt import Dimension
 from java.awt import BorderLayout
 from javax.swing import JPanel
@@ -91,6 +92,11 @@ class DataSourcesPanelSettings(JPanel):
         self.d_method.add(self.label)
 
         self.label = JLabel('It will generate a file set per device.')
+        self.label.setBorder(EmptyBorder(0,0,10,0))
+        self.d_method.add(self.label)
+
+        self.label = JLabel('This extract method requires ADB enabled on the device and may require root privilege for some paths.')
+        self.label.setFont(self.label.getFont().deriveFont(Font.BOLD, 11))
         self.label.setBorder(EmptyBorder(0,0,10,0))
         self.d_method.add(self.label)
 
