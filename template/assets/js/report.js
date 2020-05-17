@@ -227,6 +227,10 @@ function renderMedia() {
 
   var media_id = 0
   reportData["AF_media"].forEach(item => {
+    if (item["type"] == "unknown") {
+      return 
+    }
+
     // content += `
     // <div class="col-lg-4 col-md-12 mb-4">
     //   <div class="embed-responsive embed-responsive-4by3 z-depth-1-half">
@@ -247,32 +251,29 @@ function renderMedia() {
     //   <span>${item}</span>
     // </div>`
     media_id += 1;
-    content += `<div class="col">`;
-    console.log(item)
+    content += `<div class="col mt-4 text-center" style="width:240px !important">`;
 
     if (item["type"] == "video") {
-      content += `<video width="320" height="240" controls><source src="${item["path"]}" type="${item["mime"]}"></video>`;
-      content += `<figcaption class="mt-2 mb-5"><img src="assets/svg/video.svg" alt="${item["mime"]}" class="minilogo"></img>`;
-    } else if (item["type"] == "image") {
-      content += `<img width="320" height="240" src="${item["path"]}"></img>`;
-      content += `<figcaption class="mt-2 mb-5"><img src="assets/svg/image.svg" alt="${item["mime"]}" class="minilogo"></img>`;
-    } else if (item["type"] == "http") {
-      content += `<button type="button" class="btn btn-outline-primary" onclick="window.open('${item["path"]}','_blank')">Open external media</button>`;
-      content += `<figcaption><img src="assets/svg/http.svg" class="minilogo" alt="${item["mime"]}"></img>`;
-    } else if (item["type"] == "audio") {
-      content += `<audio controls><source src="${item["path"]}" type="${item["mime"]}"></audio>`;
-      content += `<figcaption><img src="assets/svg/audio.svg" alt="${item["mime"]}" class="minilogo"></img>`;}
-    else{
-        content+= `<embed src="${item["path"]}" width="320" height="240" scroll="no" autostart="0"/></embed>`;
+      content += `<video class="mb-3" width="240" controls><source src="${item["path"]}" type="${item["mime"]}"></video>`;
+      content += `<button class="btn btn-sm"><img src="assets/svg/video.svg" alt="${item["mime"]}" class="minilogo"></img></button>`;
+    } 
+    else if (item["type"] == "image") {
+      content += `<img width="240" class="img-responsive mb-3" src="${item["path"]}"></img>`;
+      content += `<button class="btn btn-sm"><img src="assets/svg/image.svg" alt="${item["mime"]}" class="minilogo"></img> Image</button>`;
+    }
+    else if (item["type"] == "audio") {
+      content += `<audio class="mb-3" controls><source src="${item["path"]}" type="${item["mime"]}"></audio>`;
+      content += `<button class="btn btn-sm"><img src="assets/svg/audio.svg" alt="${item["mime"]}" class="minilogo"></img></button>`;
     }
 
-    content += `
-              <div id='${"media-" + media_id}' class='collapse'> ${item["path"]}</div>
-              <span class="d-inline btn btn-link text-primary" data-toggle="collapse" data-target="#${"media-" + media_id}">Show Path</span>
-              <span class="d-inline btn btn-link text-primary">External viewer</span>`;
+    content += `<button type="button" class="btn btn-primary btn-sm button-copy" data-toggle="tooltip" data-placement="bottom" title="${item["path"]}">Copy Path</button>`;
+
+    if (item["type"] === "video"){
+      content += `<button type="button" class="btn btn-primary btn-sm" data-toggle="tooltip" data-placement="bottom" title="${item["path"]}">External Viewer</button>`
+    }
 
 
-    content += `</figcaption></div>`
+    content += `</div>`
 
 
     // content += `
@@ -288,6 +289,7 @@ function renderMedia() {
   content += `</div>`;
 
   $("#page-builder").html(content);
+  $(".button-copy").on("click", copyText);
 
 }
 
@@ -368,6 +370,15 @@ function startUp() {
   });
 
   feather.replace()
+}
+
+function copyText(event){
+  //https://stackoverflow.com/a/30905277
+  var $temp = $("<input>");
+  $("body").append($temp);
+  $temp.val(event.target.dataset.originalTitle).select();
+  document.execCommand("copy");
+  $temp.remove();
 }
 
 function makeReport() {
@@ -509,6 +520,11 @@ function makeReport() {
 (function () {
   'use strict'
   startUp()
+
+  //Tooltip hack
+  $(document).ready(function() {
+      $("body").tooltip({ selector: '[data-toggle=tooltip]' });
+  });
 
   $("#timeline-btn").on("click", renderTimeline);
   $("#map-btn").on("click", renderMap);
