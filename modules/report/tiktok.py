@@ -313,7 +313,7 @@ class ModuleReport(ModuleParent):
         for directory in numerate_dirs:
             for cache_file in os.listdir(os.path.join(cache_path, directory)):
                 fresco_images.append(cache_file)
-                self.media.add(os.path.join(cache_path, directory, cache_file), False)
+                self.media.add(os.path.join(cache_path, directory, cache_file))
         
         return fresco_images
 

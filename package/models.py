@@ -1,10 +1,5 @@
 import os
-# from package.utils import Utils
-# TODO -CHANGE, only for tests! avoid external libs from pip
-try:
-    import filetype
-except:
-    pass
+from package.utils import Utils
 
 class Location:
     def __init__(self):
@@ -33,35 +28,16 @@ class Location:
 class Media:
     def __init__(self):
         self.media = []
-        
-    @staticmethod
-    def get_category(filetype):
 
-        if filetype in ["video/mp4","video/x-m4v","video/x-matroska","video/webm","video/quicktime","video/x-msvideo","video/x-ms-wmv","video/mpeg","video/x-flv"]: return "video"
-        if filetype in ["image/jpeg","image/jpx","image/png","image/gif","image/webp","image/x-canon-cr2","image/tiff","image/bmp","image/vnd.ms-photo","image/vnd.adobe.photoshop","image/x-icon","image/heic"]: return "image"
-        if filetype in ["audio/midi","audio/mpeg","audio/m4a","audio/ogg","audio/x-flac","audio/x-wav","audio/amr"]: return "audio"
-        return "unknown"
-
-    def add(self, path, from_web=False):
+    def add(self, path):
         media = {}
         media["path"] = path
-        media["type"]="unknown"
-        media["mime"]="unknown"
+        media["type"] = "unknown"
 
-        if not from_web:
-            media["path"]= os.path.join("Contents", path)
-            try:
-                file_type = filetype.guess(path) #TODO FIX PATH 
-                if file_type:
-                    media["type"]= self.get_category(file_type.mime)
-                    media["mime"]= file_type.mime
-            except:
-                pass
-        
-        else:  #Web
-            media["mime"]= "image/jpeg"
-            media["type"]= self.get_category(media["mime"])
-
+        if os.path.exists(path) or Utils.is_url(path):
+            #media["path"] = os.path.join("Contents", path)
+            media["type"] = Utils.get_media_type(path)
+         
         self.media.append(media)
     
     def get_media(self):

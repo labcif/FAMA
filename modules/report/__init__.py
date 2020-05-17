@@ -55,7 +55,7 @@ class ModuleParent:
     def generate_report(self):
         raise NotImplementedError
     
-    def add_model(self, model, model_arg=True, my_model=""):
+    def add_model(self, model, model_arg = True, my_model = ""):
 
         if isinstance(model, Timeline):
             self.report["AF_timeline"] = model.get_sorted_timeline(model_arg)
@@ -72,6 +72,10 @@ class ModuleParent:
         self.report[my_model] = model
 
     def get_info(self, func):
+        debug = False #True
+        if debug:
+            return func()
+        
         try:
             return func()
         except:

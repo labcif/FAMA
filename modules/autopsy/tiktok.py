@@ -342,6 +342,9 @@ class ModulePsy(ModulePsyParent):
     
     def process_videos(self, videos, report_number, file, base_path, datasource_name):
         logging.info("Indexing videos.")
+        
+        if not videos:
+            return
 
         for v in videos:
             try: 
@@ -361,8 +364,8 @@ class ModulePsy(ModulePsyParent):
             logging.warning("Report doesn't have video files.")
             return
         
-        for v in files:
-            os.rename(os.path.join(path, v), os.path.join(path, v) + ".mp4")
+        #for v in files:
+        #    os.rename(os.path.join(path, v), os.path.join(path, v) + ".mp4")
 
         #self.utils.add_to_fileset("{}_Videos".format(datasource_name), [path])
 

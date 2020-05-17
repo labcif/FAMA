@@ -81,10 +81,10 @@ class ModuleReport(ModuleParent):
 
         database = Database(db)
         photos_list = database.execute_query("select image_uri from profile_media;")
-        user_photos =[]
+        user_photos = []
         for photo in photos_list: 
             user_photos.append(photo[0])
-            self.media.add(photo[0], True)
+            self.media.add(photo[0])
 
         logging.info("{} photo(s) found".format(len(photos_list)))
         return user_photos

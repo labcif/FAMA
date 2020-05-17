@@ -1,4 +1,5 @@
 import os
+import sys
 import platform
 import tarfile
 import xml.etree.ElementTree as ET
@@ -11,6 +12,13 @@ import time
 import re
 import logging
 import sys
+from package import imghdr
+from package import sndhdr
+
+if (sys.version_info>=(3, 0, 0,)):
+    from urllib.parse import urlparse
+else:
+    from urlparse import urlparse
 
 from distutils.dir_util import mkpath
 from distutils.errors import DistutilsFileError, DistutilsInternalError
@@ -281,6 +289,45 @@ class Utils:
                 continue
 
             os.environ[items[0].strip()] = '='.join(items[1:]).strip()
+
+    @staticmethod
+    def get_media_type(filepath):
+        images_types = [".apng", ".bmp", ".gif", ".ico", ".cur", ".jpg", ".jpeg", ".jfif", ".pjpeg", ".pjp", ".png", ".svg", ".tif", ".tiff", ".webp"]
+        videos_types = [".webm", ".mkv", ".flv", ".vob", ".ogv", ".drc", ".gifv", ".mng", ".avi", ".mts", ".m2ts", ".ts", ".mov", ".qt", ".wmv", ".yuv", ".rmvb", ".asf", ".amv", ".mp4", ".m4p", ".m4v", ".mpg", ".mp2", ".mpeg", ".mpe", ".mpv", ".svi", ".3gp", ".3g2", ".mxf", ".roq", ".nsv", ".flv", ".f4v"]
+        audios_types = [".aa", ".aac", ".aax", ".act", ".aiff", ".alac", ".amr", ".ape", ".au", ".awb", ".dct", ".dss", ".dvf", ".flac", ".gsm", ".iklax", ".ivs", ".m4a", ".m4b", ".m4p", ".mmf", ".mp3", ".mpc", ".msv", ".nmf", ".nsf", ".ogg", ".oga", ".mogg", ".opus", ".ra", ".rm", ".raw", ".rf64", ".sln", ".tta", ".voc", ".vox", ".wav", ".wma", ".wv", ".8svx", ".cda"]
+
+        if Utils.is_url(filepath):
+            filepath = urlparse(filepath).path.lower()
+
+        for x in images_types:
+            if filepath.endswith(x):
+                return "image"
+
+        for x in videos_types:
+            if filepath.endswith(x):
+                return "video"
+
+        for x in audios_types:
+            if filepath.endswith(x):
+                return "audio"
+        
+        #We can't check by url, bypass
+        if Utils.is_url(filepath):
+            return "unknown"
+
+        filetype = imghdr.what(filepath)
+        if filetype:
+            return "image"
+
+        filetype = sndhdr.what(filepath)
+        if filetype:
+            return "audio"
+
+        return "video"
+
+    @staticmethod
+    def is_url(path):
+        return ('http:' in path or 'https:' in path)
 
     @staticmethod
     def copy_tree(src, dst, preserve_mode=1, preserve_times=1,
