@@ -201,12 +201,6 @@ function removeFocus() {
 
 
 function renderMedia() {
-
-  //   content = `<div class="embed-responsive embed-responsive-21by9">
-  //   <iframe class="embed-responsive-item" src="C:\\Users\\josef\\Desktop\\Autopsy_tests\\asdasd\\ModuleOutput\\AndroidForensics\\com.zhiliaoapp.musically\\2\\report\\Contents\\external\\cache\\welcome_screen_video4.mp4"></iframe>
-  // </div>`;
-
-
   if (reportData["AF_media"] == undefined) {
     $('#empty-media-modal').modal('show');
     return
@@ -217,85 +211,79 @@ function renderMedia() {
 
   $("#page-builder").html("");
 
-
   // src = `C:\\Users\\josef\\Desktop\\ee\\test.mp4`
   // src2 = `C:\\Users\\josef\\Desktop\\ee\\test.jpg`
-  var content = `
-  ${getHeader("Media")}
-  <div class="row">
-  `
+  
+  let content = `${getHeader("Media")}`
+  
+  content += `<div class="row"><div class="col-12"><strong>Filter:</strong>
+    <select id="media-filter" class="form-control form-control-sm">
+      <option value="all">📚 All</option>
+      <option value="audio">🎧 Audios</option>
+      <option value="image">🖼️ Images</option>
+      <option value="video">🎥 Videos</option>
+    </select>
+  </div></div>`
 
-  var media_id = 0
-  reportData["AF_media"].forEach(item => {
-    if (item["type"] == "unknown") {
-      return 
-    }
-
-    // content += `
-    // <div class="col-lg-4 col-md-12 mb-4">
-    //   <div class="embed-responsive embed-responsive-4by3 z-depth-1-half">
-    //     <iframe src="${item}" allowfullscreen></iframe>
-    //   </div>
-    //   <span>${item}<span>
-    // </div>`
-
-    // content += `
-    // <div class="col-lg-4 col-md-12 mb-4">
-    //   <div class="embed-responsive embed-responsive-4by3 z-depth-1-half">
-    //   <video width="320" height="240" controls>
-    //     <source src="${item}" type="video/mp4">
-    //   Doest support video
-    // </video>
-    // <img src="${item}" alt="">
-    //   </div>
-    //   <span>${item}</span>
-    // </div>`
-    media_id += 1;
-    content += `<div class="col mt-4 text-center lazy" style="width:240px !important">`;
-
-    if (item["type"] == "video") {
-      content += `<video class="mb-3" width="240" height="380" controls><source src="${item["path"]}" type="${item["mime"]}"></video>`;
-      content += `<button class="btn btn-sm"><img src="assets/svg/video.svg" alt="${item["mime"]}" class="minilogo"/> Video</button>`;
-    } 
-    else if (item["type"] == "image") {
-      content += `<img width="240" class="img-responsive mb-3 lazy" data-src="${item["path"]}"/>`;
-      content += `<button class="btn btn-sm"><img src="assets/svg/image.svg" alt="${item["mime"]}" class="minilogo"/> Image</button>`;
-    }
-    else if (item["type"] == "audio") {
-      content += `<audio class="mb-3" controls><source src="${item["path"]}" type="${item["mime"]}"></audio>`;
-      content += `<button class="btn btn-sm"><img src="assets/svg/audio.svg" alt="${item["mime"]}" class="minilogo"/> Audio</button>`;
-    }
-
-    content += `<button type="button" class="btn btn-primary btn-sm button-copy" data-toggle="tooltip" data-placement="bottom" title="${item["path"]}">Copy Path</button>`;
-
-    if (item["type"] === "video"){
-      content += `<button type="button" class="btn btn-primary btn-sm ml-2" data-toggle="tooltip" data-placement="bottom" title="${item["path"]}">External Viewer</button>`
-    }
-
-
-    content += `</div>`
-
-
-    // content += `
-    // <div class="col-lg-4 col-md-12 mb-4">
-    //   <div class="">
-    //     <embed src="${item["path"]}" autostart="0"/></embed>
-    //   </div>
-    //   <span>Path:${item["path"]}</span>
-    // </div>`
-
-  });
+  content += `<div id="media-list" class="row">`
 
   content += `</div>`;
 
   $("#page-builder").html(content);
   $(".button-copy").on("click", copyText);
 
-  $(function($) {
-    $("img.lazy").Lazy();
+  renderMediaList("all")
+
+  $('#media-filter').on('change', function() {
+    renderMediaList(this.value)
   });
+
 }
 
+function renderMediaList(filter){
+  let mediaListing = ""
+  reportData["AF_media"].forEach(item => {
+    if (item["type"] == "unknown") {
+      return 
+    }
+
+    mediaListing += `<div class="col mt-4 text-center lazy" style="width:240px !important">`;
+
+    if (item["type"] == "video" && (filter === "all" || filter === "video")) {
+      mediaListing += `<video class="mb-3 lazy" poster="assets/img/external.png" width="240" height="380" controls autoplay muted><source src="${item["path"]}"></video>`;
+      mediaListing += `<button class="btn btn-sm"><img src="assets/svg/video.svg" class="minilogo"/> Video</button>`;
+    } 
+    else if (item["type"] == "image" && (filter === "all" || filter === "image")) {
+      mediaListing += `<img width="240" class="img-responsive mb-3 lazy" data-src="${item["path"]}"/>`;
+      mediaListing += `<button class="btn btn-sm"><img src="assets/svg/image.svg" class="minilogo"/> Image</button>`;
+    }
+    else if (item["type"] == "audio" && (filter === "all" || filter === "audio")) {
+      mediaListing += `<audio class="mb-3 lazy" controls><source data-src="${item["path"]}"></audio>`;
+      mediaListing += `<button class="btn btn-sm"><img src="assets/svg/audio.svg" class="minilogo"/> Audio</button>`;
+    }
+    else{
+      return
+    }
+
+    mediaListing += `<button type="button" class="btn btn-primary btn-sm button-copy" data-toggle="tooltip" data-placement="bottom" title="${item["path"]}">Copy Path</button>`;
+
+    if ((item["type"] === "video" && (filter === "all" || filter === "video")) || (item["type"] === "audio"  && (filter === "all" || filter === "video"))){
+      mediaListing += `<a class="btn btn-primary btn-sm ml-2" href="${item["path"]}" download target="_blank">Download to External View</a>`
+    }
+
+    mediaListing += `</div>`
+  });
+
+  $("#media-list").html(mediaListing);
+  
+  $(function($) {
+    $(".lazy").Lazy('av', ['audio', 'img','video'], function(element, response) {
+      // this plugin will automatically handle '<audio>' and '<video> elements,
+      // even when no 'data-loader' attribute was set on the elements
+    });
+  });
+  return mediaListing
+}
 
 
 
@@ -535,6 +523,7 @@ function makeReport() {
   $("#map-btn").on("click", renderMap);
   $("#media-btn").on("click", renderMedia);
   $("#pdf-btn").on("click", makeReport);
+ 
   feather.replace()
 }())
 

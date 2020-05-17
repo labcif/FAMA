@@ -30,6 +30,8 @@ explicitly given directories.
 # The file structure is top-down except that the test program and its
 # subroutine come last.
 
+# From python2.7 source code, adapter with retrocompatibility from python3.9
+
 __all__ = ["what","whathdr"]
 
 def what(filename):

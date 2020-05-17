@@ -1,5 +1,5 @@
 """Recognize image file formats based on their first few bytes."""
-#Adapted from 2.7 sourcecode with 3.9 improvements
+# From python2.7 source code, adapter with retrocompatibility from python3.9
 
 __all__ = ["what"]
 
