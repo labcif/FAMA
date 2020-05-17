@@ -29,7 +29,10 @@ class Extract:
         self.path_dump_folder = os.path.join(self.dumps_path, Utils.get_current_time())
         
 
-    def dump_from_adb(self, app_package, devices = DeviceCommunication.list_devices()):
+    def dump_from_adb(self, app_package, devices = None):
+        if not devices:
+            devices = DeviceCommunication.list_devices()
+
         folders = {}
 
         Utils.check_and_generate_folder(self.path_dump_folder)
