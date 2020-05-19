@@ -110,144 +110,139 @@ class ProjectIngestModule(DataSourceIngestModule):
 
         self.progressJob.change_text("Analyzing Information for {}".format(dataSource.getName()))
 
-        # We are going to use import previous json file or other data
-        if self.method == "method_importfile":
-            json_report = "Report.json"
-            
-            reports_by_app = {}
-            
-            # Find all Report.json in the data source
-            json_reports = self.fileManager.findFiles(dataSource, json_report)
-            
-            # Processing all datasource json reports
-            for report in json_reports:
-                
-                # Get app id of the json report
-                info = Utils.read_json(report.getLocalPath())
-                app_id = info["header"]["app_id"]
-                self.progressJob.next_job("Processing report {} ".format(app_id))
-                # Since we can have multiple json files for multiple apps, we have to track how many reports exists for each app
-                if not reports_by_app.get(app_id):
-                    reports_by_app[app_id] = 1
-                else:
-                    reports_by_app[app_id] += 1
+        reports_by_app = {}
 
-                # Path for every report
-                report_folder_path = os.path.join(temp_directory, app_id, str(reports_by_app[app_id]))
+        #We will find all dumps on the datasource
+        internal = "%_internal.tar.gz"
+        external = "%_external.tar.gz"
+        
+        dumps = []
+        dumps.extend(self.fileManager.findFiles(dataSource, internal))
+        dumps.extend(self.fileManager.findFiles(dataSource, external))
+        
+        #We found dumps, the datasource is not a mount path
+        if dumps:
+            #For each dump, we are going to check it
+            for base in dumps:
+                #Get app id of the dump
+                app_id = base.getName().replace('_internal.tar.gz', '').replace('_external.tar.gz','')
+                self.progressJob.next_job("Processing report {} ".format(app_id))
+                #No reports for this app yet
+                if not reports_by_app.get(app_id):
+                    reports_by_app[app_id] = []
+
+                #We can have multiple dumps for the same app. this ensure we don't add the same folder twice
+                base_path = os.path.dirname(base.getLocalPath())
+                if base_path in reports_by_app[app_id]:
+                    continue
+                
+                #Adds the folder to the list of reports by app
+                reports_by_app[app_id].append(base_path)
+
+                #Multiple dumps per app, we are going to create the folder based on the number of the reports
+                report_folder_path = os.path.join(temp_directory, app_id, str(len(reports_by_app[app_id])))
                 Utils.check_and_generate_folder(report_folder_path)
 
-                # Copy json report to output folder
-                report_location = os.path.join(report_folder_path, "Report.json")
-                copyfile(report.getLocalPath(), report_location)
+                self.progressJob.change_text("Analyzing Information for {} ({})".format(dataSource.getName(), app_id))
 
+                #We are going to analyze the dumps and generate the report
+                analyzer = Analyzer(app_id, base_path, report_folder_path)
+                analyzer.generate_report()
+
+                #Generated json report location
+                report_location = os.path.join(report_folder_path, "Report.json")
+
+                #Add to reports list
                 item = {}
                 item["report"] = report_location
-                item["file"] = report
+                item["file"] = base
                 item["app"] = Utils.find_app_name(app_id)
                 self.process_report(item, dataSource)
                 
-        # Not using json report
         else:
-            reports_by_app = {}
+            base_path = None
+            base = None
+            # Little hack to know datasource real path
+            # We only know the real path on files, folders doesn't provide the real path
+            # So we are going to search every file
+            files = self.fileManager.findFiles(dataSource, "%")
+            for x in files:
+                #We should add artifacts to a file, so we add it to the logicalfileset as reference
+                if not base:
+                    base = x
 
-            #We will find all dumps on the datasource
-            internal = "%_internal.tar.gz"
-            external = "%_external.tar.gz"
+                # Script needs files inside /data/data/
+                # We find a file with this path, we got the base path
+                if x.getLocalPath() and '/data/data/' in x.getParentPath():
+                    # Multiple SO normalization
+                    local = Utils.replace_slash_platform(x.getLocalPath())
+                    if Utils.get_platform().startswith("windows"):    
+                        base_path = local.split("\\data\\data\\")[0]
+                    else:
+                        base_path = local.split("/data/data/")[0]
+
+                    #Already have the base folder, stop the find
+                    break
             
-            dumps = []
-            dumps.extend(self.fileManager.findFiles(dataSource, internal))
-            dumps.extend(self.fileManager.findFiles(dataSource, external))
-            
-            #We found dumps, the datasource is not a mount path
-            if dumps:
-                #For each dump, we are going to check it
-                for base in dumps:
-                    #Get app id of the dump
-                    app_id = base.getName().replace('_internal.tar.gz', '').replace('_external.tar.gz','')
-                    self.progressJob.next_job("Processing report {} ".format(app_id))
-                    #No reports for this app yet
-                    if not reports_by_app.get(app_id):
-                        reports_by_app[app_id] = []
+            # If have the base folder
+            if base_path:
+                # For all supported apps
+                for app_id in Utils.get_all_packages().values():
+                    # If app data exists in mount
+                    if os.path.exists(os.path.join(base_path, "data", "data", app_id)):
+                        # Create report folder
+                        report_number = 1
+                        report_folder_path = os.path.join(temp_directory, app_id, str(report_number)) #report path
+                        Utils.check_and_generate_folder(report_folder_path)
 
-                    #We can have multiple dumps for the same app. this ensure we don't add the same folder twice
-                    base_path = os.path.dirname(base.getLocalPath())
-                    if base_path in reports_by_app[app_id]:
-                        continue
-                    
-                    #Adds the folder to the list of reports by app
-                    reports_by_app[app_id].append(base_path)
+                        self.progressJob.change_text("Analyzing Information for {} ({})".format(dataSource.getName(), app_id))
 
-                    #Multiple dumps per app, we are going to create the folder based on the number of the reports
-                    report_folder_path = os.path.join(temp_directory, app_id, str(len(reports_by_app[app_id])))
-                    Utils.check_and_generate_folder(report_folder_path)
+                        # Folder to analyze
+                        analyzer = Analyzer(app_id, base_path, report_folder_path)
+                        analyzer.generate_report()
+                        
+                        # Report
+                        report_location = os.path.join(report_folder_path, "Report.json")
+                        item = {}
+                        item["report"] = report_location
+                        item["file"] = base
+                        item["app"] = Utils.find_app_name(app_id)
+                        self.process_report(item, dataSource)
 
-                    self.progressJob.change_text("Analyzing Information for {} ({})".format(dataSource.getName(), app_id))
 
-                    #We are going to analyze the dumps and generate the report
-                    analyzer = Analyzer(app_id, base_path, report_folder_path)
-                    analyzer.generate_report()
+        # Find all json reports generated by the script
+        json_reports = self.fileManager.findFiles(dataSource, "%.json")
+        
+        # Processing all datasource json reports
+        for report in json_reports:
+            # Get app id of the json report
+            info = Utils.read_json(report.getLocalPath())
 
-                    #Generated json report location
-                    report_location = os.path.join(report_folder_path, "Report.json")
+            if not info.get("header") and not info["header"].get("app_id"): #Not a report
+                continue
 
-                    #Add to reports list
-                    item = {}
-                    item["report"] = report_location
-                    item["file"] = base
-                    item["app"] = Utils.find_app_name(app_id)
-                    self.process_report(item, dataSource)
-                    
-            else:
-                base_path = None
-                base = None
-                # Little hack to know datasource real path
-                # We only know the real path on files, folders doesn't provide the real path
-                # So we are going to search every file
-                files = self.fileManager.findFiles(dataSource, "%")
-                for x in files:
-                    #We should add artifacts to a file, so we add it to the logicalfileset as reference
-                    if not base:
-                        base = x
+            app_id = info["header"]["app_id"]
+            self.progressJob.next_job("Processing report {} ".format(app_id))
+            # Since we can have multiple json files for multiple apps, we have to track how many reports exists for each app
+            if not reports_by_app.get(app_id):
+                reports_by_app[app_id] = []
 
-                    # Script needs files inside /data/data/
-                    # We find a file with this path, we got the base path
-                    if x.getLocalPath() and '/data/data/' in x.getParentPath():
-                        # Multiple SO normalization
-                        local = Utils.replace_slash_platform(x.getLocalPath())
-                        if Utils.get_platform().startswith("windows"):    
-                            base_path = local.split("\\data\\data\\")[0]
-                        else:
-                            base_path = local.split("/data/data/")[0]
+            reports_by_app[app_id].append("")
 
-                        #Already have the base folder, stop the find
-                        break
+            # Path for every report
+            report_folder_path = os.path.join(temp_directory, app_id, str(len(reports_by_app[app_id])))
+            Utils.check_and_generate_folder(report_folder_path)
+
+            # Copy json report to output folder
+            report_location = os.path.join(report_folder_path, "Report.json")
+            copyfile(report.getLocalPath(), report_location)
+
+            item = {}
+            item["report"] = report_location
+            item["file"] = report
+            item["app"] = Utils.find_app_name(app_id)
+            self.process_report(item, dataSource)
                 
-                # If have the base folder
-                if base_path:
-                    # For all supported apps
-                    for app_id in Utils.get_all_packages().values():
-                        # If app data exists in mount
-                        if os.path.exists(os.path.join(base_path, "data", "data", app_id)):
-                            # Create report folder
-                            report_number = 1
-                            report_folder_path = os.path.join(temp_directory, app_id, str(report_number)) #report path
-                            Utils.check_and_generate_folder(report_folder_path)
-
-                            self.progressJob.change_text("Analyzing Information for {} ({})".format(dataSource.getName(), app_id))
-
-                            # Folder to analyze
-                            analyzer = Analyzer(app_id, base_path, report_folder_path)
-                            analyzer.generate_report()
-                            
-                            # Report
-                            report_location = os.path.join(report_folder_path, "Report.json")
-                            item = {}
-                            item["report"] = report_location
-                            item["file"] = base
-                            item["app"] = Utils.find_app_name(app_id)
-                            self.process_report(item, dataSource)
-                            
-
         # After all reports, post a message to the ingest messages in box.
         return IngestModule.ProcessResult.OK
 

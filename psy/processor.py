@@ -54,7 +54,11 @@ class DataSourcesPanelSettings(JPanel):
                 message = "Extractor Failed for {} for {}!".format(serial, e)
                 logging.error(message)
                 errors.append(message)
-                result = DataSourceProcessorCallback.DataSourceProcessorResult.CRITICAL_ERRORS
+                result = DataSourceProcessorCallback.DataSourceProcessorResult.NONCRITICAL_ERRORS
+
+        if len(newDataSources) == 0:
+            result = DataSourceProcessorCallback.DataSourceProcessorResult.CRITICAL_ERRORS
+
 
         #folders = ["C:\\Users\\User\\Downloads\\Android 10 Image with Documentation\\Android 10 Image with Documentation\\Non-Cellebrite Extraction\\Pixel 3"]
         #teste = ["C:\\teste"]
