@@ -189,7 +189,7 @@ class ModuleReport(ModuleParent):
         if name:
             name = name[0][0]
         else:
-            name = None
+            name = str(uid)
         return name
         
     def get_user_searches(self):
