@@ -23,6 +23,8 @@ class ModuleReport(ModuleParent):
         self.report["profile"] = self.get_info(self.get_user_profile)
         self.report["messages"] = self.get_info(self.get_user_messages)
         self.report["users"] = self.get_info(self.get_user_profiles)
+        self.report["logged_users"] = self.get_info(self.get_logged_users)
+
         self.report["searches"] = self.get_info(self.get_user_searches)
         self.report["videos"] = self.get_info(self.get_videos)
         self.report["published_videos"] = self.get_info(self.get_videos_publish)
@@ -106,6 +108,29 @@ class ModuleReport(ModuleParent):
         logging.info("{} messages found".format(len(conversation_output.get("messages"))))
 
         return conversations_list
+
+    def get_logged_users(self):
+        
+        logging.info("Get User Profile...")
+        xml_file = os.path.join(self.internal_cache_path, "shared_prefs", "aweme_user.xml")
+        user_profiles=[]
+        user_profile ={}
+        values = Utils.xml_attribute_finder(xml_file)
+        for key, value in values.items():
+            if key.endswith("_significant_user_info"):
+                user_profile ={}
+                dump=json.loads(value)
+                atributes =["uid", "short_id","unique_id", "nickname", "nickname", "avatar_url"]
+
+                for index in atributes:
+                    user_profile[index] = dump.get(index)
+                if user_profile.get("unique_id"):
+                    user_profile["url"] = "https://www.tiktok.com/@{}".format(user_profile["unique_id"])
+                
+                user_profiles.append(user_profile)
+        
+        return user_profiles
+
 
 
     def get_open_events(self):

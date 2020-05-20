@@ -28,6 +28,7 @@ class ModulePsy(ModulePsyParent):
         self.process_messages(data.get("messages"), file)
         self.process_user_profile(data.get("profile"), file)
         self.process_users(data.get("users"), file)
+        self.process_logged_users(data.get("logged_users"), file)
         self.process_searches(data.get("searches"), file)
         self.process_undark(data.get("freespace"), file)
         self.process_drp(data.get("sqlparse"), file)
@@ -36,9 +37,11 @@ class ModulePsy(ModulePsyParent):
         self.process_published_videos(data.get("published_videos"), file)
         self.process_open_events(data.get("open_events"), file)
         self.process_media(data.get("AF_media"), file)
+        
 
     def initialize(self, context):
         self.context = context
+        self.account = self.utils.add_account_type("Tiktok", "Tiktok")
         # Messages attributes
         # self.att_msg_uid = self.utils.create_attribute_type('TIKTOK_MSG_UID', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Uid", self.case)
         # self.att_msg_uniqueid = self.utils.create_attribute_type('TIKTOK_MSG_UNIQUE_ID', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Unique ID", self.case)
@@ -138,7 +141,8 @@ class ModulePsy(ModulePsyParent):
         self.art_deleted_rows = self.utils.create_artifact_type(self.module_name, "TIKTOK_DELETED_ROWS", "Deleted rows")
         self.art_logs = self.utils.create_artifact_type(self.module_name, "TIKTOK_LOGS", "Logs")
         self.art_media = self.utils.create_artifact_type(self.module_name, "TIKTOK_MEDIA", "Media")
-        self.art_open_app = self.utils.create_artifact_type(self.module_name, "TIKTOK_OPEN_PP", "Open Application")
+        self.art_open_app = self.utils.create_artifact_type(self.module_name, "TIKTOK_OPEN_APP", "Open Application")
+        self.art_logged_users = self.utils.create_artifact_type(self.module_name, "TIKTOK_LOGGED_USERS", "Logged Users")
         
 
     def process_media(self, media, file):
@@ -159,6 +163,32 @@ class ModulePsy(ModulePsyParent):
                 self.utils.index_artifact(art, self.art_media)        
             except Exception as e:
                 logging.warning("Error getting user: " + str(e))
+    
+    
+    
+    def process_logged_users(self, users, file):
+        logging.info("Indexing logged user profiles.")
+
+        if not users:
+            return
+
+        for u in users:
+            try: 
+                art = file.newArtifact(self.art_logged_users.getTypeID())
+                attributes = []
+                attributes.append(BlackboardAttribute(self.att_prf_uid, "aweme_user.xml", u.get("uid")))
+                attributes.append(BlackboardAttribute(self.att_prf_short_id, "aweme_user.xml", u.get("unique_id")))
+                attributes.append(BlackboardAttribute(self.att_prf_nickname, "aweme_user.xml", u.get("nickname")))
+                attributes.append(BlackboardAttribute(self.att_prf_avatar, "aweme_user.xml", u.get("avatar_url")))
+                attributes.append(BlackboardAttribute(self.att_prf_unique_id, "aweme_user.xml", u.get("unique_id")))
+                attributes.append(BlackboardAttribute(self.att_prf_url, "aweme_user.xml", u.get("url")))
+
+                self.utils.get_or_create_account(self.account, file, u.get("unique_id"))
+                art.addAttributes(attributes)
+                
+                self.utils.index_artifact(art, self.art_logged_users)        
+            except Exception as e:
+                logging.warning("Error getting logged user: " + str(e))
 
 
     def process_open_events(self, open_events, file):
@@ -217,9 +247,9 @@ class ModulePsy(ModulePsyParent):
             participant_1 = c.get("participant_1")
             participant_2 = c.get("participant_2")
 
-            account = self.utils.add_account_type("Tiktok", "Tiktok")
-            contact_1 = self.utils.get_or_create_account(account, file, participant_1)
-            contact_2 = self.utils.get_or_create_account(account, file, participant_2)
+            
+            contact_1 = self.utils.get_or_create_account(self.account, file, participant_1)
+            contact_2 = self.utils.get_or_create_account(self.account, file, participant_2)
                 
             
             for m in c.get("messages"):
@@ -332,7 +362,7 @@ class ModulePsy(ModulePsyParent):
                 attributes.append(BlackboardAttribute(self.att_prf_follow_status, "db_im_xx", u.get("follow_status")))
                 attributes.append(BlackboardAttribute(self.att_prf_url, "db_im_xx", u.get("url")))
 
-                # self.utils.get_or_create_account(self.comm_manager, file, u.get("uniqueid"))
+                self.utils.get_or_create_account(self.account, file, u.get("uniqueid"))
 
                 art.addAttributes(attributes)
                 
