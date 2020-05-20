@@ -81,6 +81,8 @@ class Analyzer:
     def generate_html_report(reports, report_path):
         logging.info("Generating HTML report")
 
+        Utils.check_and_generate_folder(report_path)
+
         Utils.copy_tree(os.path.join(Utils.get_base_path_folder(), "template"), report_path)
 
         report_file_path = os.path.join(report_path, "report.html")

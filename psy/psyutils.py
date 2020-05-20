@@ -59,6 +59,16 @@ class PsyUtils:
             logging.warning("Error creating artifact type: " + art_desc)
         art = Case.getCurrentCase().getSleuthkitCase().getArtifactType(art_name)
         return art
+
+    @staticmethod
+    def get_artifacts_list():
+        listing = []
+        try:
+            listing = Case.getCurrentCase().getSleuthkitCase().getArtifactTypesInUse()
+        except:
+            logging.warning("Error getting artifacts list")
+
+        return listing
     
     @staticmethod
     def index_artifact(artifact, artifact_type):

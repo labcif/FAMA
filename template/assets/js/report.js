@@ -24,18 +24,22 @@ function initializeMenus() {
 
   let list = "";
 
+  let indexnumber = 0;
   Object.keys(reportData).forEach(function (item) {
+    indexnumber += 1;
     if (item !== "header" && item.substring(0, 3) !== "AF_") {
-      list += `<li class="nav-item"><a id="menulink-${item}" class="nav-link menu-item" href="javascript:void(null);"><span data-feather="file-text"></span>${capitalize(item.replace("_", " "))}</a></li>`;
+      list += `<li class="nav-item"><a id="menulink-${indexnumber}" class="nav-link menu-item" href="javascript:void(null);"><span data-feather="file-text"></span>${capitalize(item.replace("_", " "))}</a></li>`;
     }
   });
   $("#menu-list").html(list);
 
   list = "";
 
+  indexnumber = 0;
   Object.keys(reportData).forEach(function (item) {
+    indexnumber += 1;
     if (item !== "header" && item.substring(0, 3) !== "AF_") {
-      list += `<li class="nav-item"><a id="menulink-${item}-listmobile" class="navbar-light nav-link menu-item top-link-mobile" style="padding: 0.5rem 0.8rem" href="javascript:void(null);"><span data-feather="file-text" class="mr-1"></span>${capitalize(item.replace("_", " "))}</a></li>`;
+      list += `<li class="nav-item"><a id="menulink-${indexnumber}-listmobile" class="navbar-light nav-link menu-item top-link-mobile" style="padding: 0.5rem 0.8rem" href="javascript:void(null);"><span data-feather="file-text" class="mr-1"></span>${capitalize(item.replace("_", " "))}</a></li>`;
     }
   });
 
@@ -64,8 +68,11 @@ function menuClick(event) {
     idName = event.target.id.replace('-listmobile', '');
   }
   else {
-    idName = "menulink-" + event.replace('-listmobile', '');
+    console.log(event)
+    idName = "menulink-" + event.toString().replace('-listmobile', '');
   }
+
+  console.log(idName)
 
   removeFocus()
 
@@ -194,8 +201,10 @@ function getHeader(title) {
 }
 
 function removeFocus() {
+  let indexnumber = 0;
   Object.keys(reportData).forEach(function (item) {
-    $("#menulink-" + item).removeClass("active");
+    indexnumber += 1;
+    $("#menulink-" + indexnumber).removeClass("active");
   });
 }
 
@@ -288,9 +297,21 @@ function renderMediaList(filter){
 
 
 
-function pageBuilder(title) {
-  if (!(title in reportData)) {
-    return;
+function pageBuilder(titlenumber) {
+  //if (!(title in reportData)) {
+  //  return;
+  //}
+  let title = null;
+  let indexnumber = 0;
+  Object.keys(reportData).forEach(function (item) {
+    indexnumber += 1;
+    if (indexnumber == titlenumber){
+      title = item
+    }
+  });
+
+  if (!title){
+    return
   }
 
   let content = "";
@@ -353,9 +374,11 @@ function startUp() {
   generatedDate()
 
   let defined = false
+  let indexnumber = 0
   Object.keys(reportData).forEach(function (item) {
+    indexnumber += 1
     if (!defined && item !== "header") {
-      menuClick(item);
+      menuClick(indexnumber);
       defined = true;
     }
   });
