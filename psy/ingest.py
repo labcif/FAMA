@@ -218,10 +218,11 @@ class ProjectIngestModule(DataSourceIngestModule):
             # Get app id of the json report
             info = Utils.read_json(report.getLocalPath())
 
-            if not info.get("header") and not info["header"].get("app_id"): #Not a report
+            try:
+                app_id = info["header"]["app_id"]
+            except:
                 continue
-
-            app_id = info["header"]["app_id"]
+            
             self.progressJob.next_job("Processing report {} ".format(app_id))
             # Since we can have multiple json files for multiple apps, we have to track how many reports exists for each app
             if not reports_by_app.get(app_id):

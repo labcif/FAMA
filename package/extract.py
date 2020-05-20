@@ -62,7 +62,7 @@ class Extract:
         return folders
 
     def check_root_access(self, serial_number):
-        output = str(subprocess.Popen(self.check_root_command.format(self.adb_location, serial_number), shell=False, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL).stdout.read())
+        output = str(subprocess.Popen(self.check_root_command.format(self.adb_location, serial_number), shell=False, stdout=subprocess.PIPE, stderr=None).stdout.read())
         status = "HASROOT" in output
         logging.info("[{}] Root status: {}".format(serial_number, status))
         return status
@@ -75,7 +75,7 @@ class Extract:
         else:
             command = self.magic_noroot_command.format(self.adb_location, serial_number, path_to_extract, self.base64_location)
 
-        subprocess.Popen(command, shell=True, stdout=sort_out, stderr=subprocess.DEVNULL).wait()
+        subprocess.Popen(command, shell=True, stdout=sort_out, stderr=None).wait()
         sort_out.close()
 
         #Clean the file if it's empty

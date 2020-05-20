@@ -43,26 +43,29 @@ class DataSourcesPanelSettings(JPanel):
         errors = []
         result = DataSourceProcessorCallback.DataSourceProcessorResult.NO_ERRORS
 
-        extractor = Extractor(self.selected_apps, self.selected_devices, progressMonitor)
-        folders = extractor.dump_apps()
+        try:
+            extractor = Extractor(self.selected_apps, self.selected_devices, progressMonitor)
+            folders = extractor.dump_apps()
 
-        for serial, folder in folders.items():
-            try:
-                data_source = PsyUtils.add_to_fileset("ADB_{}_{}".format(serial, int(time.time())), folder, notify = False)
-                newDataSources.append(data_source)
-            except Exception as e:
-                message = "Extractor Failed for {} for {}!".format(serial, e)
-                logging.error(message)
-                errors.append(message)
-                result = DataSourceProcessorCallback.DataSourceProcessorResult.NONCRITICAL_ERRORS
-
+            for serial, folder in folders.items():
+                try:
+                    data_source = PsyUtils.add_to_fileset("ADB_{}_{}".format(serial, int(time.time())), folder, notify = False)
+                    newDataSources.append(data_source)
+                except Exception as e:
+                    message = "Extractor Failed for {} for {}!".format(serial, e)
+                    logging.error(message)
+                    errors.append(message)
+                    result = DataSourceProcessorCallback.DataSourceProcessorResult.NONCRITICAL_ERRORS
+        
+        except Exception as e:
+            message = "Global Extractor Failed. Aborting: {}".format(e)
+            logging.error(message)
+            errors.append(message)
+            result = DataSourceProcessorCallback.DataSourceProcessorResult.CRITICAL_ERRORS
+        
         if len(newDataSources) == 0:
             result = DataSourceProcessorCallback.DataSourceProcessorResult.CRITICAL_ERRORS
 
-
-        #folders = ["C:\\Users\\User\\Downloads\\Android 10 Image with Documentation\\Android 10 Image with Documentation\\Non-Cellebrite Extraction\\Pixel 3"]
-        #teste = ["C:\\teste"]
-        
         callback.done(result, errors, newDataSources)
 
     #PROCESSOR JPANEL LOGIC
