@@ -59,7 +59,7 @@ class ProjectIngestSettingsPanel(IngestModuleIngestJobSettingsPanel):
             self.rb_selectedDatasource = SettingsUtils.createRadioButton("Analyze selected datasource", "method_datasource", self.onMethodChange)
             self.bg_method.add(self.rb_selectedDatasource)
             
-            self.rb_importReportFile = SettingsUtils.createRadioButton("Import previous generated report file","method_importfile" ,self.onMethodChange)
+            # self.rb_importReportFile = SettingsUtils.createRadioButton("Import previous generated report file","method_importfile" ,self.onMethodChange)
             self.rb_liveExtraction = SettingsUtils.createRadioButton("Live extraction with ADB","method_adb", self.onMethodChange)
             self.rb_selectedDatasource.setSelected(True)
 
@@ -71,7 +71,7 @@ class ProjectIngestSettingsPanel(IngestModuleIngestJobSettingsPanel):
             self.p_method.add(self.rb_liveExtraction)
 
         else:
-            self.p_info.add(self.lb_info2)
+            self.p_info.add(SettingsUtils.createInfoLabel("It will analyze the data source with previously selected method and index the forensic artifacts."))
 
         self.add(self.p_method)
 
