@@ -157,7 +157,6 @@ class ModulePsy(ModulePsyParent):
                 art = file.newArtifact(self.art_media.getTypeID())
                 attributes = []
                 attributes.append(BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_PATH, m.get("path"), m.get("path")))
-                attributes.append(BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_FILE_TYPE_SIG, m.get("path"), m.get("mime")))
                 attributes.append(BlackboardAttribute(self.att_media_type, m.get("path"), m.get("type")))
                 art.addAttributes(attributes)
                 self.utils.index_artifact(art, self.art_media)        
