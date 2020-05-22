@@ -6,7 +6,6 @@ import logging
 from package.database import Database
 from package.utils import Utils
 from package.models import Timeline, Location, Media
-from package.mdlfixer import MDLFixer
 from modules.report import ModuleParent
 
 
@@ -150,6 +149,10 @@ class ModuleReport(ModuleParent):
         
         return open_events
 
+
+
+
+
     def get_user_profile(self):
         
         logging.info("Get User Profile...")
@@ -255,10 +258,6 @@ class ModuleReport(ModuleParent):
                     break
             self.media.add(os.path.join(self.internal_cache_path, "cache", "cache", video["key"] ))
             videos.append(video)
-
-        for video in MDLFixer.folder_scanner(os.path.join(self.internal_cache_path, "cache", "cachev2")):
-            self.media.add(os.path.join(self.internal_cache_path, "cache", "cachev2", video))
-            videos.append(video)
         
         logging.info("{} video(s) found".format(len(videos)))
         return videos
@@ -349,8 +348,8 @@ class ModuleReport(ModuleParent):
         logging.info("Getting last session...")
         session = []
 
-        relevant_keys = ["page", "request_method", "is_first","duration","is_first","rip","duration","author_id","access2","video_duration","video_quality","access",
-        "page_uid","previous_page","enter_method","enter_page","key_word","search_keyword","next_tab","search_type", "play_duration", "content"]
+        relevant_keys = ["device","name","status","ab_sdk_version","storage_available_internal_size","storage_available_external_size","app_storage_size","brand","page", "request_method", "is_first","duration","is_first","rip","duration","author_id","access2","video_duration","video_quality","access",
+        "page_uid","previous_page","enter_method","enter_page","key_word","search_keyword","next_tab","search_type", "play_duration", "content", "manufacturer","os_version"]
 
         db = os.path.join(self.internal_cache_path, "databases", "ss_app_log.db")
         database = Database(db)
