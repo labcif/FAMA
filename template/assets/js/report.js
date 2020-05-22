@@ -274,7 +274,7 @@ function renderMediaList(filter){
       return
     }
 
-    mediaListing += `<button type="button" class="btn btn-primary btn-sm button-copy" data-toggle="tooltip" data-placement="bottom" title="${item["path"]}">Copy Path</button>`;
+    mediaListing += `<button type="button" class="btn btn-primary btn-sm button-copy" data-toggle="tooltip" data-placement="bottom" onclick='copyToClipboard("${item["path"]}")' title="${item["path"]}">Copy Path</button>`;
 
     if ((item["type"] === "video" && (filter === "all" || filter === "video")) || (item["type"] === "audio"  && (filter === "all" || filter === "video"))){
       mediaListing += `<a class="btn btn-primary btn-sm ml-2" href="${item["path"]}" download target="_blank">Download for External Player</a>`
@@ -294,6 +294,15 @@ function renderMediaList(filter){
   return mediaListing
 }
 
+
+function copyToClipboard(str) {
+  const el = document.createElement('input');
+  el.value = str;
+  document.body.appendChild(el);
+  el.select();
+  document.execCommand('copy');
+  document.body.removeChild(el);
+};
 
 
 
