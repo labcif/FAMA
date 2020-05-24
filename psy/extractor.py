@@ -20,8 +20,8 @@ class Extractor:
             if self.dsprocessor:
                 self.progress.setProgressText('  Extracting application data ({}).\n  Please wait.'.format(app_id))
             else:
-                self.progress.progress('Extracting application data ({})'.format(app_id))
-            
+                self.progress.next_job('Extracting application data ({})'.format(app_id))
+
             for serial, folder in self.extract.dump_from_adb(app_id, devices = self.devices).items():
                 # If the device not in the list
                 if not folders.get(serial):
@@ -30,8 +30,6 @@ class Extractor:
                 # If the folder is not the list for the device, add it
                 if not folder in folders[serial]:
                     folders[serial].append(folder)
-
-                #self.progressJob.next_job("Extracting {}".format(app_id))
 
 
         for serial, folderslist in folders.items():
@@ -56,7 +54,7 @@ class Extractor:
         if self.dsprocessor:
             self.progress.setProgressText('  Handling extracted data from {}.\n  Please wait.'.format(serial))
         else:
-            self.progress.progress('Handling extracted data from {}'.format(serial))
+            self.progress.change_text('Handling extracted data from {}'.format(serial))
 
         for filename in files:
             if '_internal.tar.gz' in filename:

@@ -112,7 +112,7 @@ class DataSourcesPanelSettings(JPanel):
 
         self.p_method = SettingsUtils.createPanel(ptop = 15)
 
-        self.sp2 = SettingsUtils.createSeparators(1)
+        self.sp2 = SettingsUtils.createSeparators(0)
         self.p_info.add(self.sp2, BorderLayout.SOUTH)
 
         self.p_method.add(JLabel("Extract user data from:"))

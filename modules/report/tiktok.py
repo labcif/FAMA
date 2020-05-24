@@ -264,7 +264,7 @@ class ModuleReport(ModuleParent):
 
             video = {}
             video["key"] = os.path.basename(entry)
-            video["last_modified"] = ""
+            video["last_modified"] = 0
             videos.append(video)
         
         logging.info("{} video(s) found".format(len(videos)))

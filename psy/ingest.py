@@ -53,19 +53,21 @@ class ProjectIngestModule(DataSourceIngestModule):
         #Initialize list of possible data sources
         data_sources = []
         
+        max_apps = len(Utils.get_all_packages().values())
+
         #Extract method for adb selected #THIS IS ONLY USED IN <= AUTOPSY 4.15
         if self.method == "method_adb":
             #Get list of selected apps to extract
             self.apps = json.loads(self.settings.getSetting('apps'))
 
-            jobs = len(self.apps)*3  #extract, analyser, index           
+            jobs = max_apps * 3  #extract, analyser, index           
             self.progressJob = ProgressJob(progressBar, jobs)
         
             self.progressJob.next_job("Extracting from ADB")
             logging.info("Starting ADB")
 
             #Variable used to store all folders for each device
-            folders = Extractor(self.apps, DeviceCommunication.list_devices(), progressBar, dsprocessor = False).dump_apps()
+            folders = Extractor(self.apps, DeviceCommunication.list_devices(), self.progressJob, dsprocessor = False).dump_apps()
 
             # Add one datasource for each device, with the list of the possible folders
             for serial, folders_list in folders.items():
@@ -85,14 +87,7 @@ class ProjectIngestModule(DataSourceIngestModule):
             logging.info("Using Selected Datasource")
             data_sources.append(dataSource)
             
-            # if self.method == "method_importfile":
-            #     self.progressJob = ProgressJob(progressBar, len(data_sources)) #indexing ( x1)
-            # else:
-            jobs = 0
-            for source in data_sources:
-                jobs = jobs + len(self.fileManager.findFiles(source, "%_internal.tar.gz"))
-
-            self.progressJob = ProgressJob(progressBar, 2 * jobs) #indexing and analying
+            self.progressJob = ProgressJob(progressBar, max_apps * 2) #indexing and analying
             
         
         # For each data source, we will process it each one
@@ -194,7 +189,7 @@ class ProjectIngestModule(DataSourceIngestModule):
                         report_folder_path = os.path.join(temp_directory, app_id, str(report_number)) #report path
                         Utils.check_and_generate_folder(report_folder_path)
 
-                        self.progressJob.change_text("Analyzing Information for {} ({})".format(dataSource.getName(), app_id))
+                        self.progressJob.next_job("Analyzing Information for {} ({})".format(dataSource.getName(), app_id))
 
                         # Folder to analyze
                         analyzer = Analyzer(app_id, base_path, report_folder_path)
@@ -222,7 +217,7 @@ class ProjectIngestModule(DataSourceIngestModule):
             except:
                 continue
             
-            self.progressJob.next_job("Processing report {} ".format(app_id))
+            self.progressJob.change_text("Processing report {} ".format(app_id))
             # Since we can have multiple json files for multiple apps, we have to track how many reports exists for each app
             if not reports_by_app.get(app_id):
                 reports_by_app[app_id] = []
