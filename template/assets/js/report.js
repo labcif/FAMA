@@ -68,11 +68,8 @@ function menuClick(event) {
     idName = event.target.id.replace('-listmobile', '');
   }
   else {
-    console.log(event)
     idName = "menulink-" + event.toString().replace('-listmobile', '');
   }
-
-  console.log(idName)
 
   removeFocus()
 
@@ -313,7 +310,6 @@ function pageBuilder(titlenumber) {
   if (!title){
     return
   }
-
   let content = "";
 
   content += getHeader(title)
@@ -324,6 +320,33 @@ function pageBuilder(titlenumber) {
     content += `<div class="table-responsive"><table class="table table-striped table-sm table-bordered table-hover">`;
 
     reportData[title].forEach(item => {
+      try {
+        if (title === "messages"){ //quick fix
+          if (!titleDefined) {
+            let title = ["participant_1", "participant_2", "createdtime", "readstatus","localinfo","sender","receiver","type","message","deleted"]
+            let theads = ""
+            Object.values(title).forEach(function (head) {
+              theads += `<td>${head}</td>`;
+            });
+            titleDefined = true;
+
+            content += `<thead><tr>${theads}</tr></thead><tbody>`
+          }
+          Object.values(item["messages"]).forEach(function (body) {
+            content += `<tr>`;
+            content += `<td>${JSON.stringify(item["participant_1"])}</td>`;
+            content += `<td>${JSON.stringify(item["participant_2"])}</td>`;
+            Object.values(body).forEach(function (messageitem) {
+              content += `<td>${JSON.stringify(messageitem)}</td>`;
+            });
+            content += `</tr>`;
+          });
+          return
+        }
+      } catch (error) {
+        
+      }
+
       //define table header
       if (!titleDefined) {
         let theads = ""
@@ -446,6 +469,33 @@ function makeReport() {
       if (Array.isArray(reportData[key]) && typeof reportData[key][0] === 'object') {
         let titleDefined = false;
         reportData[key].forEach(item => {
+          try {
+            if (key === "messages"){ //quick fix
+              if (!titleDefined) {
+                let header = ["participant_1", "participant_2", "createdtime", "readstatus","sender","receiver","type","message","deleted"]
+                titleDefined = true;
+                rows.push(header)
+              }
+              Object.values(item["messages"]).forEach(function (body) {
+                let content = []
+                content.push(item["participant_1"])
+                content.push(item["participant_2"])
+
+                Object.keys(body).forEach(function (messageitem) {
+                  if (messageitem == "localinfo"){
+                    return
+                  }
+
+                  content.push(body[messageitem])
+                });
+                rows.push(content);
+              });
+              return
+            }
+          } catch (error) {
+            
+          }
+          
           //define table header
           if (!titleDefined) {
             let header = []
@@ -505,13 +555,14 @@ function makeReport() {
 
     var docDefinition = {
       content: content,
+      pageOrientation: 'landscape',
       styles: {
         header: {
-          fontSize: 18,
+          fontSize: 14,
           bold: true
         },
         subheader: {
-          fontSize: 15,
+          fontSize: 12,
           bold: true
         },
         quote: {
@@ -521,8 +572,8 @@ function makeReport() {
           fontSize: 8
         },
         tableExample: {
-          margin: [0, 5, 0, 15],
-          width: 50
+          fontSize: 8,
+          margin: [0, 5, 0, 15]
         },
       }
     };

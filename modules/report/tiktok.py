@@ -256,8 +256,12 @@ class ModuleReport(ModuleParent):
             self.media.add(os.path.join(self.internal_cache_path, "cache", "cache", video["key"] ))
             videos.append(video)
 
-        for video in MDLFixer.folder_scanner(os.path.join(self.internal_cache_path, "cache", "cachev2")):
-            self.media.add(os.path.join(self.internal_cache_path, "cache", "cachev2", video))
+        for entry in MDLFixer.folder_scanner(os.path.join(self.internal_cache_path, "cache", "cachev2")):
+            self.media.add(os.path.join(self.internal_cache_path, "cache", "cachev2", entry))
+
+            video = {}
+            video["key"] = os.path.basename(entry)
+            video["last_modified"] = ""
             videos.append(video)
         
         logging.info("{} video(s) found".format(len(videos)))
