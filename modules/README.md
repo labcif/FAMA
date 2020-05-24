@@ -41,8 +41,11 @@ class ModuleReport(ModuleParent):
         
         logging.info("Module started")
         
+        # SPECIFIC REPORT FUNCTIONALITIES. YOU CAN USE TIMELINE, MEDIA OR LOCATION ARTIFACT
         # YOU CAN USE A JSON BASED TIMELINE. IN THIS EXAMPLE WE WILL USE A SINGLE TIMELINE FOR THE ENTIRE MODULE
         self.timeline = Timeline()
+        #self.locations = Location()
+        #self.media = Media()
         
 
         #TODO
@@ -263,4 +266,4 @@ class ModulePsy(ModulePsyParent):
 
 ```
 
-(.................)
+Both artifacts and attributes are initialized in the `initialize(self, context)` method. `process_report` is called to process the previously generated report. This method should call implemented methods in this file which will add the contents to the autopsy browser.

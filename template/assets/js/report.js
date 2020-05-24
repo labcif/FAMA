@@ -330,7 +330,7 @@ function pageBuilder(titlenumber) {
 
     reportData[title].forEach(item => {
       try {
-        if (title === "messages"){ //quick fix
+        if (title === "messages" && item["messages"]){ //quick fix
           if (!titleDefined) {
             let title = ["participant_1", "participant_2", "createdtime", "readstatus","localinfo","sender","receiver","type","message","deleted"]
             let theads = ""
@@ -479,7 +479,7 @@ function makeReport() {
         let titleDefined = false;
         reportData[key].forEach(item => {
           try {
-            if (key === "messages"){ //quick fix
+            if (key === "messages" && item["messages"]){ //quick fix
               if (!titleDefined) {
                 let header = ["participant_1", "participant_2", "createdtime", "readstatus","sender","receiver","type","message","deleted"]
                 titleDefined = true;

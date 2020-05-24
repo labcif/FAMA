@@ -2,7 +2,7 @@
 
 ## Getting Started
 
-Android extraction and analysis framework with integrated Autopsy Plugin. Dump easily user data from a device and generate powerful reports for Autopsy or external applications.
+Android extraction and analysis framework with an integrated Autopsy Module. Dump easily user data from a device and generate powerful reports for Autopsy or external applications.
 
 ## Functionalities
 
@@ -10,14 +10,14 @@ Android extraction and analysis framework with integrated Autopsy Plugin. Dump e
 * Dump user data from an android image or mounted path.
 * Easily build modules for a specific Android application.
 * Generate clean and readable JSON reports.
-* Complete integrated Autopsy compatibility (ingest, report, communication and timeline support).
+* Complete integrated Autopsy compatibility (datasource processor module, ingest module, report module, geolocation, communication and timeline support).
 * Export HTML report based on the current case.
 
 ### Report Screenshots
 
 ![Report Index](https://i.imgur.com/T3v3uH4.png)
 
-![Report Sample](https://i.imgur.com/uWpTKaF.png)
+![Report Sample](https://i.imgur.com/weKkHzt.png)
 
 ## Prerequisites
 
@@ -96,5 +96,4 @@ This project is licensed under the terms of the GNU GPL v3 License.
 
 ## Notes
 
-* Project under development
 * Made with ❤ in Leiria, Portugal
