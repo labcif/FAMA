@@ -181,6 +181,7 @@ class SettingsUtils:
         textArea.setWrapStyleWord(True)
         textArea.setOpaque(False)
         textArea.setEditable(False)
+        textArea.setText(text)
         return textArea
 
     @staticmethod

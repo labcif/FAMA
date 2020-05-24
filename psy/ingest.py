@@ -84,16 +84,15 @@ class ProjectIngestModule(DataSourceIngestModule):
         else:
             logging.info("Using Selected Datasource")
             data_sources.append(dataSource)
-
             
-            if self.method == "method_importfile":
-                self.progressJob = ProgressJob(progressBar, len(data_sources)) #indexing ( x1)
-            else:
-                jobs = 0
-                for source in data_sources:
-                    jobs = jobs + len(self.fileManager.findFiles(source, "%_internal.tar.gz"))
+            # if self.method == "method_importfile":
+            #     self.progressJob = ProgressJob(progressBar, len(data_sources)) #indexing ( x1)
+            # else:
+            jobs = 0
+            for source in data_sources:
+                jobs = jobs + len(self.fileManager.findFiles(source, "%_internal.tar.gz"))
 
-                self.progressJob = ProgressJob(progressBar, 2 * jobs) #indexing and analying
+            self.progressJob = ProgressJob(progressBar, 2 * jobs) #indexing and analying
             
         
         # For each data source, we will process it each one
