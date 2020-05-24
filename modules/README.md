@@ -2,7 +2,9 @@
 
 ## Getting Started
 
-Open the file `/modules/packages.json` and add a reference to the application. The first element `theapplication` is the name of the module, and the second element is the package id of the Android application.
+Open the file `/modules/packages.json` and add a reference to your application. The first element `theapplication` is the name of the module, and the second element is the package id of the Android application.
+
+The `report` folder contains the extraction and report logic and the `autopsy` folder contains the file required to connect the report logic with Autopsy program.
 
 ```JSON
 {
