@@ -348,6 +348,7 @@ class ModuleReport(ModuleParent):
                 fresco_images.append(cache_file)
                 self.media.add(os.path.join(cache_path, directory, cache_file))
         
+        logging.info("{} cache file(s) found".format(len(fresco_images)))
         return fresco_images
 
 
