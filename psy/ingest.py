@@ -34,7 +34,7 @@ class ProjectIngestModule(DataSourceIngestModule):
         self.fileManager = Case.getCurrentCase().getServices().getFileManager()
 
         #Initialize output folder path
-        self.temp_module_path = os.path.join(Case.getCurrentCase().getModulesOutputDirAbsPath(), "AndroidForensics")
+        self.temp_module_path = os.path.join(Case.getCurrentCase().getModulesOutputDirAbsPath(), "FAMA")
         Utils.check_and_generate_folder(self.temp_module_path)
     
     #This method runs when we click ok in ingest module selection

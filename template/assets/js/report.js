@@ -424,7 +424,7 @@ function makeReport() {
   setTimeout(function () {
     content = [
       {
-        text: `LabCIF - Android Forensics Report`,
+        text: `LabCIF - Forensic Analysis for Mobile Apps Report`,
         style: 'header'
       },
       {

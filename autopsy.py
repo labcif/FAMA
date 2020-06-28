@@ -17,7 +17,7 @@ from psy.settings import ProjectIngestSettingsPanel, ProjectReportSettingsPanel
     
 #3 Modules - Ingest, Report, DatasourceProcessor
 class ProjectIngestModuleFactory(IngestModuleFactoryAdapter):
-    moduleName = "LabCif - Android Forensics"
+    moduleName = "LabCif - FAMA"
 
     def __init__(self):
         self.settings = None
@@ -27,7 +27,7 @@ class ProjectIngestModuleFactory(IngestModuleFactoryAdapter):
         return self.moduleName
 
     def getModuleDescription(self):
-        return "Android forensics framework. Extract, analyze and generate reports based on user data."
+        return "FAMA framework. Extract, analyze and generate reports based on user data."
         
     def getModuleVersionNumber(self):
         return "1.0"
@@ -54,7 +54,7 @@ class ProjectIngestModuleFactory(IngestModuleFactoryAdapter):
         return ProjectIngestSettingsPanel(self.settings)
 
 class ProjectIngestModuleReport(GeneralReportModuleAdapter):
-    moduleName = "LabCif - Android Forensics Report"
+    moduleName = "LabCif - FAMA Report"
 
     def __init__(self):
         self.settings = None
@@ -64,7 +64,7 @@ class ProjectIngestModuleReport(GeneralReportModuleAdapter):
         return self.moduleName
 
     def getDescription(self):
-        return "Android Forensics Framework Report Generator"
+        return "Forensic Analysis for Mobile Apps Framework Report Generator"
 
     def generateReport(self, baseReportDir, progressBar):
         self.report.generateReport(baseReportDir, progressBar)

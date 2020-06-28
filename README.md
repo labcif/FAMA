@@ -1,4 +1,4 @@
-# LabCIF - Android Forensics
+# LabCIF - Forensic Analysis for Mobile Apps
 
 ## Getting Started
 

@@ -31,7 +31,7 @@ class ProjectIngestSettingsPanel(IngestModuleIngestJobSettingsPanel):
         self.p_title = SettingsUtils.createPanel()
         
         
-        self.lb_title = JLabel("Android Forensics")
+        self.lb_title = JLabel("Forensic Analysis for Mobile Apps")
         self.lb_title.setFont(self.lb_title.getFont().deriveFont(Font.BOLD, 15))
         self.p_title.add(self.lb_title)
         self.add(self.p_title)
