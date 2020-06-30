@@ -65,3 +65,21 @@ class Timeline:
         self.timeline.sort(key=self.get_value, reverse=reverse)
         return self.timeline
 
+
+# class NewModel:
+#     def __init__(self):
+#         self.my_model = []
+
+#     def add(self, timestamp, obj):
+#         entry = {
+#             "timestamp": timestamp,
+#             "value": obj 
+#         }   	
+#         self.myModel.append(entry)
+
+#     def reverse(self):
+#         self.my_model.reverse()
+
+#     def get_my_model(self):
+#         return self.my_model
+

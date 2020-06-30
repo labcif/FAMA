@@ -120,7 +120,7 @@ class Analyzer:
         info_report["artifacts"] = len(report.keys()) - 1 #ignore header
         
         if fileset:
-            info_report["link"] = "../../ModuleOutput/AndroidForensics/{}/{}/{}/report.html".format(fileset, info_report["app_id"], app_report)
+            info_report["link"] = "../../ModuleOutput/FAMA/{}/{}/{}/report.html".format(fileset, info_report["app_id"], app_report)
         else:
             info_report["link"] = "{}/{}/report.html".format(info_report["app_id"], app_report)
 

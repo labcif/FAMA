@@ -20,7 +20,7 @@ class ReportOutput:
 
         progressBar.updateStatusLabel("Finding source data")
 
-        self.tempDirectory = os.path.join(Case.getCurrentCase().getModulesOutputDirAbsPath(), "AndroidForensics")
+        self.tempDirectory = os.path.join(Case.getCurrentCase().getModulesOutputDirAbsPath(), "FAMA")
 
         if not os.path.exists(self.tempDirectory):
             progressBar.complete(ReportStatus.ERROR)
