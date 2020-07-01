@@ -210,9 +210,10 @@ class ProjectIngestModule(DataSourceIngestModule):
         # Processing all datasource json reports
         for report in json_reports:
             # Get app id of the json report
-            info = Utils.read_json(report.getLocalPath())
+            
 
             try:
+                info = Utils.read_json(report.getLocalPath())
                 app_id = info["header"]["app_id"]
             except:
                 continue
