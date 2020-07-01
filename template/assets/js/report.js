@@ -140,7 +140,7 @@ function renderTimeline() {
   removeFocus()
 
   content = getHeader("timeline")
-  content += `<div class="tracking-list inline-block">`
+  content += `<div class="tracking-list inline-block container">`
 
   var id = 1
   var date = "";
