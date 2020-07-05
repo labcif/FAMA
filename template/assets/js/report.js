@@ -321,22 +321,27 @@ function pageBuilder(titlenumber) {
     reportData[title].forEach(item => {
       try {
         if (title === "messages" && item["messages"]){ //quick fix
+          let titleHead = ["database", "participant_1", "participant_2", "createdtime", "readstatus","localinfo","sender","receiver","type","message","deleted"]
+
           if (!titleDefined) {
-            let title = ["participant_1", "participant_2", "createdtime", "readstatus","localinfo","sender","receiver","type","message","deleted"]
             let theads = ""
-            Object.values(title).forEach(function (head) {
+            Object.values(titleHead).forEach(function (head) {
               theads += `<td>${head}</td>`;
             });
             titleDefined = true;
 
             content += `<thead><tr>${theads}</tr></thead><tbody>`
           }
+
           Object.values(item["messages"]).forEach(function (body) {
             content += `<tr>`;
-            content += `<td>${JSON.stringify(item["participant_1"])}</td>`;
-            content += `<td>${JSON.stringify(item["participant_2"])}</td>`;
-            Object.values(body).forEach(function (messageitem) {
-              content += `<td>${JSON.stringify(messageitem)}</td>`;
+            Object.values(titleHead).forEach(function (itemTitle) {
+              if (itemTitle === "database" || itemTitle === "participant_1" || itemTitle === "participant_2"){
+                content += `<td>${JSON.stringify(item[itemTitle])}</td>`;
+              }
+              else{
+                content += `<td>${JSON.stringify(body[itemTitle])}</td>`;
+              }
             });
             content += `</tr>`;
           });
@@ -470,22 +475,26 @@ function makeReport() {
         reportData[key].forEach(item => {
           try {
             if (key === "messages" && item["messages"]){ //quick fix
+              let header = ["database", "participant_1", "participant_2", "createdtime", "readstatus","sender","receiver","type","message","deleted"]
+
               if (!titleDefined) {
-                let header = ["participant_1", "participant_2", "createdtime", "readstatus","sender","receiver","type","message","deleted"]
                 titleDefined = true;
                 rows.push(header)
               }
               Object.values(item["messages"]).forEach(function (body) {
                 let content = []
-                content.push(item["participant_1"])
-                content.push(item["participant_2"])
 
-                Object.keys(body).forEach(function (messageitem) {
-                  if (messageitem == "localinfo"){
+                Object.values(header).forEach(function (itemTitle) {
+                  if (itemTitle === "database" || itemTitle === "participant_1" || itemTitle === "participant_2"){
+                    content.push(item[itemTitle])
+                    return;
+                  }
+
+                  if (itemTitle == "localinfo"){
                     return
                   }
 
-                  content.push(body[messageitem])
+                  content.push(body[itemTitle])
                 });
                 rows.push(content);
               });
@@ -494,7 +503,7 @@ function makeReport() {
           } catch (error) {
             
           }
-          
+
           //define table header
           if (!titleDefined) {
             let header = []
