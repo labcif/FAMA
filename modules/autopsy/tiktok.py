@@ -55,6 +55,7 @@ class ModulePsy(ModulePsyParent):
         self.att_msg_sender = self.utils.create_attribute_type('TIKTOK_MSG_SENDER', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Sender")
         self.att_msg_type = self.utils.create_attribute_type('TIKTOK_MSG_TYPE', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Type")
         self.att_msg_deleted = self.utils.create_attribute_type('TIKTOK_MSG_DELETED', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Deleted")
+        self.att_msg_database_name = self.utils.create_attribute_type('TIKTOK_MSG_DATABASE', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Database Name")
         
         #profile
         self.att_prf_avatar = self.utils.create_attribute_type('TIKTOK_PROFILE_AVATAR', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Avatar")
@@ -245,6 +246,7 @@ class ModulePsy(ModulePsyParent):
             
             participant_1 = c.get("participant_1")
             participant_2 = c.get("participant_2")
+            database = c.get("database")
 
             
             contact_1 = self.utils.get_or_create_account(self.account, file, participant_1)
@@ -280,6 +282,7 @@ class ModulePsy(ModulePsyParent):
                         art.addAttribute(BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_PHONE_NUMBER_TO, "{}_im.db".format(self.uid), participant_1))
                         self.utils.add_relationship(contact_1, [contact_2], art, Relationship.Type.MESSAGE, m.get("createdtime"))
 
+                    art.addAttribute(BlackboardAttribute(self.att_msg_database_name, "{}_im.db".format(self.uid), database))
                     
                     # self.utils.index_artifact(self.case.getBlackboard(), art, self.art_messages)
                     self.utils.index_artifact(art, BlackboardArtifact.ARTIFACT_TYPE.TSK_MESSAGE)

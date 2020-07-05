@@ -46,11 +46,6 @@ class ModuleReport(ModuleParent):
         
         # db1 = os.path.join(self.internal_cache_path, "databases", "db_im_xx")
         # db2 = None
-
-        for db in self.databases:
-            if db.endswith("_im.db"):
-                db1 = db
-                break
         
         # if not db2:
         #     print("[Tiktok] User Messages database not found!")
@@ -58,52 +53,57 @@ class ModuleReport(ModuleParent):
 
         # db2 = os.path.join(self.internal_path, db2)
         # attach = "ATTACH '{}' AS 'db2'".format(db2)
-
-        database = Database(db1)
         
         conversations_list =[] #each entry means 1 conversation, including participants information and messages
 
-        conversations_ids_list = database.execute_query("select conversation_id from conversation_core") #list if conversations
-
-        for conversation in conversations_ids_list:
-            conversation_output={}
-
-            id1 = conversation[0].split(':')[2]
-            id2 = conversation[0].split(':')[3]
-
-            conversation_output["participant_1"] = self.get_user_uniqueid_by_id(id1)
-            conversation_output["participant_2"] = self.get_user_uniqueid_by_id(id2)
-            conversation_output["messages"] = []
+        for db in self.databases:
+            if not db.endswith("_im.db"):
+                continue
             
-            #messages from conversations
-            messages_list = database.execute_query("select created_time/1000 as created_time, content as message, case when read_status = 0 then 'Not read' when read_status = 1 then 'Read' else read_status end read_not_read, local_info, type, case when deleted = 0 then 'Not deleted' when deleted = 1 then 'Deleted' else deleted end, sender from msg where conversation_id='{}' order by created_time;".format(conversation[0]))
-            
-            #getting messages from conversations
-            for entry in messages_list:
-                message={}
-                message["createdtime"] = entry[0]
-                message["readstatus"] = str(entry[2])
-                message["localinfo"] = entry[3]
-                if entry[6] == int(id1):
-                    message["sender"] = conversation_output["participant_1"]
-                    message["receiver"] = conversation_output["participant_2"]
-                else:
-                    message["sender"] = conversation_output["participant_2"]
-                    message["receiver"] = conversation_output["participant_1"]
+            database = Database(db)
 
-                message["type"] = self.get_message_type_by_id(entry[4])                
-                message["message"] = self.parse_body_message_by_id(entry[4], json.loads(entry[1]))
-                message["deleted"] = str(entry[5])
-                conversation_output["messages"].append(message)
+            conversations_ids_list = database.execute_query("select conversation_id from conversation_core") #list if conversations
 
-                timeline_event = {}
-                timeline_event["from"]= message["sender"]
-                timeline_event["to"]= message["receiver"]
-                timeline_event["message"]= message["message"]
-                self.timeline.add(message["createdtime"],"AF_message", timeline_event)
-            
-            #adding conversation and participants information to main array
-            conversations_list.append(conversation_output)
+            for conversation in conversations_ids_list:
+                conversation_output={}
+
+                id1 = conversation[0].split(':')[2]
+                id2 = conversation[0].split(':')[3]
+
+                conversation_output["database"] = os.path.basename(db)
+                conversation_output["participant_1"] = self.get_user_uniqueid_by_id(id1)
+                conversation_output["participant_2"] = self.get_user_uniqueid_by_id(id2)
+                conversation_output["messages"] = []
+                
+                #messages from conversations
+                messages_list = database.execute_query("select created_time/1000 as created_time, content as message, case when read_status = 0 then 'Not read' when read_status = 1 then 'Read' else read_status end read_not_read, local_info, type, case when deleted = 0 then 'Not deleted' when deleted = 1 then 'Deleted' else deleted end, sender from msg where conversation_id='{}' order by created_time;".format(conversation[0]))
+                
+                #getting messages from conversations
+                for entry in messages_list:
+                    message={}
+                    message["createdtime"] = entry[0]
+                    message["readstatus"] = str(entry[2])
+                    message["localinfo"] = entry[3]
+                    if entry[6] == int(id1):
+                        message["sender"] = conversation_output["participant_1"]
+                        message["receiver"] = conversation_output["participant_2"]
+                    else:
+                        message["sender"] = conversation_output["participant_2"]
+                        message["receiver"] = conversation_output["participant_1"]
+
+                    message["type"] = self.get_message_type_by_id(entry[4])                
+                    message["message"] = self.parse_body_message_by_id(entry[4], json.loads(entry[1]))
+                    message["deleted"] = str(entry[5])
+                    conversation_output["messages"].append(message)
+
+                    timeline_event = {}
+                    timeline_event["from"]= message["sender"]
+                    timeline_event["to"]= message["receiver"]
+                    timeline_event["message"]= message["message"]
+                    self.timeline.add(message["createdtime"],"AF_message", timeline_event)
+                
+                #adding conversation and participants information to main array
+                conversations_list.append(conversation_output)
 
         logging.info("{} messages found".format(len(conversation_output.get("messages"))))
 

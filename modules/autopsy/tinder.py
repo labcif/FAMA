@@ -60,6 +60,7 @@ class ModulePsy(ModulePsyParent):
         self.att_msg_like = self.utils.create_attribute_type('TINDER_MSG_LIKE', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Like")
         self.att_msg_seen = self.utils.create_attribute_type('TINDER_MSG_SEEN', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Seen")
         self.att_msg_delivery_status = self.utils.create_attribute_type('TINDER_DELIVERY_STATUS', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Delivery status")
+        self.att_msg_database = self.utils.create_attribute_type('TINDER_DATABASE', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Database Name")
 
         # LOCATION ATTRIBUTES
         self.att_loc_latitude = self.utils.create_attribute_type('TINDER_LOC_LATITUDE', BlackboardAttribute.TSK_BLACKBOARD_ATTRIBUTE_VALUE_TYPE.STRING, "Latitude")
@@ -138,6 +139,7 @@ class ModulePsy(ModulePsyParent):
                 art.addAttribute(BlackboardAttribute(self.att_msg_like, "tinder-3.db", message.get("is_liked")))
                 art.addAttribute(BlackboardAttribute(self.att_msg_seen, "tinder-3.db", message.get("is_seen")))
                 art.addAttribute(BlackboardAttribute(self.att_msg_delivery_status, "tinder-3.db", message.get("delivery_status")))
+                art.addAttribute(BlackboardAttribute(self.att_msg_database, "tinder-3.db", message.get("database")))
         
         # THIS IS USEFUL FOR THE AUTOPSY COMMUNICATIONS TAB
         

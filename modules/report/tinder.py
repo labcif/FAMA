@@ -41,7 +41,9 @@ class ModuleReport(ModuleParent):
     def get_user_messages(self):
         logging.info("Getting User Messages...")
 
-        db = os.path.join(self.internal_cache_path, "databases", "tinder-3.db")
+        database_name = "tinder-3.db"
+
+        db = os.path.join(self.internal_cache_path, "databases", database_name)
 
         database = Database(db)
         messages_list =[] 
@@ -50,6 +52,7 @@ class ModuleReport(ModuleParent):
         #getting messages from conversations
         for entry in messages:
             message={}
+            message["database"] = database_name
             message["to"] = entry[0]
             message["from"] = entry[1]
             message["message"] = entry[2]
