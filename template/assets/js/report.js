@@ -216,9 +216,6 @@ function renderMedia() {
   removeFocus()
 
   $("#page-builder").html("");
-
-  // src = `C:\\Users\\josef\\Desktop\\ee\\test.mp4`
-  // src2 = `C:\\Users\\josef\\Desktop\\ee\\test.jpg`
   
   let content = `${getHeader("Media")}`
   
@@ -255,17 +252,20 @@ function renderMediaList(filter){
       return 
     }
 
-    mediaListing += `<div class="col mt-4 text-center lazy" style="width:240px !important">`;
+    let divElement = `<div class="col mt-4 text-center lazy" style="width:240px !important">`;
 
     if (item["type"] == "video" && (filter === "all" || filter === "video")) {
+      mediaListing += divElement
       mediaListing += `<video class="mb-3 lazy" poster="assets/img/external.png" width="240" height="380" controls autoplay muted><source src="${item["path"]}"></video>`;
       mediaListing += `<button class="btn btn-sm"><img src="assets/svg/video.svg" class="minilogo"/> Video</button>`;
     } 
     else if (item["type"] == "image" && (filter === "all" || filter === "image")) {
+      mediaListing += divElement
       mediaListing += `<img width="240" class="img-responsive mb-3 lazy" data-src="${item["path"]}"/>`;
       mediaListing += `<button class="btn btn-sm"><img src="assets/svg/image.svg" class="minilogo"/> Image</button>`;
     }
     else if (item["type"] == "audio" && (filter === "all" || filter === "audio")) {
+      mediaListing += divElement
       mediaListing += `<audio class="mb-3 lazy" controls><source data-src="${item["path"]}"></audio>`;
       mediaListing += `<button class="btn btn-sm"><img src="assets/svg/audio.svg" class="minilogo"/> Audio</button>`;
     }
