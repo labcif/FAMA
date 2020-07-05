@@ -101,6 +101,9 @@ def start(args):
             analyzer = Analyzer(app_id, folder, report_path)
             report = analyzer.generate_report()
 
+            if not report:
+                index -= 1
+
             #If we set html report output, generate it
             if args.html and report:
                 #Generate individual html report

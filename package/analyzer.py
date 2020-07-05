@@ -40,15 +40,15 @@ class Analyzer:
         logging.info("Found module {} for {}".format(self.app, self.app_id))
 
         logging.info("Looking for {} data in {}".format(self.app, self.folder))
-
         # self.report_path = os.path.join(report_path, "report", self.report_name)
-        Utils.check_and_generate_folder(self.report_path)
 
         self.internal_cache_path = os.path.join(self.report_path, "Contents", "internal")
         self.external_cache_path = os.path.join(self.report_path, "Contents", "external")
         
         if self.internal_path or self.external_path:
             logging.info("Dump file found. Extracting dump.")
+            Utils.check_and_generate_folder(self.report_path)
+
             if self.internal_path:
                 Utils.extract_tar(self.internal_path, self.internal_cache_path)
 
@@ -59,16 +59,19 @@ class Analyzer:
             self.external_path = os.path.join("data", "media", "0", "Android", "data", self.app_id)
 
             int_find = Utils.find_folder_has_folder(self.internal_path, self.folder)
-            if int_find:
-                Utils.copy_tree(int_find, self.internal_cache_path)
-            
             ext_find = Utils.find_folder_has_folder(self.external_path, self.folder)
-            if ext_find:
-                Utils.copy_tree(ext_find, self.external_cache_path)
-
+            
             if not int_find and not ext_find:
                 logging.info("Application data for {} not found".format(self.app))
                 return None
+
+            Utils.check_and_generate_folder(self.report_path)
+
+            if int_find:
+                Utils.copy_tree(int_find, self.internal_cache_path)
+
+            if ext_find:
+                Utils.copy_tree(ext_find, self.external_cache_path)
 
         m = __import__("modules.report.{}".format(self.app), fromlist=[None])
         module = m.ModuleReport(self.internal_cache_path, self.external_cache_path, self.report_path, self.app, self.app_id)
