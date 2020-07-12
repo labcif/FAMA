@@ -16,8 +16,8 @@ class Extract:
 
         #Dump internal data https://android.stackexchange.com/questions/85564/need-one-line-adb-shell-su-push-pull-to-access-data-from-windows-batch-file
         self.check_root_command = """'{}' -s {} shell "su -c 'echo HASROOT'" """
-        self.magic_root_command = """'{}' -s {} shell "su -c 'cd {} && tar czf - ./ --exclude='./files' | base64' 2>/dev/null" | {} -d"""
-        self.magic_noroot_command = """'{}' -s {} shell "cd {} && tar czf - ./ --exclude='./files' | base64 2>/dev/null" | {} -d"""
+        self.magic_root_command = """'{}' -s {} shell "su -c 'cd {} && tar czf - ./ --exclude='./files' | base64' 2>/dev/null" | '{}' -d"""
+        self.magic_noroot_command = """'{}' -s {} shell "cd {} && tar czf - ./ --exclude='./files' | base64 2>/dev/null" | '{}' -d"""
 
         if not (Utils.get_platform().startswith("windows") or Utils.get_platform().startswith("darwin")): #some linux versions doesn't output if contains errors, so we ignore it. but base64 for windows doesn't have this attribute
             self.magic_root_command += "i" #add -i flag to base64 decode to avoid some encoding issues
