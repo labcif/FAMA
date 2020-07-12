@@ -14,6 +14,9 @@ class DeviceCommunication:
         devices = []
 
         for device in info.decode().splitlines():
+            if '* daemon ' in device:
+                continue
+
             if 'devices attached' in device:
                 continue
 
