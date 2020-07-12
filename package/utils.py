@@ -175,7 +175,7 @@ class Utils:
     def get_adb_location():
         if Utils.get_platform().startswith("windows"):
             return os.path.join(Utils.get_base_path_folder(), "dependencies", "windows", "adb.exe")
-        elif Utils.get_platform().startswith("darwin"):
+        elif Utils.get_platform().startswith("darwin") or Utils.get_platform().startswith("mac"):
             return os.path.join(Utils.get_base_path_folder(), "dependencies", "mac", "adb")
         else:
             return os.path.join(Utils.get_base_path_folder(), "dependencies", "linux", "adb")
@@ -184,7 +184,7 @@ class Utils:
     def get_undark_location():
         if Utils.get_platform().startswith( "windows"):
             return os.path.join(Utils.get_base_path_folder(), "dependencies", "windows", "undark.exe")
-        elif Utils.get_platform().startswith("darwin"):
+        elif Utils.get_platform().startswith("darwin") or Utils.get_platform().startswith("mac"):
             return os.path.join(Utils.get_base_path_folder(), "dependencies", "mac", "undark")
         else:
             return os.path.join(Utils.get_base_path_folder(), "dependencies", "linux", "undark")
