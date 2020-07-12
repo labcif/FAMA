@@ -15,7 +15,7 @@ class Extract:
         self.external_data_dump_name = "{}_external.tar.gz"
 
         #Dump internal data https://android.stackexchange.com/questions/85564/need-one-line-adb-shell-su-push-pull-to-access-data-from-windows-batch-file
-        self.check_root_command = """{} -s {} shell "su -c 'echo HASROOT'"""
+        self.check_root_command = """{} -s {} shell "su -c 'echo HASROOT'" """
         self.magic_root_command = """{} -s {} shell "su -c 'cd {} && tar czf - ./ --exclude='./files' | base64' 2>/dev/null" | {} -d"""
         self.magic_noroot_command = """{} -s {} shell "cd {} && tar czf - ./ --exclude='./files' | base64 2>/dev/null" | {} -d"""
 
@@ -62,7 +62,7 @@ class Extract:
         return folders
 
     def check_root_access(self, serial_number):
-        output = str(subprocess.Popen(self.check_root_command.format(self.adb_location, serial_number), shell=False, stdout=subprocess.PIPE, stderr=None).stdout.read())
+        output = str(subprocess.Popen(self.check_root_command.format(self.adb_location, serial_number), shell=True, stdout=subprocess.PIPE, stderr=None).stdout.read())
         status = "HASROOT" in output
         logging.info("[{}] Root status: {}".format(serial_number, status))
         return status
