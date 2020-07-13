@@ -16,6 +16,8 @@ class Extract:
 
         #Dump internal data https://android.stackexchange.com/questions/85564/need-one-line-adb-shell-su-push-pull-to-access-data-from-windows-batch-file
         self.check_root_command = """"{}" -s {} shell "su -c 'echo HASROOT'" """
+        self.check_root_command_without_su = """"{}" -s {} shell "echo HASROOT" """
+        
         self.magic_root_command = """"{}" -s {} shell "su -c 'cd {} && tar czf - ./ --exclude='./files' | base64' 2>/dev/null" | "{}" -d"""
         self.magic_noroot_command = """"{}" -s {} shell "cd {} && tar czf - ./ --exclude='./files' | base64 2>/dev/null" | "{}" -d"""
 
@@ -45,7 +47,7 @@ class Extract:
 
             root_status = self.check_root_access(serial_number)
 
-            if root_status:
+            if root_status["rooted"]:
                 #Dump internal
                 logging.info("[{}] Extracting internal {} (root) data!".format(serial_number, app_package))
                 path_dump_internal = os.path.join(path_dump_folder, self.internal_data_dump_name.format(app_package))
@@ -62,15 +64,28 @@ class Extract:
         return folders
 
     def check_root_access(self, serial_number):
-        output = str(subprocess.Popen(self.check_root_command.format(self.adb_location, serial_number), shell=True, stdout=subprocess.PIPE, stderr=None).stdout.read())
-        status = "HASROOT" in output
-        logging.info("[{}] Root status: {}".format(serial_number, status))
+        status = {}
+        status["rooted"] = False
+        status["su"] = True
+
+        try:
+            output = str(subprocess.Popen(self.check_root_command.format(self.adb_location, serial_number), shell=True, stdout=subprocess.PIPE, stderr=None).stdout.read())
+            status["rooted"] = "HASROOT" in output
+            
+            if not status["rooted"]:
+                output = str(subprocess.Popen(self.check_root_command_without_su.format(self.adb_location, serial_number), shell=True, stdout=subprocess.PIPE, stderr=None).stdout.read())
+                status["rooted"] = "HASROOT" in output
+                status["su"] = False
+        except:
+            pass
+
+        logging.info("[{}] SU status - {}".format(serial_number, status["su"]))
         return status
 
     def extract_from_device(self, serial_number, root_status, path_to_extract, output_path):
         sort_out = open(output_path, 'wb', 0)
 
-        if root_status:
+        if root_status["rooted"] and root_status["su"]:
             command = self.magic_root_command.format(self.adb_location, serial_number, path_to_extract, self.base64_location)
         else:
             command = self.magic_noroot_command.format(self.adb_location, serial_number, path_to_extract, self.base64_location)
