@@ -27,6 +27,7 @@ import logging
 
 from package.database import Database
 from package.utils import Utils
+from package.models import Timeline, Location, Media
 from modules.report import ModuleParent
 
 class ModuleReport(ModuleParent):
@@ -69,9 +70,9 @@ class ModuleReport(ModuleParent):
         # UNDARK SHOULD BE FIRST TO ENSURE WE CAN RECOVER OLD DATA
 
         # ALWAYS CALL THE get_sorted_timeline FUNCTION TO ENSURE THAT THE TIMELINE IS RIGHT
+        # USE add_model FUNCTION TO ADD TIMELINE, MEDIA, LOCATION OR CUSTOM MODELS
         # YOU CAN PASS THE ARGUMENT "True" IF YOU WANT THE TIMELINE INVERTED
-        
-        # self.report["timeline"] = self.timeline.get_sorted_timeline()
+        # self.add_model(self.timeline)
 
         logging.info("Report Generated")
 

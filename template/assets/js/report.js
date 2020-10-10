@@ -132,7 +132,7 @@ function renderMap() {
 }
 
 function renderTimeline() {
-  if (reportData["AF_media"] == undefined) {
+  if (reportData["AF_timeline"] == undefined) {
     $('#empty-media-modal').modal('show');
     return
   }
