@@ -55,7 +55,7 @@ class ProjectIngestModule(DataSourceIngestModule):
         
         max_apps = len(Utils.get_all_packages().values())
 
-        #Extract method for adb selected #THIS IS ONLY USED IN <= AUTOPSY 4.15
+        #Extract method for adb selected #THIS IS ONLY USED IN <= AUTOPSY 4.16
         if self.method == "method_adb":
             #Get list of selected apps to extract
             self.apps = json.loads(self.settings.getSetting('apps'))
