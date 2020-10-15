@@ -44,8 +44,8 @@ def start(args):
         #app > appname
         #app_id > com.app.id
         if '.' in app:
-            app = Utils.find_app_name(app)
-            app_id = app
+            app_name = Utils.find_app_name(app)
+            app_id = app_name if app_name else app
         else:
             app_id = Utils.find_package(app)
         
