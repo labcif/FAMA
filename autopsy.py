@@ -14,6 +14,7 @@ from psy.ingest import ProjectIngestModule
 from psy.report import ReportOutput
 from psy.processor import DataSourcesPanelSettings
 from psy.settings import ProjectIngestSettingsPanel, ProjectReportSettingsPanel
+from psy.psyutils import PsyUtils
     
 #3 Modules - Ingest, Report, DatasourceProcessor
 class ProjectIngestModuleFactory(IngestModuleFactoryAdapter):
@@ -66,9 +67,14 @@ class ProjectIngestModuleReport(GeneralReportModuleAdapter):
     def getDescription(self):
         return "Forensic Analysis for Mobile Apps Framework Report Generator"
 
-    def generateReport(self, baseReportDir, progressBar):
+    def generateReport(self, settings, progressBar):
+        autopsy_version = PsyUtils.get_autopsy_version()
+        baseReportDir = settings
+        if (autopsy_version["major"] == 4 and autopsy_version["minor"] >= 16):
+            baseReportDir = settings.getReportDirectoryPath()
+        
         self.report.generateReport(baseReportDir, progressBar)
-    
+
     def getConfigurationPanel(self):
         self.configPanel = ProjectReportSettingsPanel()
         return self.configPanel

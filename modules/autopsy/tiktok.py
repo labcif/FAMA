@@ -23,7 +23,7 @@ class ModulePsy(ModulePsyParent):
 
         data = Utils.read_json(path)
         
-        self.uid = data.get("profile").get("uid")
+        self.uid = data.get("profile").get("uid") if data.get("profile").get("uid") else ""
 
         self.process_messages(data.get("messages"), file)
         self.process_user_profile(data.get("profile"), file)

@@ -52,7 +52,7 @@ class ProjectIngestSettingsPanel(IngestModuleIngestJobSettingsPanel):
 
         autopsy_version = PsyUtils.get_autopsy_version()
 
-        if ((autopsy_version["major"] == 4 and autopsy_version["minor"] <= 16) or autopsy_version["major"] < 4):
+        if ((autopsy_version["major"] == 4 and autopsy_version["minor"] <= 17) or autopsy_version["major"] < 4):
             self.p_info.add(self.lb_info)
             self.p_info.add(self.lb_info2, BorderLayout.SOUTH)
 
