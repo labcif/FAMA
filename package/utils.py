@@ -116,9 +116,13 @@ class Utils:
 
     @staticmethod
     def extract_tar(file, path):
-        tar = tarfile.open(file)
-        tar.extractall(path, members = Utils.safe_members(tar))
-        tar.close()
+        try:
+            tar = tarfile.open(file)
+            tar.extractall(path, members = Utils.safe_members(tar))
+            tar.close()
+        except:
+            print("Failed to extract {} to {}".format(file, path))
+            pass
 
     @staticmethod
     def verify_header_signature(file, header_type, offset, stream = None):

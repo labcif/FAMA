@@ -2,12 +2,12 @@ import os
 import sys
 import logging
 
-sys.path.append(os.path.dirname(__file__)) #include this path to module autopsy
+# sys.path.append(os.path.dirname(__file__)) #include this path to module autopsy
 
 from org.sleuthkit.autopsy.ingest import GenericIngestModuleJobSettings
 from org.sleuthkit.autopsy.report import GeneralReportModuleAdapter
 from org.sleuthkit.autopsy.ingest import IngestModuleFactoryAdapter
-from org.sleuthkit.autopsy.corecomponentinterfaces import DataSourceProcessor  
+from org.sleuthkit.autopsy.datasourceprocessors import DataSourceProcessorAdapter  
 from org.sleuthkit.autopsy.casemodule import Case
 
 from psy.ingest import ProjectIngestModule
@@ -15,6 +15,8 @@ from psy.report import ReportOutput
 from psy.processor import DataSourcesPanelSettings
 from psy.settings import ProjectIngestSettingsPanel, ProjectReportSettingsPanel
 from psy.psyutils import PsyUtils
+
+VERSION = "1.1"
     
 #3 Modules - Ingest, Report, DatasourceProcessor
 class ProjectIngestModuleFactory(IngestModuleFactoryAdapter):
@@ -31,7 +33,7 @@ class ProjectIngestModuleFactory(IngestModuleFactoryAdapter):
         return "FAMA framework. Extract, analyze and generate reports based on user data."
         
     def getModuleVersionNumber(self):
-        return "1.0"
+        return VERSION
     
     #Data Source Ingest
     def isDataSourceIngestModuleFactory(self):
@@ -82,7 +84,7 @@ class ProjectIngestModuleReport(GeneralReportModuleAdapter):
     def getRelativeFilePath(self):
         return "index.html"
 
-class ProjectDSProcessor(DataSourceProcessor):
+class ProjectDSProcessor(DataSourceProcessorAdapter):
     configPanel = None
     moduleName = "Live extraction with ADB (Android)"
 
@@ -104,9 +106,3 @@ class ProjectDSProcessor(DataSourceProcessor):
 
     def run(self, host, progressMonitor, callback):
         self.configPanel.run(host, progressMonitor, callback)
-
-    def cancel(self):
-        logging.info("cancel") #implement? #cancel thread
-
-    def reset(self):
-        pass
