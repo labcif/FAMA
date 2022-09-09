@@ -102,8 +102,8 @@ class ProjectDSProcessor(DataSourceProcessor):
     def isPanelValid(self):
         return self.configPanel.validatePanel()
 
-    def run(self, progressMonitor, callback):
-        self.configPanel.run(progressMonitor, callback)
+    def run(self, host, progressMonitor, callback):
+        self.configPanel.run(host, progressMonitor, callback)
 
     def cancel(self):
         logging.info("cancel") #implement? #cancel thread

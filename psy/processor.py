@@ -34,7 +34,7 @@ class DataSourcesPanelSettings(JPanel):
         return serialVersionUID
 
     #PROCESSOR LOGIC
-    def run(self, progressMonitor, callback):
+    def run(self, host, progressMonitor, callback):
         threading.Thread(target=self.running, args=[progressMonitor, callback]).start()
 
     def running(self, progressMonitor, callback):
