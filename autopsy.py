@@ -7,7 +7,12 @@ import logging
 from org.sleuthkit.autopsy.ingest import GenericIngestModuleJobSettings
 from org.sleuthkit.autopsy.report import GeneralReportModuleAdapter
 from org.sleuthkit.autopsy.ingest import IngestModuleFactoryAdapter
-from org.sleuthkit.autopsy.datasourceprocessors import DataSourceProcessorAdapter  
+try:
+    from org.sleuthkit.autopsy.datasourceprocessors import DataSourceProcessorAdapter as DSP
+except:
+    # Autopsy <4.20 mask
+    from org.sleuthkit.autopsy.corecomponentinterfaces import DataSourceProcessor as DSP
+    
 from org.sleuthkit.autopsy.casemodule import Case
 
 from psy.ingest import ProjectIngestModule
@@ -84,7 +89,7 @@ class ProjectIngestModuleReport(GeneralReportModuleAdapter):
     def getRelativeFilePath(self):
         return "index.html"
 
-class ProjectDSProcessor(DataSourceProcessorAdapter):
+class ProjectDSProcessor(DSP):
     configPanel = None
     moduleName = "Live extraction with ADB (Android)"
 
