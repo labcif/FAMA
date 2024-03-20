@@ -1,4 +1,4 @@
-# LabCIF - Forensic Analysis for Mobile Apps
+# DEPRECATED: LabCIF - Forensic Analysis for Mobile Apps
 
 ## Getting Started
 
